@@ -6,8 +6,8 @@ target_sources( ${PROJECT_NAME}
         brtl.cpp
         noctis-0.h
         noctis-0.cpp
-        PlanetTexture.h
-        PlanetTexture.cpp
+        Feltyrion.h
+        Feltyrion.cpp
         GDExtensionTemplate.h
         GDExtensionTemplate.cpp
         RegisterExtension.cpp

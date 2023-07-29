@@ -8,7 +8,7 @@
 #include <map>
 #include <functional>
 
-#include "PlanetTexture.h"
+#include "Feltyrion.h"
 #include "noctis-d.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
