@@ -1240,6 +1240,199 @@ void background(uint16_t start, uint8_t *target, uint8_t *background, uint8_t *o
     }
 }
 
+/*
+    Starry sky, three-of-a-kind. In the amplified view, it has 2,744 stars.
+    Star magnitudes go from 0 to +13. Since the player is a cat, with scotopic
+    vision, they can probably see more than normal.
+    JORIS added on 2023-07-29: callback function to get the results
+*/
+
+void sky(uint16_t limits, void (*callback)(float x, float y, float z)) {
+    uint16_t debug;
+
+    auto min_xy            = (int32_t) (1E9);
+    int8_t visible_sectors = 9;
+
+    if (field_amplificator) {
+        visible_sectors = 14;
+    }
+
+    uint8_t sx, sy, sz;
+    float xx, yy, zz, z2, rz, inv_rz, starneg;
+
+    if (!ap_targetting) {
+        starneg = 10000;
+    } else {
+        starneg = 1;
+    }
+
+    int32_t sect_x, sect_y, sect_z, rx, ry;
+    int32_t advance = 100000, k = 100000 * visible_sectors;
+    int32_t temp_x, temp_y, temp_z, temp;
+    /*
+        The following section changes the rarity factor of the stars as the
+        distance from the galactic center increases. The scale on the Y-Axis is
+        amplified 30 times, so that the galaxy has the shape of a crushed disk.
+        Stars will be rarefied depending on the value of "distance_from_home".
+        This is a table that provides the number of stars eliminated (each
+        sector contains one star, and the number of sectors visible to the
+        amplified field is 14 * 14 * 14 = 2744) as distance_from_home increases
+        its value:
+            0 - 400,000,000                 0% eliminated
+            400,000,000 - 800,000,000       50% eliminated
+            1,200,000,000 - 1,600,000,000   75% eliminated
+            1,600,000,000 - 2,000,000,000   87.5% eliminated.
+        Over 2 billion units, the player can no longer select stars: The rarity
+        factor ratio would still be of 1 effective star every 16 sectors.
+    */
+    int16_t rarity_factor;
+    double distance_from_home;
+
+    distance_from_home = sqrt(dzat_x * dzat_x + dzat_z * dzat_z);
+    distance_from_home += 30 * fabs(dzat_y);
+
+    rarity_factor = (int16_t) (distance_from_home * 0.25e-8);
+    rarity_factor = 1u << (uint16_t) rarity_factor;
+    rarity_factor--;
+
+    sect_x = (int32_t) ((dzat_x - visible_sectors * 50000) / 100000);
+    sect_x *= 100000;
+
+    sect_y = (int32_t) ((dzat_y - visible_sectors * 50000) / 100000);
+    sect_y *= 100000;
+
+    sect_z = (int32_t) ((dzat_z - visible_sectors * 50000) / 100000);
+    sect_z *= 100000;
+
+    uint32_t index = 0;
+
+    // Loop over a 3D cube of l,w,h = visible_sectors.
+    for (sx = 0; sx < visible_sectors; sx++) {
+        for (sy = 0; sy < visible_sectors; sy++) {
+            for (sz = 0; sz < visible_sectors; sz++, sect_z += advance) {
+                uint16_t cutoff = 50000;
+
+                temp_x = ((sect_x + sect_z) & 0x0001FFFFu) + sect_x;
+                // Exclude stars with x coordinate = 0
+                if (temp_x == cutoff) {
+                    continue;
+                }
+                temp_x -= cutoff;
+
+                int32_t abc123 = (sect_x + sect_z);
+                int32_t accum  = 0;
+
+                int32_t edx = temp_x;
+                int32_t eax = abc123;
+
+                // This replaced a very sketchy usage of imul.
+                int64_t result = (int64_t) edx * (int64_t) eax;
+                eax            = result & 0xFFFFFFFFu;
+                edx            = result >> 32u;
+                edx += eax;
+                accum = edx;
+
+                int32_t idkbro = (sect_x + sect_z) + accum;
+
+                temp_y = (accum & 0x001FFFFu) + sect_y;
+                // Exclude stars with y coordinate = 0
+                if (temp_y == cutoff) {
+                    continue;
+                }
+                temp_y -= cutoff;
+
+                edx    = temp_y;
+                eax    = idkbro;
+                result = (int64_t) edx * (int64_t) eax;
+                eax    = result & 0xFFFFFFFFu;
+                edx    = result >> 32u;
+                edx += eax;
+                accum = edx;
+
+                temp_z = (accum & 0x0001FFFFu) + sect_z;
+                // Exclude stars with z coordinate = 0
+                if (temp_z == cutoff) {
+                    continue;
+                }
+                temp_z -= cutoff;
+
+                uint32_t netpos = temp_x + temp_y + temp_z;
+                if ((netpos & rarity_factor) != 0) {
+                    continue;
+                }
+
+                zz = temp_z - dzat_z;
+                xx = temp_x - dzat_x;
+                yy = temp_y - dzat_y;
+
+                callback(xx,yy,zz);
+
+                /*
+                z2 = (zz * opt_tcosbeta) - (xx * opt_tsinbeta);
+                rz = (z2 * opt_tcosalfa) + (yy * opt_tsinalfa);
+
+                if (rz < starneg) {
+                    continue;
+                }
+
+                inv_rz = uno / rz;
+                rx     = (int32_t) round(((xx * opt_pcosbeta) + (zz * opt_psinbeta)) * inv_rz);
+
+                index = rx + VIEW_X_CENTER;
+                if (index <= 10 || index >= adapted_width - 10) {
+                    continue;
+                }
+
+                ry = (int32_t) round((yy * opt_pcosalfa - z2 * opt_psinalfa) * inv_rz) - 2;
+
+                uint32_t nety = ry + VIEW_Y_CENTER;
+                if (nety <= 10 || nety >= adapted_height - 10) {
+                    continue;
+                }
+
+                index += (uint32_t) (adapted_width * nety);
+
+                if (ap_targetting != 1) {
+                    uint8_t color = adapted[index];
+                    if (color == 68 || color < (limits >> 8u) || color > (limits & 0xFFu)) {
+                        continue;
+                    }
+                }
+
+                temp              = (int32_t) rz;
+                int32_t tempshift = temp >> (13u + field_amplificator);
+                int8_t mask       = 63 - tempshift;
+                if (mask >= 0) {
+                    int8_t color = adapted[index];
+                    adapted[index] &= 0xC0u;
+                    color &= 0x3Fu;
+                    mask += color;
+                    if (mask > 63) {
+                        mask = 63;
+                    }
+                    adapted[index] |= mask;
+                }
+
+                if (ap_targetting == 1) {
+                    temp = (rx * rx) + (ry * ry);
+
+                    if (temp < min_xy) {
+                        min_xy      = temp;
+                        ap_target_x = temp_x;
+                        ap_target_y = temp_y;
+                        ap_target_z = temp_z;
+                    }
+                }
+                */
+            }
+            sect_z -= k;
+            sect_y += advance;
+        }
+        sect_y -= k;
+        sect_x += advance;
+    }
+}
+
 // If set, draw a kind of bubble transparent around the globes drawn with the
 // "globe" function. It is used to simulate the presence of the atmosphere, but
 // only for planets with considerable quantities of gas.

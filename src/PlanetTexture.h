@@ -17,6 +17,8 @@ public:
     godot::Ref<godot::Image> returnImage(bool raw__one_bit) const;
     void lock();
     void unlock();
+    void scanStars();
+    void onStarFound(float x, float y, float z);
 
     Feltyrion();
 protected:

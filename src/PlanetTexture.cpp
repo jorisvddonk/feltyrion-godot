@@ -2,6 +2,11 @@
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/classes/mutex.hpp"
+#include "godot_cpp/classes/global_constants.hpp"
+#include "godot_cpp/classes/label.hpp"
+#include <stdio.h>
+#include <map>
+#include <functional>
 
 #include "PlanetTexture.h"
 #include "noctis-d.h"
@@ -16,6 +21,7 @@ namespace
 extern void init();
 extern void prepare_nearstar();
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
+extern void sky(uint16_t limits, void (*callback)(float x, float y, float z));
 extern uint8_t *p_background;
 extern uint8_t tmppal[768];
 extern uint8_t currpal[768];
@@ -117,6 +123,24 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool raw__one_bit) const
     return ref;
 }
 
+Feltyrion *instance;
+
+void cb(float x, float y, float z)
+{
+    instance->onStarFound(x, y, z);
+}
+
+void Feltyrion::scanStars()
+{
+    // NOTE: this is *not* thread safe!!!
+    instance = this;
+    sky(0x405C, cb);
+}
+
+void Feltyrion::onStarFound(float x, float y, float z) {
+    godot::Object::emit_signal("found_star", x, y, z);
+}
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -125,7 +149,11 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "return_image" ), &Feltyrion::returnImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_palette_as_image" ), &Feltyrion::getPaletteAsImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_atmosphere_image" ), &Feltyrion::returnAtmosphereImage );
+    godot::ClassDB::bind_method( godot::D_METHOD( "scan_stars" ), &Feltyrion::scanStars );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
+
+    // Signals
+    ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ) ) );
 }
