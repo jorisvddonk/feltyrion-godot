@@ -15,6 +15,7 @@ public:
     godot::Ref<godot::Image> getPaletteAsImage() const;
     godot::Ref<godot::Image> returnAtmosphereImage() const;
     godot::Ref<godot::Image> returnImage(bool raw__one_bit) const;
+    godot::String getObjectName(double x, double y, double z, bool isStar) const;
     void lock();
     void unlock();
     void scanStars();

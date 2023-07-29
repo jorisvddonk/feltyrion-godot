@@ -40,6 +40,13 @@
 #include "noctis-d.h"
 #include "godot_cpp/variant/utility_functions.hpp"
 
+// Support files
+
+const char *situation_file = "data/current.bin";
+const char *starmap_file   = "data/STARMAP.BIN";
+const char *goesoutputfile = "data/GOESfile.txt";
+const char *surface_file   = "data/surface.bin";
+
 // Date and specific functions imported from ASSEMBLY.H
 
 uint16_t QUADWORDS = 16000;
@@ -1365,7 +1372,7 @@ void sky(uint16_t limits, void (*callback)(float x, float y, float z)) {
                 xx = temp_x - dzat_x;
                 yy = temp_y - dzat_y;
 
-                callback(xx,yy,zz);
+                callback(temp_x,temp_y,temp_z);
 
                 /*
                 z2 = (zz * opt_tcosbeta) - (xx * opt_tsinbeta);
@@ -1601,6 +1608,22 @@ float zrandom(int16_t range) {
     return (float) (brtl_random(range) - brtl_random(range)); // NOLINT(misc-redundant-expression)
 }
 
+
+/* Added by JORIS on 2023-07-29
+*/
+double _star_id           = 12345;
+int8_t _star_label[25]    = "UNKNOWN STAR / CLASS ...";
+void update_star_label_by_offset(int32_t offset) {
+    FILE *smh = fopen(starmap_file, "rb");
+    fseek(smh, offset, SEEK_SET);
+    fread(&_star_id, 8, 1, smh);
+    fread(&_star_label, 24, 1, smh);
+    fclose(smh);
+}
+double get_id_code(double x, double y, double z) {
+   return x / 100000 * y / 100000 * z / 100000;
+}
+
 /*  Part of the cartography management.
  *  It has been moved here to be called by "prepare_nearstar".
  *  --------------------------------------------------------------------------------
@@ -1611,6 +1634,53 @@ float zrandom(int16_t range) {
  */
 
 double idscale = 0.00001;
+
+int32_t search_id_code(double id_code, int8_t type) {
+    int32_t total_pos = 4;
+    bool found        = false;
+    uint16_t n, curr_pos, index;
+    double id_low  = id_code - idscale;
+    double id_high = id_code + idscale;
+    FILE *smh      = fopen(starmap_file, "rb");
+
+    if (smh != nullptr) {
+        auto buffer = (int8_t *) malloc(ps_bytes);
+
+        auto buffer_ascii  = (int8_t *) buffer;
+        auto buffer_double = (double *) buffer;
+        fseek(smh, 4, SEEK_SET);
+
+        while ((n = fread(buffer_ascii, 1, ps_bytes, smh)) > 0) {
+            curr_pos = 0;
+            index    = 0;
+
+            while (curr_pos < n) {
+                if (buffer_ascii[curr_pos + 29] == type) {
+                    if (buffer_double[index] > id_low && buffer_double[index] < id_high) {
+                        found = true;
+                        goto stop;
+                    }
+                }
+
+                total_pos += 32;
+                curr_pos += 32;
+                index += 4;
+            }
+        }
+
+    stop:
+        fclose(smh);
+        free(buffer);
+    } else {
+        godot::UtilityFunctions::print( "Starmap bin not found!" );
+    }
+
+    if (found) {
+        return (total_pos);
+    } else {
+        return (-1);
+    }
+}
 
 
 /* Prepare information on the nearby star, the one which the player has just
@@ -1655,6 +1725,16 @@ void init() {
     ruinschart   = (uint8_t *) objectschart; // oc alias
     pvfile       = (uint8_t *) malloc(pv_bytes);
     adapted      = (uint8_t *) malloc(sc_bytes);
+
+    // initialize on Balastrackonastreya
+    dzat_x = -18928;
+    dzat_y = -29680;
+    dzat_z = -67336;
+
+    ap_target_x = -18928;
+    ap_target_y = -29680;
+    ap_target_z = -67336;
+    extract_ap_target_infos();
 }
 
 void prepare_nearstar() {

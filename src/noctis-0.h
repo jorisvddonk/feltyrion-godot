@@ -379,3 +379,8 @@ extern float pp_pressure;
 extern float pp_pulse;
 
 extern void additional_consumes();
+
+extern void update_star_label_by_offset(int32_t offset);
+extern double _star_id;
+extern int8_t _star_label[25];
+extern double get_id_code(double x, double y, double z);

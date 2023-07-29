@@ -22,10 +22,15 @@ extern void init();
 extern void prepare_nearstar();
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
 extern void sky(uint16_t limits, void (*callback)(float x, float y, float z));
+extern int32_t search_id_code(double id_code, int8_t type);
 extern uint8_t *p_background;
 extern uint8_t tmppal[768];
 extern uint8_t currpal[768];
 extern quadrant *objectschart;
+extern void update_star_label_by_offset(int32_t offset);
+extern double get_id_code(double x, double y, double z);
+extern double _star_id;
+extern int8_t _star_label[25];
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -141,6 +146,23 @@ void Feltyrion::onStarFound(float x, float y, float z) {
     godot::Object::emit_signal("found_star", x, y, z);
 }
 
+godot::String Feltyrion::getObjectName(double x, double y, double z, bool isStar) const
+{
+    int8_t searchtype = 'P';
+    if (isStar) {
+        searchtype = 'S';
+    }
+    double id = get_id_code(x, y, z);
+    godot::UtilityFunctions::print( "ID code: ", id, " x/y/z:", x, ":", y, ":", z );
+    int32_t offset = search_id_code(id, searchtype);
+    if (offset > -1) {
+        update_star_label_by_offset(offset);
+        return (char*)_star_label;
+    } else {
+        return "";
+    }
+}
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -150,6 +172,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_palette_as_image" ), &Feltyrion::getPaletteAsImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_atmosphere_image" ), &Feltyrion::returnAtmosphereImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "scan_stars" ), &Feltyrion::scanStars );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_object_name" ), &Feltyrion::getObjectName );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
