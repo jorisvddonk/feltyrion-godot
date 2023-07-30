@@ -13,8 +13,8 @@ public:
     void prepareStar();
     void loadPlanet(int logical_id, int type, double seedval, bool lighting, bool include_atmosphere) const;
     godot::Ref<godot::Image> getPaletteAsImage() const;
-    godot::Ref<godot::Image> returnAtmosphereImage() const;
-    godot::Ref<godot::Image> returnImage(bool raw__one_bit) const;
+    godot::Ref<godot::Image> returnAtmosphereImage(bool accurate_height) const;
+    godot::Ref<godot::Image> returnImage(bool accurate_height, bool raw__one_bit) const;
     godot::String getStarName(double x, double y, double z) const;
     godot::String getPlanetName(double star_x, double star_y, double star_z, int index) const;
     godot::String getPlanetNameById(double planet_id) const;

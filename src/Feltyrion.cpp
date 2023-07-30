@@ -52,13 +52,23 @@ godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
     return ref;
 }
 
-godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage() const
+/**
+ * @brief Get an image (RGBA8) for the atmosphere.
+ * 
+ * @param accurate_height get the 'Noctis IV' accurate height, instead of the ENTIRE texture. Noctis clips the entire texture to only 119 lines of latitude.
+ * @return godot::Ref<godot::Image> 
+ */
+godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage(bool accurate_height) const
 {
     uint8_t *overlay = (uint8_t *) objectschart;
     uint8_t colorbase = 192 + 32; // + 32 because in Noctis the planet base colour background is added
     auto pba = godot::PackedByteArray();
     int a = 0;
-    for (uint16_t i = 0; i < 32400; i++) {
+    int vlines = 180;
+    if (accurate_height) {
+        vlines = 119;
+    }
+    for (uint16_t i = (accurate_height ? 360 : 0); i < (180 * (vlines + (accurate_height ? 2 : 0))); i++) {
         uint8_t val = overlay[i];
         for (a = 0; a <= 1; a++) {
             // NOTE: in Noctis this is actually ADDED to the base planet background image!
@@ -72,7 +82,7 @@ godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage() const
             }
         }
     }
-    auto image = godot::Image::create_from_data(360, 180, false, godot::Image::FORMAT_RGBA8, pba);
+    auto image = godot::Image::create_from_data(360, vlines, false, godot::Image::FORMAT_RGBA8, pba);
     godot::Ref<godot::Image> ref = image;
     return ref;
 }
@@ -133,16 +143,27 @@ Feltyrion::Feltyrion()
 }
 
 
-godot::Ref<godot::Image> Feltyrion::returnImage(bool raw__one_bit) const
+/**
+ * @brief Get an image (RGBA8) for the planet texture.
+ * 
+ * @param accurate_height get the 'Noctis IV' accurate height, instead of the ENTIRE texture. Noctis clips the entire texture to only 119 lines of latitude.
+ * @param raw__one_byte get the image as a one-byte-per-pixel image (FORMAT_L8), without colormap applied
+ * @return godot::Ref<godot::Image> 
+ */
+godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__one_byte) const
 {
     godot::UtilityFunctions::print( " ReturnImage" );
     uint8_t colorbase = 192;
 
+    int vlines = 180;
+    if (accurate_height) {
+        vlines = 119;
+    }
     auto pba = godot::PackedByteArray();
-    for (uint16_t y = 0; y < 180; y++) {
+    for (uint16_t y = (accurate_height ? 1 : 0); y < vlines + (accurate_height ? 1 : 0); y++) {
         for (uint16_t x = 0; x < 360; x++) {
             uint8_t val = p_background[(y*360)+x];
-            if (raw__one_bit) {
+            if (raw__one_byte) {
                 pba.append(val);
             } else {
                 pba.append(currpal[(colorbase+val) * 3] * 4);
@@ -151,7 +172,7 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool raw__one_bit) const
             }
         }
     }
-    auto image = godot::Image::create_from_data(360, 180, false, raw__one_bit ? godot::Image::FORMAT_L8 : godot::Image::FORMAT_RGB8, pba);
+    auto image = godot::Image::create_from_data(360, vlines, false, raw__one_byte ? godot::Image::FORMAT_L8 : godot::Image::FORMAT_RGB8, pba);
     godot::Ref<godot::Image> ref = image;
     return ref;
 }
