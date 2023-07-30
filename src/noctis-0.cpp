@@ -1614,6 +1614,7 @@ float zrandom(int16_t range) {
 double _star_id           = 12345;
 int8_t _star_label[25]    = "UNKNOWN STAR / CLASS ...";
 void update_star_label_by_offset(int32_t offset) {
+    // NOTE: this is also used for planets as well (bit HACKY, I know!)
     FILE *smh = fopen(starmap_file, "rb");
     fseek(smh, offset, SEEK_SET);
     fread(&_star_id, 8, 1, smh);
@@ -1737,11 +1738,13 @@ void init() {
     extract_ap_target_infos();
 }
 
-void prepare_nearstar() {
+
+// Modified by JORIS on 2023-07-30: added callback for planets
+void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
     int16_t n, c, q, r, s, t;
     double key_radius;
 
-    if (!_delay) {
+    // if (!_delay) { // Modified by JORIS on 2023-07-30: we don't rely on Noctis' own timing system, so this has been removed to ensure that whenever prepare_nearstar gets called, stars are actually calculated
         nearstar_class = ap_target_class;
         nearstar_x     = ap_target_x;
         nearstar_y     = ap_target_y;
@@ -1751,7 +1754,7 @@ void prepare_nearstar() {
         nearstar_r     = ap_target_r;
         nearstar_g     = ap_target_g;
         nearstar_b     = ap_target_b;
-    }
+    // } // see note above
 
     s_m               = qt_M_PI * nearstar_ray * nearstar_ray * nearstar_ray * 0.01e-7;
     nearstar_identity = nearstar_x / 100000 * nearstar_y / 100000 * nearstar_z / 100000;
@@ -2136,9 +2139,9 @@ no_moons:
     nearstar_labeled = 0;
 
     for (n = 1; n <= nearstar_nob; n++) {
-        /*if (search_id_code(nearstar_identity + n, 'P') != -1) { // JORIS REMOVED THIS AT 2023-08-07 because search_id_code got removed
+        if (search_id_code(nearstar_identity + n, 'P') != -1) {
             nearstar_labeled++;
-        }*/
+        }
     }
 
     /*  Reset dei periodi di rotazione
@@ -2146,6 +2149,48 @@ no_moons:
 
     for (n = 0; n < nearstar_nob; n++) {
         nearstar_p_rtperiod[n] = 0;
+    }
+
+    // We now have all planets and can call the callbacks
+    for (n = 0; n < nearstar_nob; n++) {
+        double seedval;
+        if (nearstar_p_owner[n] > -1) {
+            if (nearstar_p_type[n]) {
+                seedval = 1000000.0 * nearstar_ray * nearstar_p_type[n] * nearstar_p_orb_orient[n];
+            } else {
+                seedval = 2000000.0 * n * nearstar_ray * nearstar_p_orb_orient[n];
+            }
+        } else {
+            if (nearstar_p_type[n]) {
+                seedval = 1000000.0 * nearstar_p_type[n] * nearstar_p_orb_seed[n] * nearstar_p_orb_tilt[n] *
+                                        nearstar_p_orb_ecc[n] * nearstar_p_orb_orient[n];
+            } else {
+                seedval = 2000000.0 * n * nearstar_p_orb_seed[n] * nearstar_p_orb_tilt[n] *
+                                        nearstar_p_orb_ecc[n] * nearstar_p_orb_orient[n];
+            }
+        }
+        // int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
+        onPlanetFound(
+            n,
+            nearstar_identity + n + 1, // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
+            seedval,
+            nearstar_p_type[n],
+            nearstar_p_owner[n],
+            nearstar_p_moonid[n],
+            nearstar_p_ring[n],
+            nearstar_p_tilt[n],
+            nearstar_p_ray[n],
+            nearstar_p_orb_ray[n],
+            nearstar_p_orb_tilt[n],
+            nearstar_p_orb_orient[n],
+            nearstar_p_orb_ecc[n],
+            nearstar_p_rtperiod[n],
+            nearstar_p_rotation[n],
+            nearstar_p_term_start[n],
+            nearstar_p_term_end[n],
+            nearstar_p_qsortindex[n],
+            nearstar_p_qsortdist[n]
+        );
     }
 }
 

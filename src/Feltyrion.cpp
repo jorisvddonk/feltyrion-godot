@@ -18,10 +18,13 @@ namespace
 {
 }
 
+Feltyrion *instance;
 extern void init();
-extern void prepare_nearstar();
+extern void extract_ap_target_infos();
+extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
 extern void sky(uint16_t limits, void (*callback)(float x, float y, float z));
+extern int16_t nearstar_nob;
 extern int32_t search_id_code(double id_code, int8_t type);
 extern uint8_t *p_background;
 extern uint8_t tmppal[768];
@@ -31,6 +34,9 @@ extern void update_star_label_by_offset(int32_t offset);
 extern double get_id_code(double x, double y, double z);
 extern double _star_id;
 extern int8_t _star_label[25];
+extern double ap_target_x;
+extern double ap_target_y;
+extern double ap_target_z;
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -71,10 +77,31 @@ godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage() const
     return ref;
 }
 
-void Feltyrion::prepareStar() const
+void cb_Planet(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
 {
-    init();
-    prepare_nearstar();
+    instance->onPlanetFound(index, planet_id, seedval, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+}
+
+void Feltyrion::setAPTarget(godot::Vector3 ap_target)
+{
+    ap_target_x = ap_target.x;
+    ap_target_y = ap_target.y;
+    ap_target_z = ap_target.z;
+    extract_ap_target_infos();
+}
+
+godot::Vector3 Feltyrion::getAPTarget()
+{
+    return godot::Vector3(ap_target_x, ap_target_y, ap_target_z);
+}
+
+void Feltyrion::prepareStar()
+{
+    // NOTE: this is NOT thread safe!
+    instance = this;
+    // NOTE: expect init() and extract_ap_target_infos() to have been called before!
+    prepare_nearstar(cb_Planet);
+    godot::UtilityFunctions::print( " Star should have number of bodies: ", nearstar_nob );
 }
 
 void Feltyrion::loadPlanet(int logical_id, int type, double seedval, bool lighting, bool include_atmosphere) const
@@ -101,6 +128,7 @@ void Feltyrion::unlock()
 
 Feltyrion::Feltyrion()
 {
+    init();
     godot::UtilityFunctions::print( "Constructor." );
 }
 
@@ -128,9 +156,8 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool raw__one_bit) const
     return ref;
 }
 
-Feltyrion *instance;
 
-void cb(float x, float y, float z)
+void cb_Star(float x, float y, float z)
 {
     instance->onStarFound(x, y, z);
 }
@@ -139,22 +166,38 @@ void Feltyrion::scanStars()
 {
     // NOTE: this is *not* thread safe!!!
     instance = this;
-    sky(0x405C, cb);
+    sky(0x405C, cb_Star);
 }
 
 void Feltyrion::onStarFound(float x, float y, float z) {
     godot::Object::emit_signal("found_star", x, y, z);
 }
 
-godot::String Feltyrion::getObjectName(double x, double y, double z, bool isStar) const
+void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
+    godot::Object::emit_signal("found_planet", index, planet_id, seedval, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+}
+
+godot::String Feltyrion::getStarName(double x, double y, double z) const
 {
-    int8_t searchtype = 'P';
-    if (isStar) {
-        searchtype = 'S';
-    }
     double id = get_id_code(x, y, z);
-    godot::UtilityFunctions::print( "ID code: ", id, " x/y/z:", x, ":", y, ":", z );
-    int32_t offset = search_id_code(id, searchtype);
+    int32_t offset = search_id_code(id, 'S');
+    if (offset > -1) {
+        update_star_label_by_offset(offset);
+        return (char*)_star_label;
+    } else {
+        return "";
+    }
+}
+
+godot::String Feltyrion::getPlanetName(double star_x, double star_y, double star_z, int index) const
+{
+    double id = get_id_code(star_x, star_y, star_z) + index + 1; // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
+    return getPlanetNameById(id);
+}
+
+godot::String Feltyrion::getPlanetNameById(double planet_id) const
+{
+    int32_t offset = search_id_code(planet_id, 'P');
     if (offset > -1) {
         update_star_label_by_offset(offset);
         return (char*)_star_label;
@@ -172,11 +215,38 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_palette_as_image" ), &Feltyrion::getPaletteAsImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_atmosphere_image" ), &Feltyrion::returnAtmosphereImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "scan_stars" ), &Feltyrion::scanStars );
-    godot::ClassDB::bind_method( godot::D_METHOD( "get_object_name" ), &Feltyrion::getObjectName );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_star_name" ), &Feltyrion::getStarName );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name" ), &Feltyrion::getPlanetName );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name_by_id" ), &Feltyrion::getPlanetNameById );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
 
+    // Properties
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target"), &Feltyrion::getAPTarget);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target", "ap_target" ), &Feltyrion::setAPTarget );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "ap_target"), "set_ap_target", "get_ap_target");
+
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ) ) );
+    ADD_SIGNAL( godot::MethodInfo( "found_planet", 
+        godot::PropertyInfo( godot::Variant::INT, "index" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "planet_id" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "seedval" ), 
+        godot::PropertyInfo( godot::Variant::INT, "type" ),  
+        godot::PropertyInfo( godot::Variant::INT, "owner" ), 
+        godot::PropertyInfo( godot::Variant::INT, "moonid" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "ring" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "tilt" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "ray" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "orb_ray" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "orb_tilt" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "orb_orient" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "orb_ecc" ),
+        godot::PropertyInfo( godot::Variant::INT, "rtperiod" ),
+        godot::PropertyInfo( godot::Variant::INT, "rotation" ),
+        godot::PropertyInfo( godot::Variant::INT, "term_start" ),
+        godot::PropertyInfo( godot::Variant::INT, "term_end" ),
+        godot::PropertyInfo( godot::Variant::INT, "qsortindex" ),
+        godot::PropertyInfo( godot::Variant::FLOAT, "qsortdist" ) ) );
 }
