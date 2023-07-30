@@ -1705,6 +1705,18 @@ int16_t starnop(double star_x, double star_y, double star_z) {
     return 0;
 }
 
+void cupola(float y_or, float brk);
+void polycupola(float y_or, int8_t textured);
+
+void save_models() {
+    // floor:
+    //cupola(0,8);
+    polycupola(0, 0);
+    // roof:
+    //cupola(+1,8);
+    //polycupola(+1, 0);
+}
+
 void init() {
     getsecs();
     int32_t ir, ig, ib, ire = 0, ige = 0, ibe = 0;
@@ -1740,7 +1752,7 @@ void init() {
 
 
 // Modified by JORIS on 2023-07-30: added callback for planets
-void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
+void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
     int16_t n, c, q, r, s, t;
     double key_radius;
 
@@ -2169,11 +2181,16 @@ no_moons:
                                         nearstar_p_orb_ecc[n] * nearstar_p_orb_orient[n];
             }
         }
-        // int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
+
+        planet_xyz(n);
+        // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
         onPlanetFound(
             n,
             nearstar_identity + n + 1, // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
             seedval,
+            plx,
+            ply,
+            plz,
             nearstar_p_type[n],
             nearstar_p_owner[n],
             nearstar_p_moonid[n],
@@ -3633,3 +3650,172 @@ int8_t snapfilename[24];
 */
 
 int32_t iqsecs = 0;
+
+
+
+void prep_write() {
+   FILE *fp;
+
+   fp = fopen("../temp.txt", "w");
+   fprintf(fp, "# beginning of file\n");
+   fclose(fp);
+}
+
+int p_tracker = 1;
+void prep_write2() {
+   FILE *fp;
+
+   fp = fopen("../temp2.obj", "w");
+   fprintf(fp, "# beginning of file\n");
+   fclose(fp);
+   p_tracker = 1;
+}
+
+void stick3d (float p_x, float p_y, float p_z, float x, float y, float z) {
+   FILE *fp;
+
+   fp = fopen("../temp.txt", "a");
+   fprintf(fp, "%f %f %f %f %f %f\n", p_x, p_y, p_z, x, y, z);
+   fclose(fp);
+}
+
+void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_t colore) {
+   // assuming nrv is always 4...
+   FILE *fp;
+
+   fp = fopen("../temp2.obj", "a");
+   fprintf(fp, "v %f %f %f\n", x[0] / 100, y[0] / 100, z[0] / 100);
+   fprintf(fp, "v %f %f %f\n", x[1] / 100, y[1] / 100, z[1] / 100);
+   fprintf(fp, "v %f %f %f\n", x[2] / 100, y[2] / 100, z[2] / 100);
+   fprintf(fp, "v %f %f %f\n", x[3] / 100, y[3] / 100, z[3] / 100);
+
+   fprintf(fp, "f %i %i %i\n", p_tracker + 0, p_tracker + 1, p_tracker + 2);
+   fprintf(fp, "f %i %i %i\n", p_tracker + 0, p_tracker + 2, p_tracker + 3);
+
+   p_tracker += 4;
+   fclose(fp);
+}
+
+void cupola(float y_or, float brk) {
+    prep_write();
+    float xx, yy, zz;
+    float lat, lon, dlat, dlon, dlon_2, k, clon, slon, ck, sk;
+    dlat   = M_PI / 20;
+    dlon   = M_PI / 10;
+    dlon_2 = dlon / 2;
+
+    for (lon = 0; lon < 2 * M_PI - dlon_2; lon += dlon) {
+        k    = lon + dlon;
+        ck   = cos(k);
+        sk   = sin(k);
+        clon = cos(lon);
+        slon = sin(lon);
+
+        for (lat = dlat; lat < brk * dlat; lat += dlat) {
+            xx = cupsize * sin(lat + dlat);
+            yy = -cupheight * cos(lat) * y_or;
+            zz = cupsize * sin(lat);
+            stick3d(zz * clon, yy, zz * slon, xx * clon, -cupheight * cos(lat + dlat) * y_or, xx * slon);
+            stick3d(zz * clon, yy, zz * slon, zz * ck, yy, zz * sk);
+        }
+
+        if (gburst > 1) {
+            lat = (M_PI / 20) * 8 * ((float) gburst / 63);
+            //lens_flares_for(cam_x, cam_y, cam_z, +cupsize * clon * sin(lat), -cupheight * cos(lat),
+            //                +cupsize * slon * sin(lat), -50000, 10, 1, 0, 1, 1);
+            //flares = 0;
+        }
+    }
+}
+
+void polycupola(float y_or, int8_t textured) {
+    prep_write2();
+    float d1, d2, d3, dd;
+    float x[4], y[4], z[4];
+    float lat, lon, dlat, dlon, dlon_2, k, clon, slon, ck, sk;
+    dlat   = M_PI / 20;
+    dlon   = M_PI / 10;
+    dlon_2 = dlon / 2;
+
+    for (lon = 0; lon < 2 * M_PI - dlon_2; lon += dlon) {
+        k    = lon + dlon;
+        ck   = cos(k);
+        sk   = sin(k);
+        clon = cos(lon);
+        slon = sin(lon);
+
+        for (lat = dlat; lat < 8 * dlat; lat += dlat) {
+            float xx = cupsize * sin(lat + dlat);
+            float yy = -cupheight * cos(lat) * y_or;
+            float zz = cupsize * sin(lat);
+            x[0]     = zz * clon;
+            y[0]     = yy;
+            z[0]     = zz * slon;
+            x[1]     = zz * ck;
+            y[1]     = yy;
+            z[1]     = zz * sk;
+            x[2]     = xx * ck;
+            y[2]     = -cupheight * cos(lat + dlat) * y_or;
+            z[2]     = xx * sk;
+            x[3]     = xx * clon;
+            y[3]     = -cupheight * cos(lat + dlat) * y_or;
+            z[3]     = xx * slon;
+
+            if (ontheroof && y_or == 1) {
+                //d1 = 0.5 * (x[0] + x[1]) - cam_x;
+                //d2 = 0.5 * (z[0] + z[1]) - cam_z;
+                dd = 1000 - sqrt(d1 * d1 + d2 * d2);
+
+                if (dd > 600) {
+                    dd = 600;
+                }
+
+                if (dd < 0) {
+                    dd = 0;
+                }
+
+                //cam_y += dd;
+                poly3d(x, y, z, 4, 64);
+                //cam_y -= dd;
+            } else {
+                if (textured) {
+                    //d1 = 0.5 * (x[0] + x[1]) - cam_x;
+                    //d2 = 0.5 * (y[0] + y[2]) - cam_y;
+                    //d3 = 0.5 * (z[0] + z[1]) - cam_z;
+                    dd = 500 - sqrt(d1 * d1 + d2 * d2 + d3 * d3);
+
+                    if (dd > 500) {
+                        dd = 500;
+                    }
+
+                    if (dd < 0) {
+                        dd = 0;
+                    }
+
+                    //cam_y += 4 * dd * y_or;
+                    xx   = x[3];
+                    yy   = y[3];
+                    zz   = z[3];
+                    x[3] = x[2];
+                    y[3] = y[2];
+                    z[3] = z[2];
+                    x[2] = x[1];
+                    y[2] = y[1];
+                    z[2] = z[1];
+                    x[1] = x[0];
+                    y[1] = y[0];
+                    z[1] = z[0];
+                    x[0] = xx;
+                    y[0] = yy;
+                    z[0] = zz;
+                    //polymap(x, y, z, 4, 0);
+                    //cam_y -= 4 * dd * y_or;
+                } else {
+                    poly3d(x, y, z, 4, 64);
+                }
+            }
+        }
+    }
+
+    //resetfx();
+}

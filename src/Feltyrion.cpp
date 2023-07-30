@@ -21,9 +21,10 @@ namespace
 Feltyrion *instance;
 extern void init();
 extern void extract_ap_target_infos();
-extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
+extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
 extern void sky(uint16_t limits, void (*callback)(float x, float y, float z));
+extern void save_models();
 extern int16_t nearstar_nob;
 extern int32_t search_id_code(double id_code, int8_t type);
 extern uint8_t *p_background;
@@ -87,9 +88,9 @@ godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage(bool accurate_height) 
     return ref;
 }
 
-void cb_Planet(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
+void cb_Planet(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
 {
-    instance->onPlanetFound(index, planet_id, seedval, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+    instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
 }
 
 void Feltyrion::setAPTarget(godot::Vector3 ap_target)
@@ -194,8 +195,8 @@ void Feltyrion::onStarFound(float x, float y, float z) {
     godot::Object::emit_signal("found_star", x, y, z);
 }
 
-void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
-    godot::Object::emit_signal("found_planet", index, planet_id, seedval, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
+    godot::Object::emit_signal("found_planet", index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
 }
 
 godot::String Feltyrion::getStarName(double x, double y, double z) const
@@ -227,6 +228,11 @@ godot::String Feltyrion::getPlanetNameById(double planet_id) const
     }
 }
 
+void Feltyrion::saveModels() const
+{
+    save_models();
+}
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -239,6 +245,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_star_name" ), &Feltyrion::getStarName );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name" ), &Feltyrion::getPlanetName );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name_by_id" ), &Feltyrion::getPlanetNameById );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
@@ -254,6 +262,9 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::INT, "index" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "planet_id" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "seedval" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "x" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "y" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "z" ), 
         godot::PropertyInfo( godot::Variant::INT, "type" ),  
         godot::PropertyInfo( godot::Variant::INT, "owner" ), 
         godot::PropertyInfo( godot::Variant::INT, "moonid" ),
