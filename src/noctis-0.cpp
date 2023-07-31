@@ -1750,6 +1750,7 @@ void init() {
     extract_ap_target_infos();
 }
 
+int16_t calculate_planet_spin(int16_t logical_id, double seedval);
 
 // Modified by JORIS on 2023-07-30: added callback for planets
 void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
@@ -2183,6 +2184,7 @@ no_moons:
         }
 
         planet_xyz(n);
+        calculate_planet_spin(n, seedval);
         // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
         onPlanetFound(
             n,
@@ -2581,30 +2583,15 @@ void storm() { // tempesta (una grande macchia chiara sull'atmosfera).
     }
 }
 
-/* Calculate the surface by extapolating it from the data on the planet and from
- * the pseudo-random table assigned to it. Includes the day-night terminator by
- * darkening the night hemisphere for an angle of 130 (not 180 due to the
- * diffused light and the reduced field at the edges of the globes). "colorbase"
- * is assigned to 192 for the planets, to 128 for the moons.
+/*
+ * Calculate the planet spin
+ * Added by JORIS on 2023-07-31; used to be part of void surface() only...
+ * Note that this sets the random seed!
  * 
- * 'lighting' boolean was added by JORIS on 2023-07-28, to allow enabling/disabling 
- * of day-night terminator application.
- * 'include_atmosphere' boolean was added by JORIS on 2023-07-28, to allow turning off
- * the inclusion of the atmosphere in the p_surfacemap (thus allowing separate textures
- * to be retrieved for surface and atmosphere)
+ * Returns 'plwp'..
  */
-
-void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere) {
-    int16_t plwp, c;
-    uint16_t seed = 0;
-    int8_t knot1  = 0, brt;
-    int16_t QW    = QUADWORDS;
-    float r1, r2, r3, g1, g2, g3, b1, b2, b3;
-    uint8_t *overlay = (uint8_t *) objectschart;
-    if (type == 10) {
-        return; // Companion star: has star surface...
-    }
-
+int16_t calculate_planet_spin(int16_t logical_id, double seedval) {
+    int16_t plwp;
     /* Setting of the rotation period. "rotation" represents the current
      * rotation of the planet, in degrees, from 0 to 359. The rotation period is
      * extracted in a very wide range, with 1 second resolution.
@@ -2630,6 +2617,47 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
     if (plwp < 0) {
         plwp += 360;
     }
+
+    nearstar_p_term_start[logical_id] = plwp + 35;
+
+    if (nearstar_p_term_start[logical_id] >= 360) {
+        nearstar_p_term_start[logical_id] -= 360;
+    }
+
+    nearstar_p_term_end[logical_id] = nearstar_p_term_start[logical_id] + 130;
+
+    if (nearstar_p_term_end[logical_id] >= 360) {
+        nearstar_p_term_end[logical_id] -= 360;
+    }
+
+    return plwp;
+}
+
+/* Calculate the surface by extapolating it from the data on the planet and from
+ * the pseudo-random table assigned to it. Includes the day-night terminator by
+ * darkening the night hemisphere for an angle of 130 (not 180 due to the
+ * diffused light and the reduced field at the edges of the globes). "colorbase"
+ * is assigned to 192 for the planets, to 128 for the moons.
+ * 
+ * 'lighting' boolean was added by JORIS on 2023-07-28, to allow enabling/disabling 
+ * of day-night terminator application.
+ * 'include_atmosphere' boolean was added by JORIS on 2023-07-28, to allow turning off
+ * the inclusion of the atmosphere in the p_surfacemap (thus allowing separate textures
+ * to be retrieved for surface and atmosphere)
+ */
+
+void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere) {
+    int16_t plwp, c;
+    uint16_t seed = 0;
+    int8_t knot1  = 0, brt;
+    int16_t QW    = QUADWORDS;
+    float r1, r2, r3, g1, g2, g3, b1, b2, b3;
+    uint8_t *overlay = (uint8_t *) objectschart;
+    if (type == 10) {
+        return; // Companion star: has star surface...
+    }
+
+    plwp = calculate_planet_spin(logical_id, seedval);
 
     /* Selection of the pseudo-table relative to this planet. The pseudo-table
      * of the "random" function in C++ has a fair probability of recurrence, but
@@ -3066,21 +3094,8 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
         }
     }
 
-
     // Day-night terminator application.
     if (lighting) {
-        nearstar_p_term_start[logical_id] = plwp + 35;
-
-        if (nearstar_p_term_start[logical_id] >= 360) {
-            nearstar_p_term_start[logical_id] -= 360;
-        }
-
-        nearstar_p_term_end[logical_id] = nearstar_p_term_start[logical_id] + 130;
-
-        if (nearstar_p_term_end[logical_id] >= 360) {
-            nearstar_p_term_end[logical_id] -= 360;
-        }
-
         for (uint16_t i = 179, j = (plwp + 35); i > 0; i--, j += 230) {
             for (uint16_t k = 130; k > 0; k--) {
                 p_background[j] >>= 2u;
