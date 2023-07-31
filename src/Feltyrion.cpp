@@ -56,6 +56,27 @@ extern int8_t ap_target_g;
 extern int8_t ap_target_b;
 extern float ap_target_ray;
 extern int8_t ap_targetted;
+extern int8_t nearstar_p_type[maxbodies];
+extern int16_t nearstar_p_owner[maxbodies];
+extern int8_t nearstar_p_moonid[maxbodies];
+extern double nearstar_p_ring[maxbodies];
+extern double nearstar_p_tilt[maxbodies];
+extern double nearstar_p_ray[maxbodies];
+extern double nearstar_p_orb_ray[maxbodies];
+extern double nearstar_p_orb_tilt[maxbodies];
+extern double nearstar_p_orb_orient[maxbodies];
+extern double nearstar_p_orb_ecc[maxbodies];
+extern int16_t nearstar_p_rtperiod[maxbodies];
+extern int16_t nearstar_p_rotation[maxbodies];
+extern int16_t nearstar_p_term_start[maxbodies];
+extern int16_t nearstar_p_term_end[maxbodies];
+extern int16_t nearstar_p_qsortindex[maxbodies];
+extern float nearstar_p_qsortdist[maxbodies];
+extern double nearstar_p_plx[maxbodies];
+extern double nearstar_p_ply[maxbodies];
+extern double nearstar_p_plz[maxbodies];
+extern double nearstar_p_seedval[maxbodies];
+extern double nearstar_p_identity[maxbodies];
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -170,7 +191,6 @@ Feltyrion::Feltyrion()
  */
 godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__one_byte) const
 {
-    godot::UtilityFunctions::print( " ReturnImage" );
     uint8_t colorbase = 192;
 
     int vlines = 180;
@@ -245,6 +265,33 @@ godot::String Feltyrion::getPlanetNameById(double planet_id) const
     }
 }
 
+godot::Dictionary Feltyrion::getPlanetInfo(int n) {
+    godot::Dictionary ret = godot::Dictionary();
+    ret["n"] = n;
+    ret["nearstar_p_seedval"] = nearstar_p_seedval[n];
+    ret["nearstar_p_identity"] = nearstar_p_identity[n];
+    ret["nearstar_p_plx"] = nearstar_p_plx[n];
+    ret["nearstar_p_ply"] = nearstar_p_ply[n];
+    ret["nearstar_p_plz"] = nearstar_p_plz[n];
+    ret["nearstar_p_type"] = nearstar_p_type[n];
+    ret["nearstar_p_owner"] = nearstar_p_owner[n];
+    ret["nearstar_p_moonid"] = nearstar_p_moonid[n];
+    ret["nearstar_p_ring"] = nearstar_p_ring[n];
+    ret["nearstar_p_tilt"] = nearstar_p_tilt[n];
+    ret["nearstar_p_ray"] = nearstar_p_ray[n];
+    ret["nearstar_p_orb_ray"] = nearstar_p_orb_ray[n];
+    ret["nearstar_p_orb_tilt"] = nearstar_p_orb_tilt[n];
+    ret["nearstar_p_orb_orient"] = nearstar_p_orb_orient[n];
+    ret["nearstar_p_orb_ecc"] = nearstar_p_orb_ecc[n];
+    ret["nearstar_p_rtperiod"] = nearstar_p_rtperiod[n];
+    ret["nearstar_p_rotation"] = nearstar_p_rotation[n];
+    ret["nearstar_p_term_start"] = nearstar_p_term_start[n];
+    ret["nearstar_p_term_end"] = nearstar_p_term_end[n];
+    ret["nearstar_p_qsortindex"] = nearstar_p_qsortindex[n];
+    ret["nearstar_p_qsortdist"] = nearstar_p_qsortdist[n];
+    return ret;
+}
+
 godot::Dictionary Feltyrion::getCurrentStarInfo() {
     godot::Dictionary ret = godot::Dictionary();
     ret["nearstar_class"] = nearstar_class;
@@ -300,6 +347,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name_by_id" ), &Feltyrion::getPlanetNameById );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_current_star_info" ), &Feltyrion::getCurrentStarInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_info" ), &Feltyrion::getAPTargetInfo );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_info" ), &Feltyrion::getPlanetInfo );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 

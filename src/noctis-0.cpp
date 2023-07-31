@@ -606,6 +606,11 @@ double nearstar_p_orb_seed[maxbodies];
 double nearstar_p_orb_tilt[maxbodies];
 double nearstar_p_orb_orient[maxbodies];
 double nearstar_p_orb_ecc[maxbodies];
+double nearstar_p_plx[maxbodies];
+double nearstar_p_ply[maxbodies];
+double nearstar_p_plz[maxbodies];
+double nearstar_p_seedval[maxbodies];
+double nearstar_p_identity[maxbodies];
 
 int16_t nearstar_p_rtperiod[maxbodies];
 int16_t nearstar_p_rotation[maxbodies];
@@ -864,6 +869,9 @@ void planet_xyz(int16_t n) {
         ply += moy;
         plz += moz;
     }
+    nearstar_p_plx[n] = plx;
+    nearstar_p_ply[n] = ply;
+    nearstar_p_plz[n] = plz;
 }
 
 // Calculate the revolution period of a body, in seconds.
@@ -2185,16 +2193,20 @@ no_moons:
             }
         }
 
+        nearstar_p_seedval[n] = seedval;
+        nearstar_p_identity[n] = nearstar_identity + n + 1; // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
         planet_xyz(n);
         calculate_planet_spin(n, seedval);
         // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
+        // temporarily DISABLED!
+        /*
         onPlanetFound(
             n,
-            nearstar_identity + n + 1, // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
-            seedval,
-            plx,
-            ply,
-            plz,
+            nearstar_p_identity[n],
+            nearstar_p_seedval[n],
+            nearstar_p_plx[n],
+            nearstar_p_ply[n],
+            nearstar_p_plz[n],
             nearstar_p_type[n],
             nearstar_p_owner[n],
             nearstar_p_moonid[n],
@@ -2212,6 +2224,7 @@ no_moons:
             nearstar_p_qsortindex[n],
             nearstar_p_qsortdist[n]
         );
+        */
     }
 }
 

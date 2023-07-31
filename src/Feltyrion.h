@@ -20,6 +20,7 @@ public:
     godot::String getPlanetNameById(double planet_id) const;
     godot::Dictionary getCurrentStarInfo();
     godot::Dictionary getAPTargetInfo();
+    godot::Dictionary getPlanetInfo(int n);
     void saveModels() const;
     void Feltyrion::setAPTarget(godot::Vector3 ap_target);
     godot::Vector3 Feltyrion::getAPTarget();
