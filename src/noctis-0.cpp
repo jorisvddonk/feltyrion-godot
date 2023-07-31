@@ -1247,6 +1247,8 @@ void background(uint16_t start, uint8_t *target, uint8_t *background, uint8_t *o
     }
 }
 
+double get_id_code(double x, double y, double z);
+
 /*
     Starry sky, three-of-a-kind. In the amplified view, it has 2,744 stars.
     Star magnitudes go from 0 to +13. Since the player is a cat, with scotopic
@@ -1254,7 +1256,7 @@ void background(uint16_t start, uint8_t *target, uint8_t *background, uint8_t *o
     JORIS added on 2023-07-29: callback function to get the results
 */
 
-void sky(uint16_t limits, void (*callback)(float x, float y, float z)) {
+void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code)) {
     uint16_t debug;
 
     auto min_xy            = (int32_t) (1E9);
@@ -1372,7 +1374,7 @@ void sky(uint16_t limits, void (*callback)(float x, float y, float z)) {
                 xx = temp_x - dzat_x;
                 yy = temp_y - dzat_y;
 
-                callback(temp_x,temp_y,temp_z);
+                callback(temp_x,temp_y,temp_z, get_id_code(temp_x, temp_y, temp_z));
 
                 /*
                 z2 = (zz * opt_tcosbeta) - (xx * opt_tsinbeta);

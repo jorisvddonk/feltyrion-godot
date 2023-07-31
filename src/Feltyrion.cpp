@@ -23,7 +23,7 @@ extern void init();
 extern void extract_ap_target_infos();
 extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
-extern void sky(uint16_t limits, void (*callback)(float x, float y, float z));
+extern void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code));
 extern void save_models();
 extern int16_t nearstar_nob;
 extern int32_t search_id_code(double id_code, int8_t type);
@@ -38,6 +38,24 @@ extern int8_t _star_label[25];
 extern double ap_target_x;
 extern double ap_target_y;
 extern double ap_target_z;
+extern int16_t nearstar_class;
+extern int16_t nearstar_nop;
+extern int8_t nearstar_spin;
+extern int8_t nearstar_r;
+extern int8_t nearstar_g;
+extern int8_t nearstar_b;
+extern double nearstar_x;
+extern double nearstar_y;
+extern double nearstar_z;
+extern float nearstar_ray;
+extern int16_t nearstar_labeled;
+extern int16_t ap_target_class;
+extern int8_t ap_target_spin;
+extern int8_t ap_target_r;
+extern int8_t ap_target_g;
+extern int8_t ap_target_b;
+extern float ap_target_ray;
+extern int8_t ap_targetted;
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -98,6 +116,7 @@ void Feltyrion::setAPTarget(godot::Vector3 ap_target)
     ap_target_x = ap_target.x;
     ap_target_y = ap_target.y;
     ap_target_z = ap_target.z;
+    ap_targetted = 1;
     extract_ap_target_infos();
 }
 
@@ -112,12 +131,10 @@ void Feltyrion::prepareStar()
     instance = this;
     // NOTE: expect init() and extract_ap_target_infos() to have been called before!
     prepare_nearstar(cb_Planet);
-    godot::UtilityFunctions::print( " Star should have number of bodies: ", nearstar_nob );
 }
 
 void Feltyrion::loadPlanet(int logical_id, int type, double seedval, bool lighting, bool include_atmosphere) const
 {
-    godot::UtilityFunctions::print( "  LoadPlanet",godot::String::num_int64( type ) );
     uint8_t colorbase = 192;
 
     surface(logical_id, type, seedval, colorbase, lighting, include_atmosphere);
@@ -179,9 +196,9 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__
 }
 
 
-void cb_Star(float x, float y, float z)
+void cb_Star(float x, float y, float z, double id_code)
 {
-    instance->onStarFound(x, y, z);
+    instance->onStarFound(x, y, z, id_code);
 }
 
 void Feltyrion::scanStars()
@@ -191,8 +208,8 @@ void Feltyrion::scanStars()
     sky(0x405C, cb_Star);
 }
 
-void Feltyrion::onStarFound(float x, float y, float z) {
-    godot::Object::emit_signal("found_star", x, y, z);
+void Feltyrion::onStarFound(float x, float y, float z, double id_code) {
+    godot::Object::emit_signal("found_star", x, y, z, id_code);
 }
 
 void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
@@ -228,6 +245,42 @@ godot::String Feltyrion::getPlanetNameById(double planet_id) const
     }
 }
 
+godot::Dictionary Feltyrion::getCurrentStarInfo() {
+    godot::Dictionary ret = godot::Dictionary();
+    ret["nearstar_class"] = nearstar_class;
+    ret["nearstar_x"] = nearstar_x;
+    ret["nearstar_y"] = nearstar_y;
+    ret["nearstar_z"] = nearstar_z;
+    ret["nearstar_ray"] = nearstar_ray;
+    ret["nearstar_spin"] = nearstar_spin;
+    ret["nearstar_r"] = nearstar_r;
+    ret["nearstar_g"] = nearstar_g;
+    ret["nearstar_b"] = nearstar_b;
+    ret["nearstar_nop"] = nearstar_nop;
+    ret["nearstar_nob"] = nearstar_nob;
+    ret["nearstar_labeled"] = nearstar_labeled;
+    ret["nearstar_id_code"] = get_id_code(nearstar_x, nearstar_y, nearstar_z);
+    return ret;
+}
+
+godot::Dictionary Feltyrion::getAPTargetInfo() {
+    godot::Dictionary ret = godot::Dictionary();
+    ret["ap_targetted"] = ap_targetted;
+    if (ap_targetted) {
+        ret["ap_target_class"] = ap_target_class;
+        ret["ap_target_ray"] = ap_target_ray;
+        ret["ap_target_r"] = ap_target_r;
+        ret["ap_target_g"] = ap_target_g;
+        ret["ap_target_b"] = ap_target_b;
+        ret["ap_target_spin"] = ap_target_spin;
+        ret["ap_target_x"] = ap_target_x;
+        ret["ap_target_y"] = ap_target_y;
+        ret["ap_target_z"] = ap_target_z;
+        ret["ap_target_id_code"] = get_id_code(ap_target_x, ap_target_y, ap_target_z);
+    }
+    return ret;
+}
+
 void Feltyrion::saveModels() const
 {
     save_models();
@@ -245,6 +298,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_star_name" ), &Feltyrion::getStarName );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name" ), &Feltyrion::getPlanetName );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_name_by_id" ), &Feltyrion::getPlanetNameById );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_current_star_info" ), &Feltyrion::getCurrentStarInfo );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_info" ), &Feltyrion::getAPTargetInfo );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 
@@ -257,7 +312,7 @@ void Feltyrion::_bind_methods()
     ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "ap_target"), "set_ap_target", "get_ap_target");
 
     // Signals
-    ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ) ) );
+    ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
     ADD_SIGNAL( godot::MethodInfo( "found_planet", 
         godot::PropertyInfo( godot::Variant::INT, "index" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "planet_id" ), 
