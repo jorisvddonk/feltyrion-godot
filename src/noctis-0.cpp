@@ -614,6 +614,7 @@ double nearstar_p_identity[maxbodies];
 
 int16_t nearstar_p_rtperiod[maxbodies];
 int16_t nearstar_p_rotation[maxbodies];
+int16_t nearstar_p_viewpoint[maxbodies]; // added by JORIS, to store the viewpoint location in
 int16_t nearstar_p_term_start[maxbodies];
 int16_t nearstar_p_term_end[maxbodies];
 
@@ -1766,7 +1767,7 @@ void init() {
 int16_t calculate_planet_spin(int16_t logical_id, double seedval);
 
 // Modified by JORIS on 2023-07-30: added callback for planets
-void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
+void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)) {
     int16_t n, c, q, r, s, t;
     double key_radius;
 
@@ -2200,7 +2201,7 @@ no_moons:
         nearstar_p_identity[n] = nearstar_identity + n + 1; // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
         planet_xyz(n);
         calculate_planet_spin(n, seedval);
-        // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
+        // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
         // temporarily DISABLED!
         /*
         onPlanetFound(
@@ -2222,6 +2223,7 @@ no_moons:
             nearstar_p_orb_ecc[n],
             nearstar_p_rtperiod[n],
             nearstar_p_rotation[n],
+            nearstar_p_viewpoint[n],
             nearstar_p_term_start[n],
             nearstar_p_term_end[n],
             nearstar_p_qsortindex[n],
@@ -2622,13 +2624,13 @@ int16_t calculate_planet_spin(int16_t logical_id, double seedval) {
      */
     nearstar_p_rtperiod[logical_id] =
         10.0 * (ranged_fast_random(50) + 1) + 10.0 * ranged_fast_random(25) + ranged_fast_random(250) + 41;
-    nearstar_p_rotation[logical_id] = secs / nearstar_p_rtperiod[logical_id];
-    nearstar_p_rotation[logical_id] %= 360;
+    nearstar_p_rotation[logical_id] = int16_t(fmod(secs / nearstar_p_rtperiod[logical_id], 360)); // JORIS FIX: this is now no longer occasionally negative
 
     /* Calculation of the planet's current orientation for the masking of the
      * dark side (with respect to the position of the star).
      */
-    plwp = 89 - cplx_planet_viewpoint(logical_id);
+    nearstar_p_viewpoint[logical_id] = cplx_planet_viewpoint(logical_id);
+    plwp = 89 - nearstar_p_viewpoint[logical_id];
     plwp += nearstar_p_rotation[logical_id];
     plwp %= 360;
 

@@ -21,7 +21,7 @@ namespace
 Feltyrion *instance;
 extern void init();
 extern void extract_ap_target_infos();
-extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
+extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
 extern void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code));
 extern void save_models();
@@ -68,6 +68,7 @@ extern double nearstar_p_orb_orient[maxbodies];
 extern double nearstar_p_orb_ecc[maxbodies];
 extern int16_t nearstar_p_rtperiod[maxbodies];
 extern int16_t nearstar_p_rotation[maxbodies];
+extern int16_t nearstar_p_viewpoint[maxbodies];
 extern int16_t nearstar_p_term_start[maxbodies];
 extern int16_t nearstar_p_term_end[maxbodies];
 extern int16_t nearstar_p_qsortindex[maxbodies];
@@ -127,9 +128,9 @@ godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage(bool accurate_height) 
     return ref;
 }
 
-void cb_Planet(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
+void cb_Planet(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
 {
-    instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+    instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
 }
 
 void Feltyrion::setAPTarget(godot::Vector3 ap_target)
@@ -232,8 +233,8 @@ void Feltyrion::onStarFound(float x, float y, float z, double id_code) {
     godot::Object::emit_signal("found_star", x, y, z, id_code);
 }
 
-void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
-    godot::Object::emit_signal("found_planet", index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, term_start, term_end, qsortindex, qsortdist);
+void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
+    godot::Object::emit_signal("found_planet", index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
 }
 
 godot::String Feltyrion::getStarName(double x, double y, double z) const
@@ -285,6 +286,7 @@ godot::Dictionary Feltyrion::getPlanetInfo(int n) {
     ret["nearstar_p_orb_ecc"] = nearstar_p_orb_ecc[n];
     ret["nearstar_p_rtperiod"] = nearstar_p_rtperiod[n];
     ret["nearstar_p_rotation"] = nearstar_p_rotation[n];
+    ret["nearstar_p_viewpoint"] = nearstar_p_viewpoint[n];
     ret["nearstar_p_term_start"] = nearstar_p_term_start[n];
     ret["nearstar_p_term_end"] = nearstar_p_term_end[n];
     ret["nearstar_p_qsortindex"] = nearstar_p_qsortindex[n];
@@ -380,6 +382,7 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::FLOAT, "orb_ecc" ),
         godot::PropertyInfo( godot::Variant::INT, "rtperiod" ),
         godot::PropertyInfo( godot::Variant::INT, "rotation" ),
+        godot::PropertyInfo( godot::Variant::INT, "viewpoint" ),
         godot::PropertyInfo( godot::Variant::INT, "term_start" ),
         godot::PropertyInfo( godot::Variant::INT, "term_end" ),
         godot::PropertyInfo( godot::Variant::INT, "qsortindex" ),
