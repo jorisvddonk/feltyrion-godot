@@ -1718,6 +1718,9 @@ int16_t starnop(double star_x, double star_y, double star_z) {
 void cupola(float y_or, float brk);
 void polycupola(float y_or, int8_t textured);
 
+/**
+ * Temporary function, meant to be run only once, allowing saving of the Stardrifter's cupola data..
+ */
 void save_models() {
     // floor:
     //cupola(0,8);
