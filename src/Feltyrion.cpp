@@ -248,6 +248,13 @@ void Feltyrion::setDzat(double parsis_x, double parsis_y, double parsis_z)
     dzat_z = parsis_z;
 }
 
+void Feltyrion::setNearstar(double parsis_x, double parsis_y, double parsis_z)
+{
+    nearstar_x = parsis_x;
+    nearstar_y = parsis_y;
+    nearstar_z = parsis_z;
+}
+
 void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath)
 {
     // thread safe as callback is not used
@@ -395,6 +402,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_info" ), &Feltyrion::getPlanetInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat" ), &Feltyrion::getDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat" ), &Feltyrion::setDzat );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_nearstar" ), &Feltyrion::setNearstar );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 

@@ -24,6 +24,7 @@ public:
     godot::Dictionary getPlanetInfo(int n);
     godot::Vector3 getDzat();
     void setDzat(double parsis_x, double parsis_y, double parsis_z);
+    void setNearstar(double parsis_x, double parsis_y, double parsis_z);
     void saveModels() const;
     void Feltyrion::setAPTarget(godot::Vector3 ap_target);
     godot::Vector3 Feltyrion::getAPTarget();
