@@ -23,9 +23,6 @@ To use this locally on your machine, you will need the following:
 - **[CMake](https://cmake.org/)** v3.22+
 - C++ Compiler with at least **C++17** support (any recent compiler)
 - (optional) **[ccache](https://ccache.dev/)** for faster rebuilds
-- (optional) **[clang-format](https://clang.llvm.org/docs/ClangFormat.html)** for linting and automatic code formatting (CI uses clang-format version 15)
-
-The GitHub actions (CI) are set up to include all of these tools. To see how to download them on your platform, take a look at the [workflow](.github/workflows/main.yml) file.
 
 ## Build
 
@@ -51,12 +48,11 @@ This tells CMake to use `Visual Studio 2022`. There is a list of Visual Studio g
 
 The following additional CMake options are available:
 
-| Option                                                                   | Description                                      | Default                                                                                                 |
-|--------------------------------------------------------------------------|--------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| `CCACHE_PROGRAM`                                                         | Path to `ccache` for faster rebuilds             | This is automatically set **ON** if `ccache` is found. If you do not want to use it, set this to "".    |
-| `CLANG_FORMAT_PROGRAM`                                                   | Path to `clang-format` for code formatting.      | This is automatically set **ON** if `clang-format` is on. If you do not want to use it, set this to "". |
-| `${PROJECT_NAME_UPPERCASE}_WARN_EVERYTHING` (e.g. FOO_WARN_EVERYTHING)   | Turns on all warnings. (Not available for MSVC.) | **OFF** (too noisy, but can be useful sometimes)                                                        |
-| `${PROJECT_NAME_UPPERCASE}_WARNING_AS_ERROR` (e.g. FOO_WARNING_AS_ERROR) | Turns warnings into errors.                      | **ON**                                                                                                  |
+| Option                                                                   | Description                                      | Default                                                                                              |
+|--------------------------------------------------------------------------|--------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `CCACHE_PROGRAM`                                                         | Path to `ccache` for faster rebuilds             | This is automatically set **ON** if `ccache` is found. If you do not want to use it, set this to "". |
+| `${PROJECT_NAME_UPPERCASE}_WARN_EVERYTHING` (e.g. FOO_WARN_EVERYTHING)   | Turns on all warnings. (Not available for MSVC.) | **OFF** (too noisy, but can be useful sometimes)                                                     |
+| `${PROJECT_NAME_UPPERCASE}_WARNING_AS_ERROR` (e.g. FOO_WARNING_AS_ERROR) | Turns warnings into errors.                      | **ON**                                                                                               |
 
 # Usage
 
