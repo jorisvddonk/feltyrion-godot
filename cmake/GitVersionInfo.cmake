@@ -17,7 +17,8 @@ if ( GIT_PROGRAM )
     get_git_head_revision( GIT_REFSPEC GIT_SHA1 )
     git_describe( GIT_SHORT )
 
-    string( TOUPPER ${PROJECT_NAME} UPPER_PROJECT_NAME )
+    string(REPLACE "-" "_" PROJECT_NAME_WITH_UNDERSCORES ${PROJECT_NAME} )
+    string(TOUPPER ${PROJECT_NAME_WITH_UNDERSCORES} UPPER_PROJECT_NAME )
 
     set( VERSION_INPUT_FILE "src/Version.h.in" )
     set( VERSION_OUTPUT_FILE "${CMAKE_BINARY_DIR}/gen/Version.h" )
