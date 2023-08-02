@@ -210,6 +210,7 @@ extern double nearstar_p_ply[maxbodies];
 extern double nearstar_p_plz[maxbodies];
 extern double nearstar_p_seedval[maxbodies];
 extern double nearstar_p_identity[maxbodies];
+extern double stars_visible[8232]; // x/y/z coordinates of stars that are visible; 14 * 14 * 14 * 3
 extern int8_t *planet_description[10];
 extern uint8_t planet_rgb_and_var[40];
 extern int16_t planet_possiblemoons[10];
@@ -288,7 +289,7 @@ extern void modpv(int16_t handle, int16_t polygon_id, int16_t vertex_id, float x
 extern char *alphavalue(double value);
 extern void background(uint16_t start, uint8_t *target, uint8_t *background, uint8_t *offsetsmap,
                        uint16_t total_map_bytes, uint16_t screenshift);
-extern void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code));
+extern void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y, double z, double id_code));
 extern double laststar_x, laststar_y, laststar_z;
 extern int8_t isthere(double star_id);
 extern uint8_t glass_bubble;

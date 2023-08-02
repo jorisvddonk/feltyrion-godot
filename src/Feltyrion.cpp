@@ -1,4 +1,7 @@
 #include "godot_cpp/classes/image.hpp"
+#include "godot_cpp/classes/node3d.hpp"
+#include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/classes/window.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/classes/mutex.hpp"
@@ -23,7 +26,7 @@ extern void init();
 extern void extract_ap_target_infos();
 extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
-extern void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code));
+extern void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y, double z, double id_code));
 extern void save_models();
 extern int16_t nearstar_nob;
 extern int32_t search_id_code(double id_code, int8_t type);
@@ -78,6 +81,10 @@ extern double nearstar_p_ply[maxbodies];
 extern double nearstar_p_plz[maxbodies];
 extern double nearstar_p_seedval[maxbodies];
 extern double nearstar_p_identity[maxbodies];
+extern double dzat_x;
+extern double dzat_y;
+extern double dzat_z;
+extern double stars_visible[8232]; // x/y/z coordinates of stars RELATIVE TO THE STARDRIFTER POSITION that are visible; 14 * 14 * 14 * 3
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -217,7 +224,7 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__
 }
 
 
-void cb_Star(float x, float y, float z, double id_code)
+void cb_Star(double x, double y, double z, double id_code)
 {
     instance->onStarFound(x, y, z, id_code);
 }
@@ -226,10 +233,46 @@ void Feltyrion::scanStars()
 {
     // NOTE: this is *not* thread safe!!!
     instance = this;
-    sky(0x405C, cb_Star);
+    sky(0x405C, true, cb_Star);
 }
 
-void Feltyrion::onStarFound(float x, float y, float z, double id_code) {
+godot::Vector3 Feltyrion::getDzat()
+{
+    return godot::Vector3(dzat_x, dzat_y, dzat_z);
+}
+
+void Feltyrion::setDzat(double parsis_x, double parsis_y, double parsis_z)
+{
+    dzat_x = parsis_x;
+    dzat_y = parsis_y;
+    dzat_z = parsis_z;
+}
+
+void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath)
+{
+    // thread safe as callback is not used
+    dzat_x = parsis_x;
+    dzat_y = parsis_y;
+    dzat_z = parsis_z;
+    sky(0x405C, false, cb_Star);
+    auto t = get_tree();
+    auto r = t->get_root();
+    auto n = r->get_node<godot::Node3D>(nodePath);
+    int csize = n->get_children().size();
+    for (int i = 0; i < csize; i++) {
+        auto v = n->get_child(i);
+        auto x = Object::cast_to<godot::Node3D>(v);
+        auto vector = godot::Vector3(stars_visible[i*3] * 0.001, stars_visible[i*3+1] * 0.001, stars_visible[i*3+2] * 0.001);
+        if (vector.x == 0 && vector.y == 0 && vector.z == 0) {
+            x->hide();
+        } else {
+            x->show();
+            x->set_position(vector);
+        }
+    }
+}
+
+void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
     godot::Object::emit_signal("found_star", x, y, z, id_code);
 }
 
@@ -350,11 +393,15 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_current_star_info" ), &Feltyrion::getCurrentStarInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_info" ), &Feltyrion::getAPTargetInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_info" ), &Feltyrion::getPlanetInfo );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat" ), &Feltyrion::getDzat );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat" ), &Feltyrion::setDzat );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "update_star_particles" ), &Feltyrion::updateStarParticles );
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target"), &Feltyrion::getAPTarget);

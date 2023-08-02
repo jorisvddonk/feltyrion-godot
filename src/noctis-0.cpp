@@ -611,6 +611,7 @@ double nearstar_p_ply[maxbodies];
 double nearstar_p_plz[maxbodies];
 double nearstar_p_seedval[maxbodies];
 double nearstar_p_identity[maxbodies];
+double stars_visible[8232]; // x/y/z coordinates of stars that are visible; 14 * 14 * 14 * 3
 
 int16_t nearstar_p_rtperiod[maxbodies];
 int16_t nearstar_p_rotation[maxbodies];
@@ -1265,14 +1266,14 @@ double get_id_code(double x, double y, double z);
     JORIS added on 2023-07-29: callback function to get the results
 */
 
-void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_code)) {
+void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y, double z, double id_code)) {
     uint16_t debug;
 
     auto min_xy            = (int32_t) (1E9);
     int8_t visible_sectors = 9;
 
     if (field_amplificator) {
-        visible_sectors = 14;
+        visible_sectors = 14; // note: if this changes, make sure to change stars_visible array's size as well
     }
 
     uint8_t sx, sy, sz;
@@ -1323,6 +1324,7 @@ void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_
     sect_z *= 100000;
 
     uint32_t index = 0;
+    uint16_t i = 0;
 
     // Loop over a 3D cube of l,w,h = visible_sectors.
     for (sx = 0; sx < visible_sectors; sx++) {
@@ -1383,7 +1385,14 @@ void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_
                 xx = temp_x - dzat_x;
                 yy = temp_y - dzat_y;
 
-                callback(temp_x,temp_y,temp_z, get_id_code(temp_x, temp_y, temp_z));
+                if (use_callback) {
+                    callback(temp_x,temp_y,temp_z, get_id_code(temp_x, temp_y, temp_z));
+                } else {
+                    stars_visible[i*3 + 0] = xx;
+                    stars_visible[i*3 + 1] = yy;
+                    stars_visible[i*3 + 2] = zz;
+                    i += 1;
+                }
 
                 /*
                 z2 = (zz * opt_tcosbeta) - (xx * opt_tsinbeta);
@@ -1448,6 +1457,14 @@ void sky(uint16_t limits, void (*callback)(float x, float y, float z, double id_
         }
         sect_y -= k;
         sect_x += advance;
+    }
+    while (i < 2744) {
+        // empty out the rest of the array
+        // 0/0/0 elements are ignored on the front-end
+        stars_visible[i*3 + 0] = 0;
+        stars_visible[i*3 + 1] = 0;
+        stars_visible[i*3 + 2] = 0;
+        i += 1;
     }
 }
 
