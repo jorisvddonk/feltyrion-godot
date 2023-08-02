@@ -13,6 +13,7 @@
 
 #include "Feltyrion.h"
 #include "noctis-d.h"
+#include "noctis-0.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
 #define UNUSED( expr ) (void)( expr )
@@ -22,68 +23,6 @@ namespace
 }
 
 Feltyrion *instance;
-extern void init();
-extern void extract_ap_target_infos();
-extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
-extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
-extern void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y, double z, double id_code));
-extern int16_t nearstar_nob;
-extern int32_t search_id_code(double id_code, int8_t type);
-extern uint8_t *p_background;
-extern uint8_t tmppal[768];
-extern uint8_t currpal[768];
-extern quadrant *objectschart;
-extern void update_star_label_by_offset(int32_t offset);
-extern double get_id_code(double x, double y, double z);
-extern double _star_id;
-extern int8_t _star_label[25];
-extern double ap_target_x;
-extern double ap_target_y;
-extern double ap_target_z;
-extern int16_t nearstar_class;
-extern int16_t nearstar_nop;
-extern int8_t nearstar_spin;
-extern int8_t nearstar_r;
-extern int8_t nearstar_g;
-extern int8_t nearstar_b;
-extern double nearstar_x;
-extern double nearstar_y;
-extern double nearstar_z;
-extern float nearstar_ray;
-extern int16_t nearstar_labeled;
-extern int16_t ap_target_class;
-extern int8_t ap_target_spin;
-extern int8_t ap_target_r;
-extern int8_t ap_target_g;
-extern int8_t ap_target_b;
-extern float ap_target_ray;
-extern int8_t ap_targetted;
-extern int8_t nearstar_p_type[maxbodies];
-extern int16_t nearstar_p_owner[maxbodies];
-extern int8_t nearstar_p_moonid[maxbodies];
-extern double nearstar_p_ring[maxbodies];
-extern double nearstar_p_tilt[maxbodies];
-extern double nearstar_p_ray[maxbodies];
-extern double nearstar_p_orb_ray[maxbodies];
-extern double nearstar_p_orb_tilt[maxbodies];
-extern double nearstar_p_orb_orient[maxbodies];
-extern double nearstar_p_orb_ecc[maxbodies];
-extern int16_t nearstar_p_rtperiod[maxbodies];
-extern int16_t nearstar_p_rotation[maxbodies];
-extern int16_t nearstar_p_viewpoint[maxbodies];
-extern int16_t nearstar_p_term_start[maxbodies];
-extern int16_t nearstar_p_term_end[maxbodies];
-extern int16_t nearstar_p_qsortindex[maxbodies];
-extern float nearstar_p_qsortdist[maxbodies];
-extern double nearstar_p_plx[maxbodies];
-extern double nearstar_p_ply[maxbodies];
-extern double nearstar_p_plz[maxbodies];
-extern double nearstar_p_seedval[maxbodies];
-extern double nearstar_p_identity[maxbodies];
-extern double dzat_x;
-extern double dzat_y;
-extern double dzat_z;
-extern double stars_visible[8232]; // x/y/z coordinates of stars RELATIVE TO THE STARDRIFTER POSITION that are visible; 14 * 14 * 14 * 3
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
