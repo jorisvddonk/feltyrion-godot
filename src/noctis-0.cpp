@@ -1733,21 +1733,6 @@ int16_t starnop(double star_x, double star_y, double star_z) {
     return 0;
 }
 
-void cupola(float y_or, float brk);
-void polycupola(float y_or, int8_t textured);
-
-/**
- * Temporary function, meant to be run only once, allowing saving of the Stardrifter's cupola data..
- */
-void save_models() {
-    // floor:
-    //cupola(0,8);
-    polycupola(0, 0);
-    // roof:
-    //cupola(+1,8);
-    //polycupola(+1, 0);
-}
-
 void init() {
     getsecs();
     int32_t ir, ig, ib, ire = 0, ige = 0, ibe = 0;
@@ -3706,33 +3691,40 @@ int32_t iqsecs = 0;
 
 
 void prep_write() {
+   /*
    FILE *fp;
 
    fp = fopen("../temp.txt", "w");
    fprintf(fp, "# beginning of file\n");
    fclose(fp);
+   */
 }
 
 int p_tracker = 1;
 void prep_write2() {
+    /*
    FILE *fp;
 
    fp = fopen("../temp2.obj", "w");
    fprintf(fp, "# beginning of file\n");
    fclose(fp);
    p_tracker = 1;
+   */
 }
 
 void stick3d (float p_x, float p_y, float p_z, float x, float y, float z) {
+    /*
    FILE *fp;
 
    fp = fopen("../temp.txt", "a");
    fprintf(fp, "%f %f %f %f %f %f\n", p_x, p_y, p_z, x, y, z);
    fclose(fp);
+   */
 }
 
 void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_t colore) {
    // assuming nrv is always 4...
+   /*
    FILE *fp;
 
    fp = fopen("../temp2.obj", "a");
@@ -3746,6 +3738,7 @@ void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_
 
    p_tracker += 4;
    fclose(fp);
+   */
 }
 
 void cupola(float y_or, float brk) {

@@ -27,7 +27,6 @@ extern void extract_ap_target_infos();
 extern void prepare_nearstar(void (*onPlanetFound)(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist));
 extern void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere);
 extern void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y, double z, double id_code));
-extern void save_models();
 extern int16_t nearstar_nob;
 extern int32_t search_id_code(double id_code, int8_t type);
 extern uint8_t *p_background;
@@ -380,11 +379,6 @@ godot::Dictionary Feltyrion::getAPTargetInfo() {
     return ret;
 }
 
-void Feltyrion::saveModels() const
-{
-    save_models();
-}
-
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -403,8 +397,6 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat" ), &Feltyrion::getDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat" ), &Feltyrion::setDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_nearstar" ), &Feltyrion::setNearstar );
-
-    godot::ClassDB::bind_method( godot::D_METHOD( "save_models" ), &Feltyrion::saveModels );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
