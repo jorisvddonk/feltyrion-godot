@@ -217,6 +217,25 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
     }
 }
 
+/**
+ * Recalculates planet positions and updates their position vectors.
+ * Note: time is not updated within this function - you'd have to call update_time() or set_secs() manually prior!
+ * 
+ * @param nodePath path to the Node3D that's the parent of each Planet scene instance. The planets are expected to be in index order.
+ */
+void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
+{
+    godot::SceneTree* t = get_tree();
+    godot::Window* r = t->get_root();
+    godot::Node3D* n = r->get_node<godot::Node3D>(nodePath);
+    for (int i = 0; i < nearstar_nob; i++) {
+        planet_xyz(i);
+        godot::Node* node = n->get_child(i);
+        godot::Node3D* planet = Object::cast_to<godot::Node3D>(node);
+        planet->set_position(godot::Vector3(-(nearstar_x - nearstar_p_plx[i]), nearstar_y - nearstar_p_ply[i], nearstar_z - nearstar_p_plz[i]));
+    }
+}
+
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
     godot::Object::emit_signal("found_star", x, y, z, id_code);
 }
@@ -318,6 +337,21 @@ godot::Dictionary Feltyrion::getAPTargetInfo() {
     return ret;
 }
 
+void Feltyrion::updateTime()
+{
+    getsecs();
+}
+
+void Feltyrion::setSecs(double s)
+{
+    secs = s;
+}
+
+double Feltyrion::getSecs()
+{
+    return secs;
+}
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -341,6 +375,11 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "update_star_particles" ), &Feltyrion::updateStarParticles );
+    godot::ClassDB::bind_method( godot::D_METHOD( "update_current_star_planets" ), &Feltyrion::updateCurrentStarPlanets );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_secs" ), &Feltyrion::setSecs );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_secs" ), &Feltyrion::getSecs );
+    godot::ClassDB::bind_method( godot::D_METHOD( "update_time" ), &Feltyrion::updateTime );
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target"), &Feltyrion::getAPTarget);

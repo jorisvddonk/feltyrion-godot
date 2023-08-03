@@ -29,11 +29,15 @@ public:
     void Feltyrion::setAPTarget(godot::Vector3 ap_target);
     godot::Vector3 Feltyrion::getAPTarget();
     void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath);
+    void updateCurrentStarPlanets(godot::NodePath nodePath);
     void lock();
     void unlock();
     void scanStars();
     void onStarFound(double x, double y, double z, double id_code);
     void onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist);
+    void updateTime();
+    void setSecs(double s);
+    double getSecs();
 
     Feltyrion();
 protected:
