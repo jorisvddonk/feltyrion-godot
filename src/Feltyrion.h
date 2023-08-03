@@ -26,7 +26,7 @@ public:
     void setDzat(double parsis_x, double parsis_y, double parsis_z);
     void setNearstar(double parsis_x, double parsis_y, double parsis_z);
     void saveModels() const;
-    void Feltyrion::setAPTarget(godot::Vector3 ap_target);
+    void Feltyrion::setAPTarget(double ap_target_x, double ap_target_y, double ap_target_z);
     godot::Vector3 Feltyrion::getAPTarget();
     void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath);
     void updateCurrentStarPlanets(godot::NodePath nodePath);

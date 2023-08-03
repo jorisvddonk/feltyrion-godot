@@ -78,11 +78,11 @@ void cb_Planet(int8_t index, double planet_id, double seedval, double x, double 
     instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
 }
 
-void Feltyrion::setAPTarget(godot::Vector3 ap_target)
+void Feltyrion::setAPTarget(double ap_target_x, double ap_target_y, double ap_target_z)
 {
-    ap_target_x = ap_target.x;
-    ap_target_y = ap_target.y;
-    ap_target_z = ap_target.z;
+    ap_target_x = ap_target_x;
+    ap_target_y = ap_target_y;
+    ap_target_z = ap_target_z;
     ap_targetted = 1;
     extract_ap_target_infos();
 }
