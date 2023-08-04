@@ -438,6 +438,12 @@ void Feltyrion::loopOneIter()
     loop(); // only one iteration here!
 }
 
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reached, getIPReached, setIPReached); // 1 if we're orbiting a planet
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reaching, getIPReaching, setIPReaching); // 1 if we're approaching a local target
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -504,6 +510,12 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ip_targetted" ), &Feltyrion::getIPTargetted );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ip_targetted" ), &Feltyrion::setIPTargetted );
     ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "ip_targetted"), "set_ip_targetted", "get_ip_targetted");
+
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ip_reached, getIPReached, setIPReached);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ip_reaching, getIPReaching, setIPReaching);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, nsync, getNSync, setNSync);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, stspeed, getSTSpeed, setSTSpeed);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ap_reached, getAPReached, setAPReached);
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );

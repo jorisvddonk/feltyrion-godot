@@ -5,6 +5,26 @@
 #include "godot_cpp/core/binder_common.hpp"
 #include "godot_cpp/classes/mutex.hpp"
 
+#define _Q(x) #x
+#define _QUOTE(x) _Q(x)
+#define _SET_QUOTE(x) _Q(set_ ## x)
+#define _GET_QUOTE(x) _Q(get_ ## x)
+
+#define DECLARE_NOCTIS_VARIABLE_ACCESSORS(type, setterType, property, getterName, setterName) type getterName(); void setterName(setterType value)
+#define EXPOSE_NOCTIS_VARIABLE(variantType, property, getterName, setterName) \
+    godot::ClassDB::bind_method( godot::D_METHOD( _GET_QUOTE(property) ), &Feltyrion::getterName );\
+    godot::ClassDB::bind_method( godot::D_METHOD( _SET_QUOTE(property) ), &Feltyrion::setterName );\
+    ADD_PROPERTY(godot::PropertyInfo(variantType, _QUOTE(property)), _SET_QUOTE(property), _GET_QUOTE(property));
+#define DEFINE_NOCTIS_VARIABLE_ACCESSORS(type, setterType, property, getterName, setterName) \
+void Feltyrion::setterName(setterType value)\
+{\
+    property = value;\
+}\
+type Feltyrion::getterName()\
+{\
+    return property;\
+}
+
 class Feltyrion : public godot::Control
 {
     GDCLASS( Feltyrion, godot::Control )
@@ -33,6 +53,12 @@ public:
     double getAPTargetY();
     void setAPTargetZ(double z);
     double getAPTargetZ();
+
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reached, getIPReached, setIPReached); // 1 if we're orbiting a planet
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reaching, getIPReaching, setIPReaching); // 1 if we're approaching a local target
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
 
     void setDzatX(double x);
     double getDzatX();
