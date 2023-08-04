@@ -22,12 +22,35 @@ public:
     godot::Dictionary getCurrentStarInfo();
     godot::Dictionary getAPTargetInfo();
     godot::Dictionary getPlanetInfo(int n);
-    godot::Vector3 getDzat();
     void setDzat(double parsis_x, double parsis_y, double parsis_z);
     void setNearstar(double parsis_x, double parsis_y, double parsis_z);
     void saveModels() const;
-    void Feltyrion::setAPTarget(double ap_target_x, double ap_target_y, double ap_target_z);
-    godot::Vector3 Feltyrion::getAPTarget();
+
+    void Feltyrion::setAPTargetted(int i);
+    void Feltyrion::setAPTargetX(double x);
+    double Feltyrion::getAPTargetX();
+    void Feltyrion::setAPTargetY(double y);
+    double Feltyrion::getAPTargetY();
+    void Feltyrion::setAPTargetZ(double z);
+    double Feltyrion::getAPTargetZ();
+
+    void Feltyrion::setDzatX(double x);
+    double Feltyrion::getDzatX();
+    void Feltyrion::setDzatY(double y);
+    double Feltyrion::getDzatY();
+    void Feltyrion::setDzatZ(double z);
+    double Feltyrion::getDzatZ();
+
+    double Feltyrion::getIPTargettedX();
+    double Feltyrion::getIPTargettedY();
+    double Feltyrion::getIPTargettedZ();
+
+    double Feltyrion::getNearstarX();
+    double Feltyrion::getNearstarY();
+    double Feltyrion::getNearstarZ();
+
+    void setIPTargetted(int new_target);
+    int8_t getIPTargetted();
     void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath);
     void updateCurrentStarPlanets(godot::NodePath nodePath);
     void lock();
@@ -38,6 +61,7 @@ public:
     void updateTime();
     void setSecs(double s);
     double getSecs();
+    void loopOneIter();
 
     Feltyrion();
 protected:

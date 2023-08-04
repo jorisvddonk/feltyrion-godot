@@ -14,6 +14,7 @@
 #include "Feltyrion.h"
 #include "noctis-d.h"
 #include "noctis-0.h"
+#include "noctis.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
 #define UNUSED( expr ) (void)( expr )
@@ -23,6 +24,7 @@ namespace
 }
 
 Feltyrion *instance;
+extern void loop();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -78,18 +80,97 @@ void cb_Planet(int8_t index, double planet_id, double seedval, double x, double 
     instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
 }
 
-void Feltyrion::setAPTarget(double ap_target_x, double ap_target_y, double ap_target_z)
+void Feltyrion::setAPTargetted(int i)
 {
-    ap_target_x = ap_target_x;
-    ap_target_y = ap_target_y;
-    ap_target_z = ap_target_z;
-    ap_targetted = 1;
+    ap_targetted = i;
     extract_ap_target_infos();
 }
 
-godot::Vector3 Feltyrion::getAPTarget()
+void Feltyrion::setAPTargetX(double x)
 {
-    return godot::Vector3(ap_target_x, ap_target_y, ap_target_z);
+    ap_target_x = x;
+}
+void Feltyrion::setAPTargetY(double y)
+{
+    ap_target_y = y;
+}
+void Feltyrion::setAPTargetZ(double z)
+{
+    ap_target_z = z;
+}
+
+double Feltyrion::getAPTargetX()
+{
+    return ap_target_x;
+}
+double Feltyrion::getAPTargetY()
+{
+    return ap_target_y;
+}
+double Feltyrion::getAPTargetZ()
+{
+    return ap_target_z;
+}
+
+void Feltyrion::setDzatX(double x)
+{
+    dzat_x = x;
+}
+void Feltyrion::setDzatY(double y)
+{
+    dzat_y = y;
+}
+void Feltyrion::setDzatZ(double z)
+{
+    dzat_z = z;
+}
+
+double Feltyrion::getDzatX()
+{
+    return dzat_x;
+}
+double Feltyrion::getDzatY()
+{
+    return dzat_y;
+}
+double Feltyrion::getDzatZ()
+{
+    return dzat_z;
+}
+
+void Feltyrion::setIPTargetted(int new_target)
+{
+    ip_targetted = new_target;
+}
+
+int8_t Feltyrion::getIPTargetted()
+{
+    return ip_targetted;
+}
+double Feltyrion::getIPTargettedX()
+{
+    return nearstar_p_plx[ip_targetted];
+}
+double Feltyrion::getIPTargettedY()
+{
+    return nearstar_p_ply[ip_targetted];
+}
+double Feltyrion::getIPTargettedZ()
+{
+    return nearstar_p_plz[ip_targetted];
+}
+
+double Feltyrion::getNearstarX()
+{
+    return nearstar_x;
+}
+double Feltyrion::getNearstarY()
+{
+    return nearstar_y;
+}
+double Feltyrion::getNearstarZ()
+{
+    return nearstar_z;
 }
 
 void Feltyrion::prepareStar()
@@ -172,11 +253,6 @@ void Feltyrion::scanStars()
     // NOTE: this is *not* thread safe!!!
     instance = this;
     sky(0x405C, true, cb_Star);
-}
-
-godot::Vector3 Feltyrion::getDzat()
-{
-    return godot::Vector3(dzat_x, dzat_y, dzat_z);
 }
 
 void Feltyrion::setDzat(double parsis_x, double parsis_y, double parsis_z)
@@ -352,6 +428,11 @@ double Feltyrion::getSecs()
     return secs;
 }
 
+void Feltyrion::loopOneIter()
+{
+    loop(); // only one iteration here!
+}
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -367,7 +448,6 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_current_star_info" ), &Feltyrion::getCurrentStarInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_info" ), &Feltyrion::getAPTargetInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_info" ), &Feltyrion::getPlanetInfo );
-    godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat" ), &Feltyrion::getDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat" ), &Feltyrion::setDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_nearstar" ), &Feltyrion::setNearstar );
 
@@ -381,10 +461,42 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_secs" ), &Feltyrion::getSecs );
     godot::ClassDB::bind_method( godot::D_METHOD( "update_time" ), &Feltyrion::updateTime );
 
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ip_targetted_x" ), &Feltyrion::getIPTargettedX );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ip_targetted_y" ), &Feltyrion::getIPTargettedY );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ip_targetted_z" ), &Feltyrion::getIPTargettedZ );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_x" ), &Feltyrion::getNearstarX );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_y" ), &Feltyrion::getNearstarY );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_z" ), &Feltyrion::getNearstarZ );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted" ), &Feltyrion::setAPTargetted );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
+
     // Properties
-    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target"), &Feltyrion::getAPTarget);
-    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target", "ap_target" ), &Feltyrion::setAPTarget );
-    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "ap_target"), "set_ap_target", "get_ap_target");
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target_x", "ap_target_x" ), &Feltyrion::setAPTargetX );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "ap_target_x"), "set_ap_target_x", "get_ap_target_x");
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_y"), &Feltyrion::getAPTargetY);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target_y", "ap_target_y" ), &Feltyrion::setAPTargetY );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "ap_target_y"), "set_ap_target_y", "get_ap_target_y");
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_z"), &Feltyrion::getAPTargetZ);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target_z", "ap_target_z" ), &Feltyrion::setAPTargetZ );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "ap_target_z"), "set_ap_target_z", "get_ap_target_z");
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat_x"), &Feltyrion::getDzatX);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat_x", "dzat_x" ), &Feltyrion::setDzatX );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "dzat_x"), "set_dzat_x", "get_dzat_x");
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat_y"), &Feltyrion::getDzatY);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat_y", "dzat_y" ), &Feltyrion::setDzatY );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "dzat_y"), "set_dzat_y", "get_dzat_y");
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_dzat_z"), &Feltyrion::getDzatZ);
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat_z", "dzat_z" ), &Feltyrion::setDzatZ );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "dzat_z"), "set_dzat_z", "get_dzat_z");
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ip_targetted" ), &Feltyrion::getIPTargetted );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ip_targetted" ), &Feltyrion::setIPTargetted );
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "ip_targetted"), "set_ip_targetted", "get_ip_targetted");
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
