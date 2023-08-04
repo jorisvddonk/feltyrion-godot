@@ -26,28 +26,28 @@ public:
     void setNearstar(double parsis_x, double parsis_y, double parsis_z);
     void saveModels() const;
 
-    void Feltyrion::setAPTargetted(int i);
-    void Feltyrion::setAPTargetX(double x);
-    double Feltyrion::getAPTargetX();
-    void Feltyrion::setAPTargetY(double y);
-    double Feltyrion::getAPTargetY();
-    void Feltyrion::setAPTargetZ(double z);
-    double Feltyrion::getAPTargetZ();
+    void setAPTargetted(int i);
+    void setAPTargetX(double x);
+    double getAPTargetX();
+    void setAPTargetY(double y);
+    double getAPTargetY();
+    void setAPTargetZ(double z);
+    double getAPTargetZ();
 
-    void Feltyrion::setDzatX(double x);
-    double Feltyrion::getDzatX();
-    void Feltyrion::setDzatY(double y);
-    double Feltyrion::getDzatY();
-    void Feltyrion::setDzatZ(double z);
-    double Feltyrion::getDzatZ();
+    void setDzatX(double x);
+    double getDzatX();
+    void setDzatY(double y);
+    double getDzatY();
+    void setDzatZ(double z);
+    double getDzatZ();
 
-    double Feltyrion::getIPTargettedX();
-    double Feltyrion::getIPTargettedY();
-    double Feltyrion::getIPTargettedZ();
+    double getIPTargettedX();
+    double getIPTargettedY();
+    double getIPTargettedZ();
 
-    double Feltyrion::getNearstarX();
-    double Feltyrion::getNearstarY();
-    double Feltyrion::getNearstarZ();
+    double getNearstarX();
+    double getNearstarY();
+    double getNearstarZ();
 
     void setIPTargetted(int new_target);
     int8_t getIPTargetted();

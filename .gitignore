@@ -4,3 +4,4 @@ build/
 *-build/
 src/test.cpp
 test.exe
+.cache/
