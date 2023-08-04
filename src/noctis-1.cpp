@@ -3,7 +3,9 @@
 #include "noctis-d.h"
 #include "noctis.h"
 
+#ifndef WITH_GODOT
 const double deg = M_PI / 180;
+#endif
 
 static int16_t opencapcount = 0;
 float refx, refy, refz;

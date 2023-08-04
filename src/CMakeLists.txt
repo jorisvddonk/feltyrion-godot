@@ -6,12 +6,16 @@ target_sources( ${PROJECT_NAME}
         brtl.cpp
         noctis-0.h
         noctis-0.cpp
+        noctis.h
+        noctis.cpp
         Feltyrion.h
         Feltyrion.cpp
         GDExtensionTemplate.h
         GDExtensionTemplate.cpp
         RegisterExtension.cpp
 )
+
+target_compile_definitions( ${PROJECT_NAME} PRIVATE WITH_GODOT)
 
 target_include_directories( ${PROJECT_NAME}
     PRIVATE

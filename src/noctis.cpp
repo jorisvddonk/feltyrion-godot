@@ -7,14 +7,18 @@
 #include "noctis-0.h"
 #include "noctis-d.h"
 #include <chrono>
+#ifndef WITH_GODOT
 #include <raylib.h>
+#endif
 #include <thread>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
+#ifndef WITH_GODOT
 const double deg = M_PI / 180;
+#endif
 
 extern int8_t exitflag;
 extern int8_t entryflag;
@@ -70,6 +74,7 @@ void fix_local_target() {
 /* Lampada alogena (ovvero il laser a diffusione interno alle zattere). */
 
 void alogena() {
+#ifndef WITH_GODOT
     float x[3], y[3], z[3];
     float lon, dlon, dlon_2;
     int16_t pcol;
@@ -105,11 +110,13 @@ void alogena() {
     if (ilightv == 1 && !elight) {
         lens_flares_for(cam_x, cam_y, cam_z, -10, 10, -10, -50000, 2, 1, 0, 1, 1);
     }
+#endif
 }
 
 /* Selection panels for the on-board computer */
 
 void qsel(float *x, float *y, float *z, uint16_t n) {
+#ifndef WITH_GODOT
     setfx(1);
     x[0] -= 10;
     y[0] -= 10;
@@ -131,11 +138,13 @@ void qsel(float *x, float *y, float *z, uint16_t n) {
     y[3] -= 10;
     poly3d(x, y, z, n, 68);
     resetfx();
+#endif
 }
 
 // All reflections on reflective surfaces.
 
 void reflexes() {
+#ifndef WITH_GODOT
     float x[4], y[4], z[4];
     setfx(1);
     lbxf++;
@@ -231,11 +240,13 @@ void reflexes() {
 noevid:
     lbxf--;
     setfx(0);
+#endif
 }
 
 /* Schemi aggiuntivi per lo schermo del computer. */
 
 void frame(float x, float y, float l, float h, float borderwidth, uint8_t color) {
+#ifndef WITH_GODOT
     // disegna una cornice rettangolare.
     float vx[4], vy[4], vz[4] = {0, 0, 0, 0};
     float x0 = cam_x;
@@ -270,10 +281,12 @@ void frame(float x, float y, float l, float h, float borderwidth, uint8_t color)
     cam_x = x0;
     cam_y = y0;
     resetfx();
+#endif
 }
 
 // Draw star targeting cross.
 void pointer_cross_for(double xlight, double ylight, double zlight) {
+#ifndef WITH_GODOT
     double xx, yy, zz, z2, rx, ry, rz;
     xx = xlight - dzat_x;
     yy = ylight - dzat_y;
@@ -302,10 +315,12 @@ void pointer_cross_for(double xlight, double ylight, double zlight) {
             }
         }
     }
+#endif
 }
 
 // Write a line on the onboard computer screen.
 void cline(int16_t line, const char *text) {
+#ifndef WITH_GODOT
     // Multiply the line index by 128 b/c there are 128 characters per line.
     line *= 128;
     // The non-control section starts 20 characters into the line.
@@ -313,26 +328,32 @@ void cline(int16_t line, const char *text) {
     strcpy(&ctb[start], text);
     // The current index, used for the other() function.
     point = start + strlen(text);
+#endif
 }
 
 // Write text following what was just written with cline().
 void other(const char *text) {
+#ifndef WITH_GODOT
     strcpy(&ctb[point], text);
     // Increment the current character index by the length of what was just
     // added.
     point += strlen(text);
+#endif
 }
 
 // Write the title of a system check (there are 4 in all).
 void control(int16_t line, const char *text) {
+#ifndef WITH_GODOT
     // Multiply the line index by 128 b/c there are 128 characters per line.
     uint16_t start = line * 128;
     strcpy(&ctb[start], text);
+#endif
 }
 
 // Writes the title of a command on the main display.
 // These are split up into 4 blocks of 27 characters.
 void command(int16_t nr, const char *text) {
+#ifndef WITH_GODOT
     uint16_t length = strlen(text);
 
     if (length > 27) {
@@ -341,10 +362,15 @@ void command(int16_t nr, const char *text) {
 
     int16_t index = 20 + 27 * nr;
     strcpy(&ctb[index], text);
+#endif
 }
 
 // Clear the whole on-board computer screen.
-void clear_onboard_screen() { memset(ctb, 0, 512); }
+void clear_onboard_screen() {
+#ifndef WITH_GODOT
+    memset(ctb, 0, 512); 
+#endif
+}
 
 /* On-board operating system management group. */
 
@@ -401,7 +427,7 @@ char goesnet_command[120] = "_";             // GOES Net Command Line
 const char *comm          = "data/comm.bin"; // File di comunicazione dei moduli.
 
 /* Freezes the situation (when exiting the program or running a module). */
-
+#ifndef WITH_GODOT
 void freeze() {
     FILE *fh = fopen(situation_file, "wb");
 
@@ -485,6 +511,7 @@ void freeze() {
 
     fclose(fh);
 }
+#endif
 
 /* Get the Noctis executable's relative path
  * 	and strip the name to leave only the directory.
@@ -517,7 +544,9 @@ void run_goesnet_module() {
     char *dir = get_exe_dir();
 
     // Save the situation because some modules need it.
+    #ifndef WITH_GODOT
     freeze();
+    #endif
 
     // Check resident commands.
     if (memcmp(goesnet_command, "CLR", 3) != 0) {
@@ -614,6 +643,7 @@ uint32_t pp[32] = {0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0
                    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
 
 void digit_at(int8_t digit, float x, float y, float size, uint8_t color, int8_t shader) {
+#ifndef WITH_GODOT
     // This is an alphanumeric character.
     uint8_t *prev_txtr = txtr;
     float vx[4], vy[4], vz[4] = {0, 0, 0, 0};
@@ -680,9 +710,11 @@ void digit_at(int8_t digit, float x, float y, float size, uint8_t color, int8_t 
         txtr  = prev_txtr;
         resetfx();
     }
+#endif
 }
 
 void screen() {
+#ifndef WITH_GODOT
     float x, y;
     int16_t c, p, t = 0;
 #define blinkscolor 127
@@ -753,11 +785,13 @@ void screen() {
 
     cam_x = x;
     cam_y = y;
+#endif
 }
 
 // Draw the surface map at the time you want to land.
 
 void show_planetary_map() {
+#ifndef WITH_GODOT
     int8_t is_moon;
     int16_t lat, lon, i, j, p;
 
@@ -800,6 +834,7 @@ void show_planetary_map() {
 
         lon++;
     }
+#endif
 }
 
 /*  Draw the stardrifter. (The one you are using, seen from the inside.)
@@ -809,6 +844,7 @@ int16_t goesk_a = -1;
 int16_t goesk_e = -1;
 
 void vehicle(float opencapcount) {
+#ifndef WITH_GODOT
     int16_t n, c, i, j, k;
     int8_t short_text[11];
     uint8_t chcol;
@@ -1158,6 +1194,7 @@ void vehicle(float opencapcount) {
 
     // Tracciamento degli schermi di GOESNet.
     // Si tratta dei primi due schermi sulla paratia destra.
+#ifndef WITH_GODOT
     H_MATRIXS = 6;
     V_MATRIXS = 3;
     change_txm_repeating_mode();
@@ -1245,9 +1282,11 @@ void vehicle(float opencapcount) {
         cam_z += 54 * 15;
         n++;
     }
+#endif
 
     // Tracing the planetary map.
     // After the GOES screen.
+#ifndef WITH_GODOT
     H_MATRIXS = 3;
     V_MATRIXS = 2;
     change_txm_repeating_mode();
@@ -1260,6 +1299,7 @@ void vehicle(float opencapcount) {
     } else {
         poly3d(osscreen_x, osscreen_y, osscreen_z, 4, 4);
     }
+#endif
 
 #define surface_crosshair_x_shift +25
 #define surface_crosshair_y_shift -10
@@ -1324,10 +1364,11 @@ void vehicle(float opencapcount) {
         cam_z -= 3100;
         cam_y = chry;
     }
+#endif
 }
 
 /* Draw a starlight, seen from the outside */
-
+#ifndef WITH_GODOT
 void other_vehicle_at(double ovhx, double ovhy, double ovhz) {
     cam_x = (float) -ovhx;
     cam_y = (float) -ovhy;
@@ -1365,11 +1406,13 @@ void other_vehicle_at(double ovhx, double ovhy, double ovhz) {
 
     resetfx();
     cam_z -= 3100;
+    
     lens_flares_for(cam_x, cam_y, cam_z, 3225, 0, 0, -5e5, 3, 1, 1, 1, 1);
     lens_flares_for(cam_x, cam_y, cam_z, -3225, 0, 0, -5e5, 3, 1, 1, 1, 1);
     lens_flares_for(cam_x, cam_y, cam_z, 3225, 0, -6150, -5e5, 3, 1, 1, 1, 1);
     lens_flares_for(cam_x, cam_y, cam_z, -3225, 0, -6150, -5e5, 3, 1, 1, 1, 1);
 }
+#endif
 
 /* Fine roba importata da noctis-0.cpp */
 
@@ -1464,6 +1507,7 @@ void update_planet_label() {
 
 // Control the flight (Flight Control System).
 void fcs() {
+#ifndef WITH_GODOT
     int16_t n;
 
     if (ip_targetted != -1) {
@@ -1531,11 +1575,13 @@ void fcs() {
             command(3, "clear local target");
         }
     }
+#endif
 }
 
 /* FCS Commands. */
 
 void fcs_commands() {
+#ifndef WITH_GODOT
     switch (s_command) {
     case 1:
         if (stspeed || manual_target) {
@@ -1629,6 +1675,7 @@ void fcs_commands() {
     default:
         break;
     }
+#endif
 }
 
 /* Onboard devices: main menu and four submenus */
@@ -2170,6 +2217,7 @@ void dev_commands() {
             break;
 
         case 3:
+#ifndef WITH_GODOT
             targets_in_range = 1 - targets_in_range;
 
             if (targets_in_range) {
@@ -2182,6 +2230,7 @@ void dev_commands() {
                 collect_targets();
                 tgts_in_show = 0;
             }
+#endif
 
             break;
 
@@ -2328,6 +2377,7 @@ void pfs_commands() {
  *  All except "disable screen". */
 
 void commands() {
+#ifndef WITH_GODOT
     switch (sys) {
     case 1:
         fcs_commands();
@@ -2344,6 +2394,7 @@ void commands() {
     default:
         break;
     }
+#endif
 }
 
 /*  Undo the situation, reproducing it in all respects,
@@ -2351,7 +2402,7 @@ void commands() {
  *  Note: Garbage translation above
  *
  *  This loads the situation saved by freeze() */
-
+#ifndef WITH_GODOT
 void unfreeze() {
     double elapsed, dpwr;
     // Reading the consolidated starmap.
@@ -2531,6 +2582,7 @@ void unfreeze() {
 
     pwr = (int16_t) dpwr;
 }
+#endif
 
 /* Main program. */
 
@@ -2549,7 +2601,9 @@ float starmass_correction[star_classes] = {
     15000.00 // Class 11
 };
 
+#ifndef WITH_GODOT
 Texture2D screen_texture;
+#endif
 
 // Actual noctis stuff starts here.
 float satur, DfCoS;
@@ -2582,6 +2636,7 @@ int16_t resolve = 64;
 
 void loop();
 
+#ifndef WITH_GODOT
 int main(int argc, char **argv) {
     InitWindow(1280, 720, "Noctis IV LR");
     auto image     = GenImageColor(adapted_width, adapted_height, {});
@@ -2694,15 +2749,21 @@ int main(int argc, char **argv) {
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(loop, 24, 1);
 #else
+#ifndef WITH_GODOT
     do {
         loop();
     } while ((mc != 27) || stspeed || ip_reaching || lifter);
 #endif
+#endif
+#ifndef WITH_GODOT
     remove(surface_file);
 
     freeze();
+#endif
 }
+#endif
 
+#ifndef WITH_GODOT
 void swapBuffers() {
     BeginDrawing();
     ClearBackground(BLACK);
@@ -2737,6 +2798,7 @@ void swapBuffers() {
     last = now;
     EndDrawing();
 }
+#endif
 
 void loop() {
     sync_start();
@@ -2908,7 +2970,9 @@ void loop() {
 
     // Mouse input for user movements.
     p_mpul = mpul;
+#ifndef WITH_GODOT
     handle_input();
+#endif
 
     // Dev Bryce: Mouse Currently only rotates camera
     /*if (mpul & 2u) {
@@ -3087,6 +3151,7 @@ nop:
     }
 
     // Variation of the user's position in the spacecraft.
+#ifndef WITH_GODOT
     alfa = user_alfa;
     beta = user_beta - 90;
     change_angle_of_view();
@@ -3121,15 +3186,19 @@ nop:
     if (pos_z < -5800) {
         pos_z = -5800;
     }
+#endif
 
     // Black background, which will be made hazy.
+#ifndef WITH_GODOT
     if (!stspeed) {
         memset(adapted + 2880, 0, (adapted_width * adapted_height) - 2880);
     } else {
         pfade(adapted, 180, 8);
     }
+#endif
 
     // Close star management
+#ifndef WITH_GODOT
     proj_from_vehicle();
     dxx   = dzat_x - nearstar_x;
     dyy   = dzat_y - nearstar_y;
@@ -3211,6 +3280,7 @@ nop:
         far_pixel_at(nearstar_x, nearstar_y, nearstar_z, 0, ir);
         far_pixel_at(nearstar_x, nearstar_y, nearstar_z, 0, ir);
     }
+#endif
 
     //
     // Reflections of the protagonist on the glass (removed).
@@ -3242,6 +3312,7 @@ nop:
     */
     // Controllo gestore (indicando i comandi con lo sguardo).
     //
+#ifndef WITH_GODOT
     proj_from_user();
     leftturn  = 0;
     rightturn = 0;
@@ -3307,7 +3378,9 @@ nop:
             }
         }
     }
+#endif
 
+#ifndef WITH_GODOT
     if (lselect && pwr > 15000) {
         if (revcontrols) {
             if (cam_x > 2500) {
@@ -3339,6 +3412,7 @@ nop:
     if (cam_x < -2500) {
         leftturn = 1;
     }
+#endif
 
 //
 // Rotazione della navicella.
@@ -3384,8 +3458,10 @@ jpr:
     }
 
     // Planet tracking
+#ifndef WITH_GODOT
     proj_from_vehicle();
     draw_planets();
+#endif
 
     // Controlling help requests.
     if ((helptime != 0) && secs > helptime) {
@@ -3409,7 +3485,9 @@ jpr:
                 charge = 3;
             }
 
+            #ifndef WITH_GODOT
             other_vehicle_at((stz + 16000) * cos(secs / 10), 4000 * sin(secs / 100), (stz + 16000) * sin(secs / 10));
+            #endif
         } else {
             helptime = 0;
         }
@@ -3418,8 +3496,10 @@ jpr:
     //
     // Tracciamento della navicella.
     //
+#ifndef WITH_GODOT
     proj_from_user();
     vehicle(opencapcount);
+#endif
 
     //
     // Tracciamento riflessi, aggiornamento dello schermo
@@ -3430,7 +3510,9 @@ jpr:
         goto ext_1;
     }
 
+#ifndef WITH_GODOT
     proj_from_user();
+#endif
 
     if (!opencapcount) {
         reflexes();
@@ -3496,7 +3578,9 @@ jpr:
             dxx = -16;
         }
 
+#ifndef WITH_GODOT
         entity = (uint8_t) dxx;
+#endif
         screen();
         setfx(0);
     }
@@ -3535,6 +3619,7 @@ jpr:
     /* Additional information and diagrams on the H.U.D. , label tracking of
      * selected star, and distance tracking from selected star.
      */
+#ifndef WITH_GODOT
     if (ap_targetting || ap_targetted) {
         alfa = 0;
         beta = 0;
@@ -3582,12 +3667,14 @@ jpr:
         cam_x -= 40;
         digit_at('.', -6, -15, 5, 112, 1);
     }
+#endif
 
     //
     // Tracciamento label del pianeta selezionato,
     // tracciamento distanza dal pianeta selezionato,
     // aggiornamento nome del pianeta-bersaglio.
     //
+#ifndef WITH_GODOT
     if (ip_targetted != -1) {
         update_planet_label();
         alfa = 0;
@@ -3634,10 +3721,12 @@ jpr:
         cam_x -= 40;
         digit_at('S', -6, -15, 5, 105, 1);
     }
+#endif
 
     //
     // Messaggio di reset, lampeggiante.
     //
+#ifndef WITH_GODOT
     if (reset_signal && (reset_signal % 10) < 5) {
         alfa = 0;
         beta = 0;
@@ -3653,11 +3742,13 @@ jpr:
             mc++;
         }
     }
+#endif
 
 //
 // Tracing the current FCS status.
 //
 nohud_1:
+#ifndef WITH_GODOT
     alfa = 0;
     beta = 0;
     change_angle_of_view();
@@ -3671,10 +3762,12 @@ nohud_1:
         cam_x += 45;
         mc--;
     }
+#endif
 
     //
     // Link alla funzione di ricerca dei targets in real-time.
     //
+#ifndef WITH_GODOT
     if (collecting_targets) {
         status("SCANNING..", 100);
         collect_targets();
@@ -3687,10 +3780,12 @@ nohud_1:
             }
         }
     }
+#endif
 
     //
     // Display / update table "targets in range".
     //
+#ifndef WITH_GODOT
     if (targets_in_range) {
         if (update_targets) {
             tgts_in_show = 0;
@@ -3739,6 +3834,7 @@ nohud_1:
             mc++;
         }
     }
+#endif
 
 ext_1: //
     // Anti-aliasing e dithering (error-diffusion).
@@ -3753,8 +3849,14 @@ ext_1: //
     //
     // Tracking of all visible stars.
     //
+    #ifndef WITH_GODOT
     proj_from_vehicle();
-    sky(0x405C);
+    #endif
+    #ifdef WITH_GODOT
+    sky(0x405C, false, nullptr);
+    #else
+    sky(0x405c);
+    #endif
 
     //
     // ***** H.U.D. INNER LAYER *****
@@ -3995,6 +4097,7 @@ ext_1: //
     }
 
     // Draw planetary targeting cross.
+#ifndef WITH_GODOT
     if ((ip_targetted != -1 && !ip_reached) || ip_targetting) {
         planet_xyz(ip_targetted);
 
@@ -4011,6 +4114,7 @@ ext_1: //
             }
         }
     }
+#endif
 
     //
     // Star-Target pointing cross, update star-target name, shift interstellar
@@ -4039,7 +4143,11 @@ ext_1: //
                 }
 
                 if (l_dsd < 20000 && nsnp) {
+#ifdef WITH_GODOT
+                    prepare_nearstar(nullptr);
+#else
                     prepare_nearstar();
+#endif
                     nsnp = 0;
                 }
             }
@@ -4213,7 +4321,9 @@ resynctoplanet:
     // Gestione del consumo di litio.
     // Consumi supplementari, gestione ricariche.
     //
+#ifndef WITH_GODOT
     additional_consumes();
+#endif
     //
     // Calcolo della distanza dalla stella pi� vicina,
     // per il controllo su radiazioni, eclissi, temperatura.
@@ -4305,6 +4415,7 @@ resynctoplanet:
 
     eclipse = 0;
 
+#ifndef WITH_GODOT
     for (mc = 0; mc < nearstar_nob; mc++) {
         if (nearstar_p_type[mc] != -1) {
             planet_xyz(mc);
@@ -4340,6 +4451,7 @@ resynctoplanet:
             }
         }
     }
+#endif
 
     //
     // Reactions to eclipses (obscure the color of the spacecraft).
@@ -4528,10 +4640,12 @@ resynctoplanet:
     // dall'ultima volta che si � scesi in superficie)
     // e variazioni nelle pulsazioni, pi� verosimili...
     fast_srand((int32_t) (secs / 2));
+#ifndef WITH_GODOT
     tiredness *= 0.9977;
     pp_pulse = (1 + tiredness) * 118;
     pp_pulse += fast_flandom() * 8;
     pp_pulse -= fast_flandom() * 8;
+#endif
 
     // se si sta per scendere o si � appena risaliti,
     // si deve trattenere il player nel mezzo della navicella,
@@ -4559,6 +4673,7 @@ resynctoplanet:
     // effetto di chiusura della capsula:
     // quando � totalmente sigillata, scotty beam me down.
     // al ritorno, comincia a riaprire la capsula...
+#ifndef WITH_GODOT
     if (opencapdelta > 0) {
         opencapcount += opencapdelta;
 
@@ -4578,6 +4693,7 @@ resynctoplanet:
             goto resynctoplanet;
         }
     }
+#endif
 
     // Page swap.
     QUADWORDS = 16000;
@@ -4587,7 +4703,9 @@ resynctoplanet:
     }
 
     if (!_delay) {
+        #ifndef WITH_GODOT
         swapBuffers();
+        #endif
     } else if (_delay > 0 && _delay < 10) {
         _delay--;
     }
@@ -4836,6 +4954,7 @@ resynctoplanet:
     /* Keyboard input: Taking snapshots, ending the game session, selecting
      * targets, attributing labels, etc.
      */
+#ifndef WITH_GODOT
     if (ontheroof) {
         if (is_key()) {
             mc = get_key();
@@ -5280,4 +5399,5 @@ resynctoplanet:
     } else {
         mc = 0;
     }
+#endif
 }

@@ -13,6 +13,13 @@ const double deg = M_PI / 180;
 #include <cstring>
 #include <ctime>
 
+#ifdef WITH_GODOT
+#ifdef _MSC_VER 
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
+#endif
+
 #include <memory.h>
 #include <sys/stat.h>
 

@@ -40,6 +40,11 @@
 #include "noctis-d.h"
 #include "godot_cpp/variant/utility_functions.hpp"
 
+// HSP Inclusions.
+#ifndef WITH_GODOT
+#include "tdpolygs.h" // 3D Engine.
+#endif
+
 // Support files
 
 const char *situation_file = "data/current.bin";
@@ -944,6 +949,12 @@ int16_t cplx_planet_viewpoint(int16_t logical_id) {
 // Effect selection via "flares" control variable.
 
 int8_t previous_flares_value = 0;
+void setfx(int8_t fx) {
+#ifndef WITH_GODOT
+    previous_flares_value = flares;
+    flares                = fx;
+#endif
+}
 
 /* Tracing sticks (3D Part). */
 
@@ -2204,34 +2215,33 @@ no_moons:
         planet_xyz(n);
         calculate_planet_spin(n, seedval);
         // int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist
-        // temporarily DISABLED!
-        /*
-        onPlanetFound(
-            n,
-            nearstar_p_identity[n],
-            nearstar_p_seedval[n],
-            nearstar_p_plx[n],
-            nearstar_p_ply[n],
-            nearstar_p_plz[n],
-            nearstar_p_type[n],
-            nearstar_p_owner[n],
-            nearstar_p_moonid[n],
-            nearstar_p_ring[n],
-            nearstar_p_tilt[n],
-            nearstar_p_ray[n],
-            nearstar_p_orb_ray[n],
-            nearstar_p_orb_tilt[n],
-            nearstar_p_orb_orient[n],
-            nearstar_p_orb_ecc[n],
-            nearstar_p_rtperiod[n],
-            nearstar_p_rotation[n],
-            nearstar_p_viewpoint[n],
-            nearstar_p_term_start[n],
-            nearstar_p_term_end[n],
-            nearstar_p_qsortindex[n],
-            nearstar_p_qsortdist[n]
-        );
-        */
+        if (onPlanetFound != nullptr) {
+            onPlanetFound(
+                n,
+                nearstar_p_identity[n],
+                nearstar_p_seedval[n],
+                nearstar_p_plx[n],
+                nearstar_p_ply[n],
+                nearstar_p_plz[n],
+                nearstar_p_type[n],
+                nearstar_p_owner[n],
+                nearstar_p_moonid[n],
+                nearstar_p_ring[n],
+                nearstar_p_tilt[n],
+                nearstar_p_ray[n],
+                nearstar_p_orb_ray[n],
+                nearstar_p_orb_tilt[n],
+                nearstar_p_orb_orient[n],
+                nearstar_p_orb_ecc[n],
+                nearstar_p_rtperiod[n],
+                nearstar_p_rotation[n],
+                nearstar_p_viewpoint[n],
+                nearstar_p_term_start[n],
+                nearstar_p_term_end[n],
+                nearstar_p_qsortindex[n],
+                nearstar_p_qsortdist[n]
+            );
+        }
     }
 }
 
@@ -3332,6 +3342,14 @@ double targets_table_px[50];
 double targets_table_py[50];
 double targets_table_pz[50];
 
+void status(const char *status_description, int16_t message_delay) {
+#ifndef WITH_GODOT
+    if (message_delay >= fcs_status_delay) {
+        strcpy((char *) fcs_status, status_description);
+        fcs_status_delay = message_delay;
+    }
+#endif
+}
 
 // Character map for the hud, 3x5 pixels.
 int8_t digimap[65 * 5] = {
