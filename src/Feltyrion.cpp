@@ -313,9 +313,9 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
         auto v = n->get_child(i);
         auto x = Object::cast_to<godot::Node3D>(v);
         auto vector = godot::Vector3(
-            ((stars_visible[i*3]  ) - dzat_x) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER, 
-            ((stars_visible[i*3+1]) - dzat_y) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER, 
-            ((stars_visible[i*3+2]) - dzat_z) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Z_MULTIPLIER
+            stars_visible[i*3]   * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER, 
+            stars_visible[i*3+1] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER, 
+            stars_visible[i*3+2] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Z_MULTIPLIER
         );
         if (vector.x == 0 && vector.y == 0 && vector.z == 0) {
             x->hide();
