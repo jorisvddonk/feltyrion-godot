@@ -5,6 +5,11 @@
 #include "godot_cpp/core/binder_common.hpp"
 #include "godot_cpp/classes/mutex.hpp"
 
+#define FAR_STAR_PARSIS_SCALING_FACTOR 0.001
+#define PARSIS_X_MULTIPLIER 1
+#define PARSIS_Y_MULTIPLIER 1
+#define PARSIS_Z_MULTIPLIER 1
+
 #define _Q(x) #x
 #define _QUOTE(x) _Q(x)
 #define _SET_QUOTE(x) _Q(set_ ## x)

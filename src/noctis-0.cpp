@@ -1399,9 +1399,9 @@ void sky(uint16_t limits, bool use_callback, void (*callback)(double x, double y
                 if (use_callback) {
                     callback(temp_x,temp_y,temp_z, get_id_code(temp_x, temp_y, temp_z));
                 } else {
-                    stars_visible[i*3 + 0] = xx;
-                    stars_visible[i*3 + 1] = yy;
-                    stars_visible[i*3 + 2] = zz;
+                    stars_visible[i*3 + 0] = temp_x;
+                    stars_visible[i*3 + 1] = temp_y;
+                    stars_visible[i*3 + 2] = temp_z;
                     i += 1;
                 }
 

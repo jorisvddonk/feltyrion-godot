@@ -77,7 +77,31 @@ godot::Ref<godot::Image> Feltyrion::returnAtmosphereImage(bool accurate_height) 
 
 void cb_Planet(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist)
 {
-    instance->onPlanetFound(index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
+    instance->onPlanetFound(
+        index,
+        planet_id,
+        seedval,
+        x * PARSIS_X_MULTIPLIER,
+        y * PARSIS_Y_MULTIPLIER,
+        z * PARSIS_Z_MULTIPLIER,
+        type,
+        owner,
+        moonid,
+        ring,
+        tilt,
+        ray,
+        orb_ray,
+        orb_tilt,
+        orb_orient,
+        orb_ecc,
+        rtperiod,
+        rotation,
+        viewpoint,
+        term_start,
+        term_end,
+        qsortindex,
+        qsortdist
+    );
 }
 
 void Feltyrion::setAPTargetted(int i)
@@ -88,54 +112,54 @@ void Feltyrion::setAPTargetted(int i)
 
 void Feltyrion::setAPTargetX(double x)
 {
-    ap_target_x = x;
+    ap_target_x = x * PARSIS_X_MULTIPLIER;
 }
 void Feltyrion::setAPTargetY(double y)
 {
-    ap_target_y = y;
+    ap_target_y = y * PARSIS_Y_MULTIPLIER;
 }
 void Feltyrion::setAPTargetZ(double z)
 {
-    ap_target_z = z;
+    ap_target_z = z * PARSIS_Z_MULTIPLIER;
 }
 
 double Feltyrion::getAPTargetX()
 {
-    return ap_target_x;
+    return ap_target_x * PARSIS_X_MULTIPLIER;
 }
 double Feltyrion::getAPTargetY()
 {
-    return ap_target_y;
+    return ap_target_y * PARSIS_Y_MULTIPLIER;
 }
 double Feltyrion::getAPTargetZ()
 {
-    return ap_target_z;
+    return ap_target_z * PARSIS_Z_MULTIPLIER;
 }
 
 void Feltyrion::setDzatX(double x)
 {
-    dzat_x = x;
+    dzat_x = x * PARSIS_X_MULTIPLIER;
 }
 void Feltyrion::setDzatY(double y)
 {
-    dzat_y = y;
+    dzat_y = y * PARSIS_Y_MULTIPLIER;
 }
 void Feltyrion::setDzatZ(double z)
 {
-    dzat_z = z;
+    dzat_z = z * PARSIS_Z_MULTIPLIER;
 }
 
 double Feltyrion::getDzatX()
 {
-    return dzat_x;
+    return dzat_x * PARSIS_X_MULTIPLIER;
 }
 double Feltyrion::getDzatY()
 {
-    return dzat_y;
+    return dzat_y * PARSIS_Y_MULTIPLIER;
 }
 double Feltyrion::getDzatZ()
 {
-    return dzat_z;
+    return dzat_z * PARSIS_Z_MULTIPLIER;
 }
 
 void Feltyrion::setIPTargetted(int new_target)
@@ -149,28 +173,28 @@ int8_t Feltyrion::getIPTargetted()
 }
 double Feltyrion::getIPTargettedX()
 {
-    return nearstar_p_plx[ip_targetted];
+    return nearstar_p_plx[ip_targetted] * PARSIS_X_MULTIPLIER;
 }
 double Feltyrion::getIPTargettedY()
 {
-    return nearstar_p_ply[ip_targetted];
+    return nearstar_p_ply[ip_targetted] * PARSIS_Y_MULTIPLIER;
 }
 double Feltyrion::getIPTargettedZ()
 {
-    return nearstar_p_plz[ip_targetted];
+    return nearstar_p_plz[ip_targetted] * PARSIS_Z_MULTIPLIER;
 }
 
 double Feltyrion::getNearstarX()
 {
-    return nearstar_x;
+    return nearstar_x * PARSIS_X_MULTIPLIER;
 }
 double Feltyrion::getNearstarY()
 {
-    return nearstar_y;
+    return nearstar_y * PARSIS_Y_MULTIPLIER;
 }
 double Feltyrion::getNearstarZ()
 {
-    return nearstar_z;
+    return nearstar_z * PARSIS_Z_MULTIPLIER;
 }
 
 void Feltyrion::prepareStar()
@@ -245,7 +269,12 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__
 
 void cb_Star(double x, double y, double z, double id_code)
 {
-    instance->onStarFound(x, y, z, id_code);
+    instance->onStarFound(
+        x * PARSIS_X_MULTIPLIER,
+        y * PARSIS_Y_MULTIPLIER,
+        z * PARSIS_Z_MULTIPLIER,
+        id_code
+    );
 }
 
 void Feltyrion::scanStars()
@@ -257,24 +286,24 @@ void Feltyrion::scanStars()
 
 void Feltyrion::setDzat(double parsis_x, double parsis_y, double parsis_z)
 {
-    dzat_x = parsis_x;
-    dzat_y = parsis_y;
-    dzat_z = parsis_z;
+    dzat_x = parsis_x * PARSIS_X_MULTIPLIER;
+    dzat_y = parsis_y * PARSIS_Y_MULTIPLIER;
+    dzat_z = parsis_z * PARSIS_Z_MULTIPLIER;
 }
 
 void Feltyrion::setNearstar(double parsis_x, double parsis_y, double parsis_z)
 {
-    nearstar_x = parsis_x;
-    nearstar_y = parsis_y;
-    nearstar_z = parsis_z;
+    nearstar_x = parsis_x * PARSIS_X_MULTIPLIER;
+    nearstar_y = parsis_y * PARSIS_Y_MULTIPLIER;
+    nearstar_z = parsis_z * PARSIS_Z_MULTIPLIER;
 }
 
 void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath)
 {
     // thread safe as callback is not used
-    dzat_x = parsis_x;
-    dzat_y = parsis_y;
-    dzat_z = parsis_z;
+    dzat_x = parsis_x * PARSIS_X_MULTIPLIER;
+    dzat_y = parsis_y * PARSIS_Y_MULTIPLIER;
+    dzat_z = parsis_z * PARSIS_Z_MULTIPLIER;
     sky(0x405C, false, cb_Star);
     auto t = get_tree();
     auto r = t->get_root();
@@ -283,7 +312,11 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
     for (int i = 0; i < csize; i++) {
         auto v = n->get_child(i);
         auto x = Object::cast_to<godot::Node3D>(v);
-        auto vector = godot::Vector3(stars_visible[i*3] * 0.001, stars_visible[i*3+1] * 0.001, stars_visible[i*3+2] * 0.001);
+        auto vector = godot::Vector3(
+            ((stars_visible[i*3]  ) - dzat_x) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER, 
+            ((stars_visible[i*3+1]) - dzat_y) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER, 
+            ((stars_visible[i*3+2]) - dzat_z) * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Z_MULTIPLIER
+        );
         if (vector.x == 0 && vector.y == 0 && vector.z == 0) {
             x->hide();
         } else {
@@ -308,21 +341,56 @@ void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
         planet_xyz(i);
         godot::Node* node = n->get_child(i);
         godot::Node3D* planet = Object::cast_to<godot::Node3D>(node);
-        planet->set_position(godot::Vector3(-(nearstar_x - nearstar_p_plx[i]), -(nearstar_y - nearstar_p_ply[i]), nearstar_z - nearstar_p_plz[i]));
+        planet->set_position(godot::Vector3(
+            (nearstar_p_plx[i] - nearstar_x) * PARSIS_X_MULTIPLIER,
+            (nearstar_p_ply[i] - nearstar_y) * PARSIS_Y_MULTIPLIER,
+            (nearstar_p_plz[i] - nearstar_z) * PARSIS_Z_MULTIPLIER
+        ));
     }
 }
 
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
-    godot::Object::emit_signal("found_star", x, y, z, id_code);
+    godot::Object::emit_signal(
+        "found_star",
+        x * PARSIS_X_MULTIPLIER,
+        y * PARSIS_Y_MULTIPLIER,
+        z * PARSIS_Z_MULTIPLIER,
+        id_code
+    );
 }
 
 void Feltyrion::onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist) {
-    godot::Object::emit_signal("found_planet", index, planet_id, seedval, x, y, z, type, owner, moonid, ring, tilt, ray, orb_ray, orb_tilt, orb_orient, orb_ecc, rtperiod, rotation, viewpoint, term_start, term_end, qsortindex, qsortdist);
+    godot::Object::emit_signal(
+        "found_planet",
+        index,
+        planet_id,
+        seedval,
+        x * PARSIS_X_MULTIPLIER,
+        y * PARSIS_Y_MULTIPLIER,
+        z * PARSIS_Z_MULTIPLIER,
+        type,
+        owner,
+        moonid,
+        ring,
+        tilt,
+        ray,
+        orb_ray,
+        orb_tilt,
+        orb_orient,
+        orb_ecc,
+        rtperiod,
+        rotation,
+        viewpoint,
+        term_start,
+        term_end,
+        qsortindex,
+        qsortdist
+    );
 }
 
 godot::String Feltyrion::getStarName(double x, double y, double z) const
 {
-    double id = get_id_code(x, y, z);
+    double id = get_id_code(x * PARSIS_X_MULTIPLIER, y * PARSIS_Y_MULTIPLIER, z * PARSIS_Z_MULTIPLIER);
     int32_t offset = search_id_code(id, 'S');
     if (offset > -1) {
         update_star_label_by_offset(offset);
@@ -334,7 +402,7 @@ godot::String Feltyrion::getStarName(double x, double y, double z) const
 
 godot::String Feltyrion::getPlanetName(double star_x, double star_y, double star_z, int index) const
 {
-    double id = get_id_code(star_x, star_y, star_z) + index + 1; // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
+    double id = get_id_code(star_x * PARSIS_X_MULTIPLIER, star_y * PARSIS_Y_MULTIPLIER, star_z * PARSIS_Z_MULTIPLIER) + index + 1; // note; a planet's ID code is determined by the in-game body number, which starts at 1 (NOT zero)
     return getPlanetNameById(id);
 }
 
@@ -359,9 +427,9 @@ godot::Dictionary Feltyrion::getPlanetInfo(int n) {
     ret["n"] = n;
     ret["nearstar_p_seedval"] = nearstar_p_seedval[n];
     ret["nearstar_p_identity"] = nearstar_p_identity[n];
-    ret["nearstar_p_plx"] = nearstar_p_plx[n];
-    ret["nearstar_p_ply"] = nearstar_p_ply[n];
-    ret["nearstar_p_plz"] = nearstar_p_plz[n];
+    ret["nearstar_p_plx"] = nearstar_p_plx[n] * PARSIS_X_MULTIPLIER;
+    ret["nearstar_p_ply"] = nearstar_p_ply[n] * PARSIS_Y_MULTIPLIER;
+    ret["nearstar_p_plz"] = nearstar_p_plz[n] * PARSIS_Z_MULTIPLIER;
     ret["nearstar_p_type"] = nearstar_p_type[n];
     ret["nearstar_p_owner"] = nearstar_p_owner[n];
     ret["nearstar_p_moonid"] = nearstar_p_moonid[n];
@@ -385,9 +453,9 @@ godot::Dictionary Feltyrion::getPlanetInfo(int n) {
 godot::Dictionary Feltyrion::getCurrentStarInfo() {
     godot::Dictionary ret = godot::Dictionary();
     ret["nearstar_class"] = nearstar_class;
-    ret["nearstar_x"] = nearstar_x;
-    ret["nearstar_y"] = nearstar_y;
-    ret["nearstar_z"] = nearstar_z;
+    ret["nearstar_x"] = nearstar_x * PARSIS_X_MULTIPLIER;
+    ret["nearstar_y"] = nearstar_y * PARSIS_Y_MULTIPLIER;
+    ret["nearstar_z"] = nearstar_z * PARSIS_Z_MULTIPLIER;
     ret["nearstar_ray"] = nearstar_ray;
     ret["nearstar_spin"] = nearstar_spin;
     ret["nearstar_r"] = nearstar_r;
@@ -410,9 +478,9 @@ godot::Dictionary Feltyrion::getAPTargetInfo() {
         ret["ap_target_g"] = ap_target_g;
         ret["ap_target_b"] = ap_target_b;
         ret["ap_target_spin"] = ap_target_spin;
-        ret["ap_target_x"] = ap_target_x;
-        ret["ap_target_y"] = ap_target_y;
-        ret["ap_target_z"] = ap_target_z;
+        ret["ap_target_x"] = ap_target_x * PARSIS_X_MULTIPLIER;
+        ret["ap_target_y"] = ap_target_y * PARSIS_Y_MULTIPLIER;
+        ret["ap_target_z"] = ap_target_z * PARSIS_Z_MULTIPLIER;
         ret["ap_target_id_code"] = get_id_code(ap_target_x, ap_target_y, ap_target_z);
     }
     return ret;
