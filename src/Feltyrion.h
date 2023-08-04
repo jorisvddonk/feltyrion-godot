@@ -63,6 +63,8 @@ public:
     double getSecs();
     void loopOneIter();
 
+    godot::String getFCSStatus();
+
     Feltyrion();
 protected:
     static void _bind_methods();

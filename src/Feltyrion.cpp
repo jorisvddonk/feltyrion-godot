@@ -349,6 +349,11 @@ godot::String Feltyrion::getPlanetNameById(double planet_id) const
     }
 }
 
+godot::String Feltyrion::getFCSStatus()
+{
+    return (char*)fcs_status;
+}
+
 godot::Dictionary Feltyrion::getPlanetInfo(int n) {
     godot::Dictionary ret = godot::Dictionary();
     ret["n"] = n;
@@ -472,6 +477,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted" ), &Feltyrion::setAPTargetted );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);

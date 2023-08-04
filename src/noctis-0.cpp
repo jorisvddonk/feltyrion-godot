@@ -3343,12 +3343,10 @@ double targets_table_py[50];
 double targets_table_pz[50];
 
 void status(const char *status_description, int16_t message_delay) {
-#ifndef WITH_GODOT
     if (message_delay >= fcs_status_delay) {
         strcpy((char *) fcs_status, status_description);
         fcs_status_delay = message_delay;
     }
-#endif
 }
 
 // Character map for the hud, 3x5 pixels.

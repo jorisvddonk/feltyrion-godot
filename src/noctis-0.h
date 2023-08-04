@@ -130,7 +130,11 @@ extern double ip_target_initial_d;
 extern double requested_approach_coefficient;
 extern double current_approach_coefficient;
 extern double reaction_time;
+#ifdef WITH_GODOT
+extern int8_t fcs_status[11];
+#else
 extern char fcs_status[11];
+#endif
 extern int16_t fcs_status_delay;
 extern int16_t psys;
 extern double ap_target_initial_d;
