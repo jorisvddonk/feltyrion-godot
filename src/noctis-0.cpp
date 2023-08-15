@@ -43,6 +43,9 @@
 // HSP Inclusions.
 #ifndef WITH_GODOT
 #include "tdpolygs.h" // 3D Engine.
+#else
+#include "tdpolygs_stub.h"
+#include "additional_math.h"
 #endif
 
 // Support files
@@ -822,6 +825,31 @@ void shade(uint8_t *palette_buffer, int16_t first_color, int16_t number_of_color
     }
 }
 
+// Sets the 3d projection from a still viewpoint.
+void proj_from_vehicle() {
+    cam_x = dzat_x;
+    cam_y = dzat_y;
+    cam_z = dzat_z;
+    alfa  = user_alfa;
+    beta  = user_beta + navigation_beta + 180;
+
+    if (beta >= 360) {
+        beta -= 360;
+    }
+
+    change_angle_of_view();
+}
+
+// Sets the 3d projection from the user's point of view.
+void proj_from_user() {
+    cam_x = pos_x;
+    cam_y = pos_y;
+    cam_z = pos_z;
+    alfa  = user_alfa;
+    beta  = user_beta;
+    change_angle_of_view();
+}
+
 // Calculate the position of a certain planet in orbit around a star (the
 // neighbouring one) based on orbital parameters (inclination, eccentricity,
 // radius and orientation of major axis), and returns i values in plx, ply, plz.
@@ -956,6 +984,10 @@ void setfx(int8_t fx) {
 #endif
 }
 
+void chgfx(int8_t fx) { flares = fx; }
+
+void resetfx() { flares = previous_flares_value; }
+
 /* Tracing sticks (3D Part). */
 
 int32_t fpx = -1; // First-point-x
@@ -976,6 +1008,64 @@ uint8_t map_color_a = 30;
 uint8_t map_color_b = 31;
 uint8_t map_color_c = 32;
 uint8_t map_color_d = 33;
+
+void randomic_mapper(float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2,
+                     int8_t divisions) {
+    float vx[3], vy[3], vz[3];
+    float e0, f0, g0;
+    float e1, f1, g1;
+    float e2, f2, g2;
+    divisions--;
+
+    if (divisions) {
+        e0 = (x0 + x1) * 0.5;
+        f0 = (y0 + y1) * 0.5;
+        g0 = (z0 + z1) * 0.5;
+        e1 = (x1 + x2) * 0.5;
+        f1 = (y1 + y2) * 0.5;
+        g1 = (z1 + z2) * 0.5;
+        e2 = (x0 + x2) * 0.5;
+        f2 = (y0 + y2) * 0.5;
+        g2 = (z0 + z2) * 0.5;
+
+        if (divisions == 1) {
+            vx[0] = x0;
+            vy[0] = y0;
+            vz[0] = z0;
+            vx[1] = e0;
+            vy[1] = f0;
+            vz[1] = g0;
+            vx[2] = e2;
+            vy[2] = f2;
+            vz[2] = g2;
+            poly3d(vx, vy, vz, 3, map_color_a);
+            randomic_mapper(x0, y0, z0, e0, f0, g0, e2, f2, g2, divisions);
+            vx[0] = e1;
+            vy[0] = f1;
+            vz[0] = g1;
+            poly3d(vx, vy, vz, 3, map_color_b);
+            randomic_mapper(e1, f1, g1, e0, f0, g0, e2, f2, g2, divisions);
+            vx[1] = x2;
+            vy[1] = y2;
+            vz[1] = z2;
+            poly3d(vx, vy, vz, 3, map_color_c);
+            randomic_mapper(e1, f1, g1, x2, y2, z2, e2, f2, g2, divisions);
+            vx[2] = x1;
+            vy[2] = y1;
+            vz[2] = z1;
+            vx[1] = e0;
+            vy[1] = f0;
+            vz[1] = g0;
+            poly3d(vx, vy, vz, 3, map_color_d);
+            randomic_mapper(e1, f1, g1, e0, f0, g0, x1, y1, z1, divisions);
+        } else {
+            randomic_mapper(x0, y0, z0, e0, f0, g0, e2, f2, g2, divisions);
+            randomic_mapper(e1, f1, g1, e0, f0, g0, e2, f2, g2, divisions);
+            randomic_mapper(e1, f1, g1, x2, y2, z2, e2, f2, g2, divisions);
+            randomic_mapper(e1, f1, g1, e0, f0, g0, x1, y1, z1, divisions);
+        }
+    }
+}
 
 /*
     Free a handle in which a polygonal graphic file was loaded: if the handle
@@ -1232,6 +1322,301 @@ void quick_sort(int16_t *index, float *mdist, int16_t start, int16_t end) {
             opzione nella chiamata a "loadpv" per quell'handle.
 */
 
+/*
+    Traccia una figura poligonale.
+    handle: l'handle (da 0 a 15) che si � attribuito al file con "loadpv";
+    mode: pu� essere -- 0 = tracciamento poligoni in tinta unita;
+                1 = tracciamento con texture mapping;
+                2 = rimappatura randomica ricorsiva dei poligoni.
+    rm_iterations: viene usato solo se mode = 2, indica quante suddivisioni
+            devono essere effettuate per ogni poligono rimappato;
+    center_x/y/z: coordinate ove piazzare il centro dell'oggetto;
+    use_depth_sort: flag per attivare il depth sort, che viene tuttavia
+            effettivamente attivato solo se � stato incluso come
+            opzione nella chiamata a "loadpv" per quell'handle.
+*/
+
+/**
+ * @brief Draw a polygonal figure.
+ *
+ * @param handle The handle (0-15) assigned to the file from `loadpv`
+ * @param mode 0=Solid Polygons, 1=Tracking w/ Texture Mapping, 2=Random
+ * Recursive Polygon Remapping
+ * @param rm_iterations Only used if mode=2, indicates how many subdivisions
+ * must be done for each remapped polygon
+ * @param center_x Object center x coordinate
+ * @param center_y Object center y coordinate
+ * @param center_z Object center z coordinate
+ * @param use_depth_sort Flag to activate depth sort, only actived for real if
+ * `loadpv` was called with it activated.
+ */
+void drawpv(int16_t handle, int16_t mode, int16_t rm_iterations, float center_x, float center_y, float center_z,
+            int8_t use_depth_sort) {
+    float dx, dy, dz;
+    uint16_t p, c, i, k;
+
+    if (handle >= handles) {
+        return;
+    }
+
+    if (!pvfile_datalen[handle]) {
+        return;
+    }
+
+    // Entire space translation at the object's origin
+    cam_x -= center_x;
+    cam_y -= center_y;
+    cam_z -= center_z;
+
+    uint16_t mask;
+    if (use_depth_sort && pv_mid_x[handle]) {
+        // Tracking with depth sorting.
+        // Stage 1: Midpoint distance calculation.
+        for (p = 0; p < pvfile_npolygs[handle]; p++) {
+            dx                  = pv_mid_x[handle][p] - cam_x;
+            dy                  = pv_mid_y[handle][p] - cam_y;
+            dz                  = pv_mid_z[handle][p] - cam_z;
+            pv_mid_d[handle][p] = dx * dx + dy * dy + dz * dz;
+        }
+
+        // Stage 2: Sorting polygons by distance
+        quick_sort(pv_dep_i[handle], pv_mid_d[handle], 0, pvfile_npolygs[handle] - 1);
+
+        // Stage 3: Tracking, in the order specified above
+        for (p = 0; p < pvfile_npolygs[handle]; p++) {
+            c = pv_dep_i[handle][p];
+            i = c * 4;
+
+            switch (mode) {
+            case 0:
+                poly3d(pvfile_x[handle] + i, pvfile_y[handle] + i, pvfile_z[handle] + i, pv_n_vtx[handle][c],
+                       pvfile_c[handle][c]);
+                break;
+
+            case 1:
+                k = pvfile_c[handle][c];
+
+                mask = k;
+                mask &= 0x3Fu;
+                k &= 0xC0u;
+                mask >>= 1u;
+                k |= mask;
+
+                polymap(pvfile_x[handle] + i, pvfile_y[handle] + i, pvfile_z[handle] + i, pv_n_vtx[handle][c], k);
+                break;
+
+            case 2:
+                map_color_a = pvfile_c[handle][c];
+                map_color_b = map_color_a - 2;
+                map_color_c = map_color_a - 1;
+                map_color_d = map_color_a + 1;
+                randomic_mapper(pvfile_x[handle][i + 0], pvfile_y[handle][i + 0], pvfile_z[handle][i + 0],
+                                pvfile_x[handle][i + 1], pvfile_y[handle][i + 1], pvfile_z[handle][i + 1],
+                                pvfile_x[handle][i + 2], pvfile_y[handle][i + 2], pvfile_z[handle][i + 2],
+                                rm_iterations);
+
+                if (pv_n_vtx[handle][p] == 4)
+                    randomic_mapper(pvfile_x[handle][i + 2], pvfile_y[handle][i + 2], pvfile_z[handle][i + 2],
+                                    pvfile_x[handle][i + 3], pvfile_y[handle][i + 3], pvfile_z[handle][i + 3],
+                                    pvfile_x[handle][i + 0], pvfile_y[handle][i + 0], pvfile_z[handle][i + 0],
+                                    rm_iterations);
+                break;
+            default:
+                break;
+            }
+        }
+    } else {
+        // tracciamento senza depth sorting.
+        // in queso caso traccia i poligoni nell'ordine in cui
+        // sono stati salvati nel file di grafica di "PolyVert".
+        for (p = 0, i = 0; p < pvfile_npolygs[handle]; p++, i += 4)
+            switch (mode) {
+            case 0:
+                poly3d(pvfile_x[handle] + i, pvfile_y[handle] + i, pvfile_z[handle] + i, pv_n_vtx[handle][p],
+                       pvfile_c[handle][p]);
+                break;
+
+            case 1:
+                k = pvfile_c[handle][p];
+
+                mask = k;
+                mask &= 0x3Fu;
+                k &= 0xC0u;
+                mask >>= 1u;
+                k |= mask;
+
+                polymap(pvfile_x[handle] + i, pvfile_y[handle] + i, pvfile_z[handle] + i, pv_n_vtx[handle][p], k);
+                break;
+            case 2:
+                map_color_a = pvfile_c[handle][p];
+                map_color_b = map_color_a - 2;
+                map_color_c = map_color_a - 1;
+                map_color_d = map_color_a + 1;
+                randomic_mapper(pvfile_x[handle][i + 0], pvfile_y[handle][i + 0], pvfile_z[handle][i + 0],
+                                pvfile_x[handle][i + 1], pvfile_y[handle][i + 1], pvfile_z[handle][i + 1],
+                                pvfile_x[handle][i + 2], pvfile_y[handle][i + 2], pvfile_z[handle][i + 2],
+                                rm_iterations);
+
+                if (pv_n_vtx[handle][p] == 4)
+                    randomic_mapper(pvfile_x[handle][i + 2], pvfile_y[handle][i + 2], pvfile_z[handle][i + 2],
+                                    pvfile_x[handle][i + 3], pvfile_y[handle][i + 3], pvfile_z[handle][i + 3],
+                                    pvfile_x[handle][i + 0], pvfile_y[handle][i + 0], pvfile_z[handle][i + 0],
+                                    rm_iterations);
+                break;
+            default:
+                break;
+            }
+    }
+
+    // traslazione intero spazio all'origine precedente.
+    cam_x += center_x;
+    cam_y += center_y;
+    cam_z += center_z;
+}
+
+/*  Replica una forma poligonale, copiandola da un'handle gi� definito
+    a uno di uguali dimensioni. In caso d'errore, non succede nulla. */
+
+void copypv(int16_t dest_handle, int16_t src_handle) {
+    if (src_handle >= handles) {
+        return;
+    }
+
+    if (dest_handle >= handles) {
+        return;
+    }
+
+    if (!pvfile_datalen[src_handle]) {
+        return;
+    }
+
+    if (pvfile_datalen[dest_handle] != pvfile_datalen[src_handle]) {
+        return;
+    }
+
+    memcpy(pv_n_vtx[dest_handle], pv_n_vtx[src_handle], pvfile_datalen[src_handle]);
+}
+
+/*  Ruota una forma poligonale rispetto a uno dei suoi vertici,
+    che viene assunto come centro di rotazione, applicando anche
+    un fattore di scalatura (che pu� essere 1 se non � necessario
+    cambiare le dimensioni, come possono essere 0 gli angoli se
+    si stanno cambiando le dimensioni senza ruotare).
+    "vertexs_to_affect" � un puntatore a una serie di strutture "pvlist",
+    nelle quali sono elencati i vertici che verranno effettivamente modificati:
+    se il puntatore "vertexs_to_affect" � nullo, tutti i vertici lo sono.
+    Gli angoli sono espressi in gradi. */
+
+void modpv(int16_t handle, int16_t polygon_id, int16_t vertex_id, float x_scale, float y_scale, float z_scale,
+           float x_angle, float y_angle, float z_angle, pvlist *vertexs_to_affect) {
+    if (handle >= handles) {
+        return;
+    }
+
+    if (!pvfile_datalen[handle]) {
+        return;
+    }
+
+    float sin_x = sin(deg * x_angle);
+    float cos_x = cos(deg * x_angle);
+    float sin_y = sin(deg * y_angle);
+    float cos_y = cos(deg * y_angle);
+    float sin_z = sin(deg * z_angle);
+    float cos_z = cos(deg * z_angle);
+    int16_t c, p, v, i, j;
+    float x1, y1, z1;
+    float cx, cy, cz;
+
+    if (polygon_id > -1 && vertex_id > -1) {
+        i  = 4 * polygon_id + vertex_id;
+        cx = pvfile_x[handle][i];
+        cy = pvfile_y[handle][i];
+        cz = pvfile_z[handle][i];
+    } else {
+        cx = 0;
+        cy = 0;
+        cz = 0;
+    }
+
+    if (!vertexs_to_affect) {
+        for (p = 0; p < pvfile_npolygs[handle]; p++) {
+            i = 4 * p;
+
+            for (v = 0; v < pv_n_vtx[handle][p]; v++) {
+                x1                  = (pvfile_x[handle][i] - cx) * cos_y + (pvfile_z[handle][i] - cz) * sin_y;
+                z1                  = (pvfile_z[handle][i] - cz) * cos_y - (pvfile_x[handle][i] - cx) * sin_y;
+                pvfile_z[handle][i] = z_scale * (z1 * cos_x + (pvfile_y[handle][i] - cy) * sin_x) + cz;
+                y1                  = (pvfile_y[handle][i] - cy) * cos_x - z1 * sin_x;
+                pvfile_x[handle][i] = x_scale * (x1 * cos_z + y1 * sin_z) + cx;
+                pvfile_y[handle][i] = y_scale * (y1 * cos_z - x1 * sin_z) + cy;
+                i++;
+            }
+        }
+    } else {
+        p = 0;
+
+        while (vertexs_to_affect[p].polygon_id != 0xFFF) {
+            c = vertexs_to_affect[p].polygon_id;
+            i = 4 * c;
+            v = 0;
+
+            do {
+                if (v == 0 && vertexs_to_affect[p].vtxflag_0) {
+                    j = i;
+                    goto perform;
+                }
+
+                if (v == 1 && vertexs_to_affect[p].vtxflag_1) {
+                    j = i + 1;
+                    goto perform;
+                }
+
+                if (v == 2 && vertexs_to_affect[p].vtxflag_2) {
+                    j = i + 2;
+                    goto perform;
+                }
+
+                if (v == 3 && vertexs_to_affect[p].vtxflag_3) {
+                    j = i + 3;
+                    goto perform;
+                }
+
+                goto next;
+            perform:
+                x1                  = (pvfile_x[handle][j] - cx) * cos_y + (pvfile_z[handle][j] - cz) * sin_y;
+                z1                  = (pvfile_z[handle][j] - cz) * cos_y - (pvfile_x[handle][j] - cx) * sin_y;
+                pvfile_z[handle][j] = z_scale * (z1 * cos_x + (pvfile_y[handle][j] - cy) * sin_x) + cz;
+                y1                  = (pvfile_y[handle][j] - cy) * cos_x - z1 * sin_x;
+                pvfile_x[handle][j] = x_scale * (x1 * cos_z + y1 * sin_z) + cx;
+                pvfile_y[handle][j] = y_scale * (y1 * cos_z - x1 * sin_z) + cy;
+            next:
+                v++;
+            } while (v < pv_n_vtx[handle][c]);
+
+            p++;
+        }
+    }
+
+    if (pv_mid_x[handle]) {
+        for (p = 0; p < pvfile_npolygs[handle]; p++) {
+            i  = 4 * p;
+            cx = 0;
+            cy = 0;
+            cz = 0;
+
+            for (v = 0; v < pv_n_vtx[handle][p]; v++) {
+                cx += pvfile_x[handle][i];
+                cy += pvfile_y[handle][i];
+                cz += pvfile_z[handle][i];
+                i++;
+            }
+
+            pv_mid_x[handle][p] = cx / v;
+            pv_mid_y[handle][p] = cy / v;
+            pv_mid_z[handle][p] = cz / v;
+        }
+    }
+}
 
 // Returns the alphabetic correspondent of integers and / or real numbers.
 char *alphavalue(double value) {
@@ -1765,6 +2150,7 @@ void init() {
     ruinschart   = (uint8_t *) objectschart; // oc alias
     pvfile       = (uint8_t *) malloc(pv_bytes);
     adapted      = (uint8_t *) malloc(sc_bytes);
+    txtr         = (uint8_t *) p_background;             // txtr alias
 
     // initialize on Balastrackonastreya
     dzat_x = -18928;
@@ -3690,6 +4076,110 @@ extern int8_t planet_label[25];
 */
 
 int8_t snapfilename[24];
+/* Save a photo of the screen into the file "SNAP[XXXX].BMP", where [XXXX] is a
+ * progressive disambiguation number.
+ */
+void snapshot(int16_t forcenumber, int8_t showdata) {
+#ifndef WITH_GODOT
+    int16_t prog;
+    uint16_t pqw;
+    double parsis_x, parsis_y, parsis_z;
+    uint16_t ptr, c;
+    int8_t a, b, t[54];
+    FILE *ih = sa_open(header_bmp);
+
+    if (ih == nullptr) {
+        return;
+    }
+
+    fread(t, 1, 54, ih);
+    fclose(ih);
+
+    if (!forcenumber) {
+        prog = -1;
+
+        do {
+            prog++;
+
+            if (prog == 9999) {
+                return;
+            }
+
+            sprintf((char *) snapfilename, "gallery/SNAP%04d.BMP", prog);
+            ih = fopen((char *) snapfilename, "rb");
+
+            if (ih != nullptr) {
+                fclose(ih);
+            }
+        } while (ih != nullptr);
+    } else {
+        sprintf((char *) snapfilename, "gallery/SNAP%04d.BMP", forcenumber);
+    }
+
+    if (showdata) {
+        area_clear(adapted, 2, 191, 0, 0, 316, 7, 64 + 63);
+
+        parsis_x = round(dzat_x);
+        parsis_y = round(dzat_y);
+        parsis_z = round(dzat_z);
+
+        strcpy((char *) outhudbuffer, "LOCATION PARSIS: ");
+        strcat((char *) outhudbuffer, alphavalue(parsis_x));
+        strcat((char *) outhudbuffer, ";");
+        strcat((char *) outhudbuffer, alphavalue(-parsis_y));
+        strcat((char *) outhudbuffer, ";");
+        strcat((char *) outhudbuffer, alphavalue(parsis_z));
+
+        if (ip_targetted > -1) {
+            if (nearstar_p_owner[ip_targetted] > -1) {
+                strcat((char *) outhudbuffer, " & TGT: MOON N@");
+                strcat((char *) outhudbuffer, alphavalue(nearstar_p_moonid[ip_targetted] + 1));
+                strcat((char *) outhudbuffer, " OF PLANET N@");
+                strcat((char *) outhudbuffer, alphavalue(nearstar_p_owner[ip_targetted] + 1));
+            } else {
+                strcat((char *) outhudbuffer, " & TGT: PLANET N@");
+                strcat((char *) outhudbuffer, alphavalue(ip_targetted + 1));
+            }
+        }
+
+        wrouthud(3, 192, 0, (char *) outhudbuffer);
+
+        if (ap_targetted == 1 && star_label_pos != -1) {
+            area_clear(adapted, 14, 14, 0, 0, 102, 7, 64 + 63);
+            wrouthud(15, 15, 20, (char *) star_label);
+        }
+
+        if (ip_targetted != -1 && planet_label_pos != -1) {
+            area_clear(adapted, 14, 23, 0, 0, 102, 7, 64 + 63);
+            wrouthud(15, 24, 20, (char *) planet_label);
+        }
+    }
+
+    ih = fopen((char *) snapfilename, "wb+");
+
+    if (ih != nullptr) {
+        a = 0;
+        fwrite(t, 1, 54, ih);
+
+        for (c = 0; c < 768; c += 3) {
+            b = tmppal[c + 2] * 4;
+            fwrite(&b, 1, 1, ih);
+            b = tmppal[c + 1] * 4;
+            fwrite(&b, 1, 1, ih);
+            b = tmppal[c + 0] * 4;
+            fwrite(&b, 1, 1, ih);
+            fwrite(&a, 1, 1, ih);
+        }
+
+        for (ptr = 63680; ptr < 64000; ptr -= 320) {
+            fwrite(adapted + ptr, 1, 320, ih);
+        }
+
+        fclose(ih);
+    }
+#endif
+}
+
 /*
     Consumi supplementari di litio, dal pi� dispendioso al pi� economico:
     - orbita vimana:            1 KD ogni 7 secondi.
@@ -3704,61 +4194,7 @@ int8_t snapfilename[24];
 
 int32_t iqsecs = 0;
 
-
-
-void prep_write() {
-   /*
-   FILE *fp;
-
-   fp = fopen("../temp.txt", "w");
-   fprintf(fp, "# beginning of file\n");
-   fclose(fp);
-   */
-}
-
-int p_tracker = 1;
-void prep_write2() {
-    /*
-   FILE *fp;
-
-   fp = fopen("../temp2.obj", "w");
-   fprintf(fp, "# beginning of file\n");
-   fclose(fp);
-   p_tracker = 1;
-   */
-}
-
-void stick3d (float p_x, float p_y, float p_z, float x, float y, float z) {
-    /*
-   FILE *fp;
-
-   fp = fopen("../temp.txt", "a");
-   fprintf(fp, "%f %f %f %f %f %f\n", p_x, p_y, p_z, x, y, z);
-   fclose(fp);
-   */
-}
-
-void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_t colore) {
-   // assuming nrv is always 4...
-   /*
-   FILE *fp;
-
-   fp = fopen("../temp2.obj", "a");
-   fprintf(fp, "v %f %f %f\n", x[0] / 100, y[0] / 100, z[0] / 100);
-   fprintf(fp, "v %f %f %f\n", x[1] / 100, y[1] / 100, z[1] / 100);
-   fprintf(fp, "v %f %f %f\n", x[2] / 100, y[2] / 100, z[2] / 100);
-   fprintf(fp, "v %f %f %f\n", x[3] / 100, y[3] / 100, z[3] / 100);
-
-   fprintf(fp, "f %i %i %i\n", p_tracker + 0, p_tracker + 1, p_tracker + 2);
-   fprintf(fp, "f %i %i %i\n", p_tracker + 0, p_tracker + 2, p_tracker + 3);
-
-   p_tracker += 4;
-   fclose(fp);
-   */
-}
-
 void cupola(float y_or, float brk) {
-    prep_write();
     float xx, yy, zz;
     float lat, lon, dlat, dlon, dlon_2, k, clon, slon, ck, sk;
     dlat   = M_PI / 20;
@@ -3790,7 +4226,6 @@ void cupola(float y_or, float brk) {
 }
 
 void polycupola(float y_or, int8_t textured) {
-    prep_write2();
     float d1, d2, d3, dd;
     float x[4], y[4], z[4];
     float lat, lon, dlat, dlon, dlon_2, k, clon, slon, ck, sk;

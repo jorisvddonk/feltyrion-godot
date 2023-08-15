@@ -1,8 +1,5 @@
 #pragma once
 
-#define M_PI 3.14159265358979323846264338327950288
-const double deg = M_PI / 180;
-
 // C Standard Library includes
 
 #include <cassert>
@@ -14,6 +11,7 @@ const double deg = M_PI / 180;
 #include <ctime>
 
 #ifdef WITH_GODOT
+#include "additional_math.h"
 #ifdef _MSC_VER 
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp

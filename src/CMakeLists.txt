@@ -4,8 +4,11 @@ target_sources( ${PROJECT_NAME}
     PRIVATE
         brtl.h
         brtl.cpp
+        noctis-d.h
+        additional_math.h
         noctis-0.h
         noctis-0.cpp
+        noctis-1.cpp
         noctis.h
         noctis.cpp
         Feltyrion.h

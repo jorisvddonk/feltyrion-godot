@@ -4,7 +4,8 @@
 #include "noctis.h"
 
 #ifndef WITH_GODOT
-const double deg = M_PI / 180;
+#include "additional_math.h"
+#else
 #endif
 
 static int16_t opencapcount = 0;
@@ -2264,6 +2265,7 @@ void build_surface() {
         }
     }
 
+
     // normalmente, la superficie ? pi? o meno rocciosa...
     liquid_water = 0;
 
@@ -2298,6 +2300,7 @@ void build_surface() {
         rootshade = 0xC0;
         break;
     }
+
 
     // altro dettaglio parecchio insolito, che per? conviene sia
     // davvero molto raro: alberi trasparenti (e chi lo sa? magari...)
@@ -2335,6 +2338,7 @@ void build_surface() {
     default:
         leafflares = 0;
     }
+
 
     // gli altri parametri degli alberi, b?... sono piuttosto casuali.
     treescaling = 3000 + flandom() * 3000 - flandom() * 1500;
@@ -3094,6 +3098,7 @@ void build_surface() {
     }
     }
 
+
     n = brtl_random(5);
 
     if (n) {
@@ -3137,6 +3142,7 @@ void build_surface() {
         }
     }
 
+
     // se c'? acqua liquida sulla superficie, non possono esserci
     // oggetti che vi galleggiano: ? opinabile, ma per ora lasciamo
     // perdere eventuali alghe, pezzi di legno...
@@ -3162,6 +3168,7 @@ void build_surface() {
     // generalmente costante.
     fast_srand(landing_pt_lat * landing_pt_lon);
     brtl_srand(landing_pt_lat * landing_pt_lon);
+
 
     if ((int32_t) (nearstar_identity * 1E6) == -37828) {
         // Questa stella ? Balastrackonastreya
@@ -3247,6 +3254,7 @@ void build_surface() {
     ////////////////////////////////////////////////////////////////////
     // infine si calcola la mappa di shading.
     sh_delta = 0;
+
 
     if (fabs(sun_x) > 0.33 * dsd1) {
         if (sun_x > 0) {
@@ -3979,6 +3987,7 @@ void planetary_main() {
         w++;
     }
 
+
     // Se invece si tratta di un pianeta che gira attorno ad una
     // delle stelle compagne della primaria, il sole secondario
     // diventa il primario, dato che i fattori di esposizione
@@ -4025,11 +4034,14 @@ void planetary_main() {
     memcpy(return_palette, tmppal, 768);
 
     // Fade to black (blank frame.)
+#ifndef WITH_GODOT
     for (w = 64; w >= 0; w -= 4) {
         tavola_colori((const uint8_t *) return_palette, 0, 256, w, w, w);
 
         swapBuffers();
     }
+#endif
+
 
     // regolazione della forza di gravit?.
     gravity     = nearstar_p_ray[ip_targetted];
@@ -4064,6 +4076,7 @@ void planetary_main() {
         wr[w] = 0;
         w++;
     }
+
 
     // preparazione di alcune variabili di controllo.
     bfa                = field_amplificator;
@@ -4181,6 +4194,7 @@ void planetary_main() {
         }
     }
 
+
     //
     te_ll_distance_1 = 0;
     ll               = landing_pt_lon;
@@ -4269,6 +4283,7 @@ nosecondarysun:
 
     /* operazioni preliminari per ogni tipo di pianeta. */
 
+
     switch (nearstar_p_type[ip_targetted]) {
     case 1:
         sky_brightness = 0;
@@ -4344,6 +4359,7 @@ nosecondarysun:
     global_surface_seed =
         (nearstar_p_ray[ip_targetted] + nearstar_p_orb_ray[ip_targetted] + nearstar_p_orb_orient[ip_targetted]) * 4112;
 
+
     if (nearstar_p_type[ip_targetted] == 3) {
         brtl_srand(global_surface_seed + landing_pt_lon);
 
@@ -4351,6 +4367,7 @@ nosecondarysun:
             global_surface_seed++;
         }
     }
+
 
     /* generazione del cielo (in sfondo). */
     memset(s_background, sky_brightness, st_bytes);
@@ -4372,6 +4389,7 @@ nosecondarysun:
         }
     }
 
+
     /* generazione superficie. */
     build_surface();
     /* generazione animali e altre forme di vita indigene, qualora presenti. */
@@ -4384,6 +4402,7 @@ nosecondarysun:
     int16_t prog;
     int32_t line;
     exitflag = 0;
+
 
     if (entryflag) {
         FILE *sfh = fopen(surface_file, "rb");
@@ -4423,6 +4442,8 @@ nosecondarysun:
     step             = 0;
     directional_beta = user_beta;
 
+
+#ifndef WITH_GODOT
     do {
         // Start of synchronization and resolution from the blank frame.
         sync_start();
@@ -4742,7 +4763,11 @@ nosecondarysun:
             alfa  = user_alfa;
             beta  = user_beta;
             change_angle_of_view();
+            #ifdef WITH_GODOT
+            sky(0x003E, false, nullptr);
+            #else
             sky(0x003E);
+            #endif
         }
 
         // tracciamento del "sole" locale.
@@ -5758,17 +5783,23 @@ nosecondarysun:
             }
         }
     } while (1);
+#endif
+
 
     /* operazioni di recupero per ritornare al ciclo principale. */
 
     // Fade to black (return blank frame).
+#ifndef WITH_GODOT
     for (w = 64; w >= 0; w -= 4) {
         tavola_colori((const uint8_t *) surface_palette, 0, 256, w, w, w);
 
         swapBuffers();
     }
+#endif
+
 
 nodissolve:
+#ifndef WITH_GODOT
     memset(adapted, 0, QUADWORDS * 4);
     dzat_x             = backup_dzat_x;
     dzat_y             = backup_dzat_y;
@@ -5789,4 +5820,6 @@ nodissolve:
     load_starface();
     load_digimap2();
     npcs = -12345;
+#endif
+    (void)0;
 }

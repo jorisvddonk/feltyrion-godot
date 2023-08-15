@@ -51,6 +51,11 @@ public:
     void setNearstar(double parsis_x, double parsis_y, double parsis_z);
     void saveModels() const;
 
+    void preparePlanetSurface();
+    godot::Ref<godot::Image> returnSkyImage();
+    godot::Ref<godot::Image> returnSurfacemapImage();
+    godot::Ref<godot::Image> returnTxtrImage();
+
     void setAPTargetted(int i);
     void setAPTargetX(double x);
     double getAPTargetX();
@@ -64,6 +69,9 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
+
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
 
     void setDzatX(double x);
     double getDzatX();

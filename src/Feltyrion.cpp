@@ -25,6 +25,7 @@ namespace
 
 Feltyrion *instance;
 extern void loop();
+extern void planetary_main();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -506,11 +507,61 @@ void Feltyrion::loopOneIter()
     loop(); // only one iteration here!
 }
 
+void Feltyrion::preparePlanetSurface() {
+    planetary_main();
+}
+
+
+godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
+    auto pba = godot::PackedByteArray();
+    int a = 0;
+    for (uint16_t i = 0; i < (120 * 360); i++) {
+        uint8_t val = s_background[i];
+        pba.append(surface_palette[(val) * 3] * 4);
+        pba.append(surface_palette[(val) * 3 + 1] * 4);
+        pba.append(surface_palette[(val) * 3 + 2] * 4);
+    }
+    auto image = godot::Image::create_from_data(360, 120, false, godot::Image::FORMAT_RGB8, pba);
+    godot::Ref<godot::Image> ref = image;
+    return ref;
+}
+
+godot::Ref<godot::Image> Feltyrion::returnSurfacemapImage() {
+    auto pba = godot::PackedByteArray();
+    int a = 0;
+    for (uint16_t i = 0; i < (200 * 200); i++) {
+        uint8_t val = p_surfacemap[i];
+        pba.append(val);
+    }
+    auto image = godot::Image::create_from_data(200, 200, false, godot::Image::FORMAT_L8, pba);
+    godot::Ref<godot::Image> ref = image;
+    return ref;
+}
+
+godot::Ref<godot::Image> Feltyrion::returnTxtrImage() {
+    auto pba = godot::PackedByteArray();
+    int a = 0;
+    for (uint16_t y = 0; y < 256; y++) {
+        for (uint16_t x = 0; x < 256; x++) {
+            uint8_t val = txtr[(y*256)+x];
+            pba.append(surface_palette[(val) * 3] * 4);
+            pba.append(surface_palette[(val) * 3 + 1] * 4);
+            pba.append(surface_palette[(val) * 3 + 2] * 4);
+        }
+    }
+    auto image = godot::Image::create_from_data(256, 256, false, godot::Image::FORMAT_RGB8, pba);
+    godot::Ref<godot::Image> ref = image;
+    return ref;
+}
+
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reached, getIPReached, setIPReached); // 1 if we're orbiting a planet
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reaching, getIPReaching, setIPReaching); // 1 if we're approaching a local target
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
+
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
 
 void Feltyrion::_bind_methods()
 {
@@ -554,6 +605,11 @@ void Feltyrion::_bind_methods()
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
 
+    godot::ClassDB::bind_method( godot::D_METHOD( "prepare_planet_surface" ), &Feltyrion::preparePlanetSurface );
+    godot::ClassDB::bind_method( godot::D_METHOD( "return_sky_image" ), &Feltyrion::returnSkyImage );
+    godot::ClassDB::bind_method( godot::D_METHOD( "return_surfacemap_image" ), &Feltyrion::returnSurfacemapImage );
+    godot::ClassDB::bind_method( godot::D_METHOD( "return_txtr_image" ), &Feltyrion::returnTxtrImage );
+
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target_x", "ap_target_x" ), &Feltyrion::setAPTargetX );
@@ -584,6 +640,8 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, nsync, getNSync, setNSync);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, stspeed, getSTSpeed, setSTSpeed);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ap_reached, getAPReached, setAPReached);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lat, getLandingPtLat, setLandingPtLat);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lon, getLandingPtLon, setLandingPtLon);
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
