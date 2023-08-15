@@ -543,7 +543,7 @@ godot::Ref<godot::Image> Feltyrion::returnTxtrImage() {
     int a = 0;
     for (uint16_t y = 0; y < 256; y++) {
         for (uint16_t x = 0; x < 256; x++) {
-            uint8_t val = txtr[(y*256)+x];
+            uint8_t val = p_background[(y*256)+x];
             pba.append(surface_palette[(val) * 3] * 4);
             pba.append(surface_palette[(val) * 3 + 1] * 4);
             pba.append(surface_palette[(val) * 3 + 2] * 4);
