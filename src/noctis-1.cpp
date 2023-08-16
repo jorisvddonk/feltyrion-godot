@@ -4193,7 +4193,9 @@ void planetary_main() {
             pri_nightzone = 1;
         }
     }
-
+#ifdef WITH_GODOT
+    nightzone = pri_nightzone; // added by JORIS; there's some comparisons to nightzone elsewhere; this prevents those comparisons to be made against something that may not be set correctly.
+#endif
 
     //
     te_ll_distance_1 = 0;
@@ -4443,7 +4445,11 @@ nosecondarysun:
     directional_beta = user_beta;
 
 
-#ifndef WITH_GODOT
+#ifdef WITH_GODOT
+    sync_start();
+    getsecs();
+    fast_srand(secs / 2);
+#else
     do {
         // Start of synchronization and resolution from the blank frame.
         sync_start();

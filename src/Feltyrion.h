@@ -38,6 +38,7 @@ public:
     // Functions.
     void prepareStar();
     void loadPlanet(int logical_id, int type, double seedval, bool lighting, bool include_atmosphere) const;
+    void loadPlanetAtCurrentSystem(int logical_id);
     godot::Ref<godot::Image> getPaletteAsImage() const;
     godot::Ref<godot::Image> returnAtmosphereImage(bool accurate_height) const;
     godot::Ref<godot::Image> returnImage(bool accurate_height, bool raw__one_bit) const;

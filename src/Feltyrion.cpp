@@ -26,6 +26,7 @@ namespace
 Feltyrion *instance;
 extern void loop();
 extern void planetary_main();
+extern void not_actually_draw_planet(int16_t target_body);
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -211,6 +212,11 @@ void Feltyrion::loadPlanet(int logical_id, int type, double seedval, bool lighti
     uint8_t colorbase = 192;
 
     surface(logical_id, type, seedval, colorbase, lighting, include_atmosphere);
+}
+
+void Feltyrion::loadPlanetAtCurrentSystem(int logical_id)
+{
+    not_actually_draw_planet(logical_id);
 }
 
 void Feltyrion::lock()
@@ -489,7 +495,7 @@ godot::Dictionary Feltyrion::getAPTargetInfo() {
 
 void Feltyrion::updateTime()
 {
-    getsecs();
+    ::getsecs();
 }
 
 void Feltyrion::setSecs(double s)
@@ -568,6 +574,7 @@ void Feltyrion::_bind_methods()
     // Methods.
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_star" ), &Feltyrion::prepareStar );
     godot::ClassDB::bind_method( godot::D_METHOD( "load_planet" ), &Feltyrion::loadPlanet );
+    godot::ClassDB::bind_method( godot::D_METHOD( "load_planet_at_current_system" ), &Feltyrion::loadPlanetAtCurrentSystem );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_image" ), &Feltyrion::returnImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_palette_as_image" ), &Feltyrion::getPaletteAsImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_atmosphere_image" ), &Feltyrion::returnAtmosphereImage );

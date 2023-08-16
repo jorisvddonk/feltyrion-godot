@@ -11,6 +11,7 @@ target_sources( ${PROJECT_NAME}
         noctis-1.cpp
         noctis.h
         noctis.cpp
+        noctis-f.cpp
         Feltyrion.h
         Feltyrion.cpp
         GDExtensionTemplate.h

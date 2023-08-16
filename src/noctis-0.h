@@ -202,6 +202,7 @@ extern double nearstar_p_orb_ray[maxbodies];
 extern double nearstar_p_orb_tilt[maxbodies];
 extern double nearstar_p_orb_orient[maxbodies];
 extern double nearstar_p_orb_ecc[maxbodies];
+extern double nearstar_p_orb_seed[maxbodies];
 extern int16_t nearstar_p_rtperiod[maxbodies];
 extern int16_t nearstar_p_rotation[maxbodies];
 extern int16_t nearstar_p_viewpoint[maxbodies];
