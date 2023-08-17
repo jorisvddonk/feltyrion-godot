@@ -146,22 +146,22 @@ void not_actually_draw_planet(int16_t target_body) {
                     if (is_moon) {
                         if (nearstar_p_type[n]) {
                             surface(n, nearstar_p_type[n],
-                                    1000000.0 * nearstar_ray * nearstar_p_type[n] * nearstar_p_orb_orient[n], 128, true, false);
+                                    1000000.0 * nearstar_ray * nearstar_p_type[n] * nearstar_p_orb_orient[n], 128, true, true);
                         } else {
                             surface(n, nearstar_p_type[n], 2000000.0 * n * nearstar_ray * nearstar_p_orb_orient[n],
-                                    128, true, false);
+                                    128, true, true);
                         }
                     } else {
                         if (nearstar_p_type[n]) {
                             surface(n, nearstar_p_type[n],
                                     1000000.0 * nearstar_p_type[n] * nearstar_p_orb_seed[n] * nearstar_p_orb_tilt[n] *
                                         nearstar_p_orb_ecc[n] * nearstar_p_orb_orient[n],
-                                    192, true, false);
+                                    192, true, true);
                         } else {
                             surface(n, nearstar_p_type[n],
                                     2000000.0 * n * nearstar_p_orb_seed[n] * nearstar_p_orb_tilt[n] *
                                         nearstar_p_orb_ecc[n] * nearstar_p_orb_orient[n],
-                                    192, true, false);
+                                    192, true, true);
                         }
                     }
 
