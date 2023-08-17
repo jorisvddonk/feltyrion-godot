@@ -568,6 +568,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPRea
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, setLandingPoint);
 
 void Feltyrion::_bind_methods()
 {
@@ -649,6 +650,7 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ap_reached, getAPReached, setAPReached);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lon, getLandingPtLon, setLandingPtLon);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_point, getLandingPoint, setLandingPoint);
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );

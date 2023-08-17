@@ -73,6 +73,7 @@ public:
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, setLandingPoint); // 0 normally, 1 if we're selecting our landing point in the Stardrifter (9 - deploy surface capsule from FCD)
 
     void setDzatX(double x);
     double getDzatX();
