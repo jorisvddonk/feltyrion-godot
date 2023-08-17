@@ -80,11 +80,9 @@ void not_actually_draw_planet(int16_t target_body) {
         planet_xyz(n);
 
         if (nearstar_p_owner[n] > -1) {
-            godot::UtilityFunctions::print( "It's a planet!", n );
             colorbase    = 128;
             is_moon      = 1;
         } else {
-            godot::UtilityFunctions::print( "It's a moon!", n );
             colorbase    = 192;
             is_moon      = 0;
         }
@@ -98,7 +96,6 @@ void not_actually_draw_planet(int16_t target_body) {
             ringlayers = (int16_t) (0.05 * (d3 / nearstar_p_ray[n]));
             showdisc = 1;
             surfacemap = 1;
-          godot::UtilityFunctions::print( "Found target body..." );
         }
 
         //
