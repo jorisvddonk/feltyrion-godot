@@ -42,6 +42,20 @@ godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
     return ref;
 }
 
+godot::Ref<godot::Image> Feltyrion::getSurfacePaletteAsImage() const
+{
+    auto pba = godot::PackedByteArray();
+    for (uint16_t i = 0; i < 256; i++) {
+        uint8_t val = surface_palette[i];
+        pba.append(surface_palette[i * 3] * 4);
+        pba.append(surface_palette[i * 3 + 1] * 4);
+        pba.append(surface_palette[i * 3 + 2] * 4);
+    }
+    auto image = godot::Image::create_from_data(256, 1, false, godot::Image::FORMAT_RGB8, pba);
+    godot::Ref<godot::Image> ref = image;
+    return ref;
+}
+
 /**
  * @brief Get an image (RGBA8) for the atmosphere.
  * 
@@ -520,9 +534,8 @@ void Feltyrion::preparePlanetSurface() {
 
 godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
     auto pba = godot::PackedByteArray();
-    int a = 0;
     for (uint16_t i = 0; i < (120 * 360); i++) {
-        uint8_t val = s_background[i];
+        uint8_t val = s_background[i] + 64; // don't ask me why the +64 here.... I couldn't find any indication for this in the background() function... But +64 fixes the colour here!
         pba.append(surface_palette[(val) * 3] * 4);
         pba.append(surface_palette[(val) * 3 + 1] * 4);
         pba.append(surface_palette[(val) * 3 + 2] * 4);
@@ -534,7 +547,6 @@ godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
 
 godot::Ref<godot::Image> Feltyrion::returnSurfacemapImage() {
     auto pba = godot::PackedByteArray();
-    int a = 0;
     for (uint16_t i = 0; i < (200 * 200); i++) {
         uint8_t val = p_surfacemap[i];
         pba.append(val);
@@ -578,6 +590,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "load_planet_at_current_system" ), &Feltyrion::loadPlanetAtCurrentSystem );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_image" ), &Feltyrion::returnImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_palette_as_image" ), &Feltyrion::getPaletteAsImage );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_surface_palette_as_image" ), &Feltyrion::getSurfacePaletteAsImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_atmosphere_image" ), &Feltyrion::returnAtmosphereImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "scan_stars" ), &Feltyrion::scanStars );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_star_name" ), &Feltyrion::getStarName );
