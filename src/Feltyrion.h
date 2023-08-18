@@ -58,6 +58,9 @@ public:
     godot::Ref<godot::Image> returnSurfacemapImage();
     godot::Ref<godot::Image> returnTxtrImage();
 
+    void freeze();
+    void unfreeze();
+
     void setAPTargetted(int i);
     void setAPTargetX(double x);
     double getAPTargetX();

@@ -427,7 +427,6 @@ char goesnet_command[120] = "_";             // GOES Net Command Line
 const char *comm          = "data/comm.bin"; // File di comunicazione dei moduli.
 
 /* Freezes the situation (when exiting the program or running a module). */
-#ifndef WITH_GODOT
 void freeze() {
     FILE *fh = fopen(situation_file, "wb");
 
@@ -511,7 +510,6 @@ void freeze() {
 
     fclose(fh);
 }
-#endif
 
 /* Get the Noctis executable's relative path
  * 	and strip the name to leave only the directory.
@@ -2402,7 +2400,6 @@ void commands() {
  *  Note: Garbage translation above
  *
  *  This loads the situation saved by freeze() */
-#ifndef WITH_GODOT
 void unfreeze() {
     double elapsed, dpwr;
     // Reading the consolidated starmap.
@@ -2518,7 +2515,7 @@ void unfreeze() {
 
     /* Reconstruction of the current star system. */
     npcs = -12345;
-    prepare_nearstar();
+    prepare_nearstar(nullptr);
 
     if (lithium_collector) {
         while (elapsed >= 30 && charge < 120) {
@@ -2582,7 +2579,6 @@ void unfreeze() {
 
     pwr = (int16_t) dpwr;
 }
-#endif
 
 /* Main program. */
 
@@ -4143,11 +4139,7 @@ ext_1: //
                 }
 
                 if (l_dsd < 20000 && nsnp) {
-#ifdef WITH_GODOT
                     prepare_nearstar(nullptr);
-#else
-                    prepare_nearstar();
-#endif
                     nsnp = 0;
                 }
             }

@@ -27,6 +27,8 @@ Feltyrion *instance;
 extern void loop();
 extern void planetary_main();
 extern void not_actually_draw_planet(int16_t target_body);
+extern void freeze();
+extern void unfreeze();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -533,6 +535,14 @@ void Feltyrion::preparePlanetSurface() {
     planetary_main();
 }
 
+void Feltyrion::freeze() {
+    ::freeze();
+}
+
+void Feltyrion::unfreeze() {
+    ::unfreeze();
+}
+
 
 godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
     auto pba = godot::PackedByteArray();
@@ -632,6 +642,9 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "return_sky_image" ), &Feltyrion::returnSkyImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_surfacemap_image" ), &Feltyrion::returnSurfacemapImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_txtr_image" ), &Feltyrion::returnTxtrImage );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "freeze" ), &Feltyrion::freeze );
+    godot::ClassDB::bind_method( godot::D_METHOD( "unfreeze" ), &Feltyrion::unfreeze );
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);
