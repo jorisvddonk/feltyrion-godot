@@ -362,11 +362,13 @@ void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
         planet_xyz(i);
         godot::Node* node = n->get_child(i);
         godot::Node3D* planet = Object::cast_to<godot::Node3D>(node);
-        planet->set_position(godot::Vector3(
-            (nearstar_p_plx[i] - nearstar_x) * PARSIS_X_MULTIPLIER,
-            (nearstar_p_ply[i] - nearstar_y) * PARSIS_Y_MULTIPLIER,
-            (nearstar_p_plz[i] - nearstar_z) * PARSIS_Z_MULTIPLIER
-        ));
+        if (planet != nullptr) {
+            planet->set_position(godot::Vector3(
+                (nearstar_p_plx[i] - nearstar_x) * PARSIS_X_MULTIPLIER,
+                (nearstar_p_ply[i] - nearstar_y) * PARSIS_Y_MULTIPLIER,
+                (nearstar_p_plz[i] - nearstar_z) * PARSIS_Z_MULTIPLIER
+            ));
+        }
     }
 }
 
