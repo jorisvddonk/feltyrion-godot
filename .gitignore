@@ -1,6 +1,7 @@
 CMakeLists.txt.user
 .vscode
 build/
+build-debug/
 *-build/
 src/test.cpp
 test.exe
