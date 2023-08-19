@@ -447,6 +447,11 @@ godot::String Feltyrion::getFCSStatus()
     return (char*)fcs_status;
 }
 
+void Feltyrion::setFCSStatus(godot::String status)
+{
+    strcpy((char *)fcs_status, (const char *)(status.to_ascii_buffer().ptr()));
+}
+
 godot::Dictionary Feltyrion::getPlanetInfo(int n) {
     godot::Dictionary ret = godot::Dictionary();
     ret["n"] = n;
@@ -637,6 +642,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_planet_surface" ), &Feltyrion::preparePlanetSurface );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_sky_image" ), &Feltyrion::returnSkyImage );

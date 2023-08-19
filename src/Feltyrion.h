@@ -109,6 +109,7 @@ public:
     void loopOneIter();
 
     godot::String getFCSStatus();
+    void setFCSStatus(godot::String status);
 
     Feltyrion();
 protected:
