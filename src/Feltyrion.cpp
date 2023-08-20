@@ -449,7 +449,7 @@ godot::String Feltyrion::getFCSStatus()
 
 void Feltyrion::setFCSStatus(godot::String status)
 {
-    strcpy((char *)fcs_status, (const char *)(status.to_ascii_buffer().ptr()));
+    strcpy((char *)fcs_status, status.ascii().get_data());
 }
 
 godot::Dictionary Feltyrion::getPlanetInfo(int n) {
