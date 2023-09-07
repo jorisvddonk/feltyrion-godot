@@ -56,6 +56,7 @@ public:
     void preparePlanetSurface();
     godot::Ref<godot::Image> returnSkyImage();
     godot::Ref<godot::Image> returnSurfacemapImage();
+    godot::Ref<godot::Image> returnRuinschartImage();
     godot::Ref<godot::Image> returnTxtrImage();
 
     void freeze();

@@ -2147,7 +2147,11 @@ void init() {
      */
     p_surfacemap = (uint8_t *) malloc(ps_bytes | 65536);
     objectschart = (quadrant *) malloc(oc_bytes);
+#ifdef WITH_GODOT
+    ruinschart   = (uint8_t *) malloc(oc_bytes);
+#else
     ruinschart   = (uint8_t *) objectschart; // oc alias
+#endif
     pvfile       = (uint8_t *) malloc(pv_bytes);
     adapted      = (uint8_t *) malloc(sc_bytes);
     txtr         = (uint8_t *) p_background;             // txtr alias

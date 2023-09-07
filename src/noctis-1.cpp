@@ -3965,6 +3965,11 @@ void planetary_main() {
     compdist = 1E9;
     w        = 0;
 
+#ifdef WITH_GODOT
+    // reset ruinschart
+    memset(ruinschart, 0, 40000);
+#endif
+
     while (w < nearstar_nop) {
         if (nearstar_p_type[w] == 10) {
             if (nearstar_p_qsortdist[w] < compdist) {

@@ -573,6 +573,17 @@ godot::Ref<godot::Image> Feltyrion::returnSurfacemapImage() {
     return ref;
 }
 
+godot::Ref<godot::Image> Feltyrion::returnRuinschartImage() {
+    auto pba = godot::PackedByteArray();
+    for (uint16_t i = 0; i < (200 * 200); i++) {
+        uint8_t val = ruinschart[i];
+        pba.append(val);
+    }
+    auto image = godot::Image::create_from_data(200, 200, false, godot::Image::FORMAT_L8, pba);
+    godot::Ref<godot::Image> ref = image;
+    return ref;
+}
+
 godot::Ref<godot::Image> Feltyrion::returnTxtrImage() {
     auto pba = godot::PackedByteArray();
     int a = 0;
@@ -647,6 +658,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_planet_surface" ), &Feltyrion::preparePlanetSurface );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_sky_image" ), &Feltyrion::returnSkyImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_surfacemap_image" ), &Feltyrion::returnSurfacemapImage );
+    godot::ClassDB::bind_method( godot::D_METHOD( "return_ruinschart_image" ), &Feltyrion::returnRuinschartImage );
     godot::ClassDB::bind_method( godot::D_METHOD( "return_txtr_image" ), &Feltyrion::returnTxtrImage );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "freeze" ), &Feltyrion::freeze );
