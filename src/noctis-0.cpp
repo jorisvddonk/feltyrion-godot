@@ -46,6 +46,7 @@
 #else
 #include "tdpolygs_stub.h"
 #include "additional_math.h"
+#include "godot_cpp/variant/utility_functions.hpp"
 #endif
 
 // Support files
@@ -3069,6 +3070,9 @@ int16_t calculate_planet_spin(int16_t logical_id, double seedval) {
  */
 
 void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase, bool lighting, bool include_atmosphere) {
+#ifdef WITH_GODOT
+    godot::UtilityFunctions::print("Seed val: ", seedval);
+#endif
     int16_t plwp, c;
     uint16_t seed = 0;
     int8_t knot1  = 0, brt;

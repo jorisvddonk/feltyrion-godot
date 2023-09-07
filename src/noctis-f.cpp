@@ -299,6 +299,10 @@ void not_actually_draw_planet(int16_t target_body) {
                     if (test == 3 || test == 5) {
                         albedo *= 2; // da 0 a 1F --> da 0 a 3F
                     }
+#ifdef WITH_GODOT
+    godot::UtilityFunctions::print("_albedo: ", albedo);
+    godot::UtilityFunctions::print("_ptr: ", ptr);
+#endif
 
                     rainy = (float) atmosphere[ptr >> 1u] * 0.25;
 

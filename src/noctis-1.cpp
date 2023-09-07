@@ -6,6 +6,7 @@
 #ifndef WITH_GODOT
 #include "additional_math.h"
 #else
+#include "godot_cpp/variant/utility_functions.hpp"
 #endif
 
 static int16_t opencapcount = 0;
@@ -2247,6 +2248,9 @@ void build_surface() {
     // del pianeta, e indipendente dalla superficie.
     fast_srand(global_surface_seed);
     brtl_srand(global_surface_seed);
+#ifdef WITH_GODOT
+    godot::UtilityFunctions::print("global_surface_seed: ", global_surface_seed);
+#endif
     // normalmente, la superficie non ? trasparente o traslucida...
     groundflares = 0;
     // potrebbe esserlo? mah, per esempio in caso di ghiacci molto
@@ -2366,6 +2370,10 @@ void build_surface() {
     // esso dipende strettamente dalle coordinate di sbarco.
     fast_srand(landing_pt_lat * landing_pt_lon);
     brtl_srand(landing_pt_lat * landing_pt_lon);
+#ifdef WITH_GODOT
+    godot::UtilityFunctions::print("lon*lat: ", landing_pt_lat * landing_pt_lon);
+    godot::UtilityFunctions::print("albedo: ", albedo);
+#endif
 
     switch (nearstar_p_type[ip_targetted]) {
     // case 0: ATTUALMENTE non considerato: ? un pianeta vulcanico.
