@@ -1953,7 +1953,7 @@ void cloudy_sky(int16_t density, int16_t smooths) {
 int16_t average_of_y(int16_t ic, int16_t jc, int16_t ra) {
     int16_t av = 0;
     int16_t ai = 1;
-    int16_t ip, jp, pt;
+    int16_t ip, jp, pt = 0; // JORIS NOTE: originally, these values were not explicitly initialized to 0, which can cause a crash/segfault. Assumption is that Borland C implicitly initialized these to 0.
 
     for (jp = jc - ra; jp < jc + ra; jp++) {
         for (ip = ic - ra; ip < ic + ra; ip++) {
