@@ -2,7 +2,7 @@
 
 This repository contains a highly experimental GDExtension extension for Godot that exposes Noctis IV universe information to Godot, allowing either a re-implementation of Noctis IV in Godot, or creation of explorer tools in Godot. The GDExtension is intended to be called via GDScript or C# scripts; with only very few exceptions (one at the time of writing), the extension does not operate on a Godot scene tree at all.
 
-This repository structure is based on [GDExtensionTemplate](https://github.com/asmaloney/GDExtensionTemplate) and is currently set up to work with the **[Godot 4.1](https://github.com/godotengine/godot/releases/tag/4.1-stable)** release.
+This repository structure is based on [GDExtensionTemplate](https://github.com/asmaloney/GDExtensionTemplate) and is currently set up to work with the **[Godot 4.2](https://github.com/godotengine/godot/releases/tag/4.2-stable)** release.
 
 Noctis IV source code that was used for this (and stripped heavily) is from the [noctis-iv-lr](https://github.com/dgcole/noctis-iv-lr) project. The Noctis IV source code itself was heavily stripped and modified in places to make compilation easier, and to ensure that certain information could be exposed to a GDExtension.
 
