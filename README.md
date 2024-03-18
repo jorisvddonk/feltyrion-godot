@@ -26,7 +26,9 @@ To use this locally on your machine, you will need the following:
 
 ## Build
 
-Here's an example of how to build a release version (use the terminal to run the following commands in the parent directory of this repo):
+Here's an example of how to build a release version; use the terminal to run the following commands in the root directory of this repository.
+
+(If you want to build from some entirely different path, you can specify the absolute path to the locally checked-out git repository via cmake's `-S` flag (so instead of `-S .` as below, use `-S <absolute path to local git repository>`))
 
 ### Not MSVC
 
