@@ -30,14 +30,23 @@ Here's an example of how to build a release version; use the terminal to run the
 
 (If you want to build from some entirely different path, you can specify the absolute path to the locally checked-out git repository via cmake's `-S` flag (so instead of `-S .` as below, use `-S <absolute path to local git repository>`))
 
-### Not MSVC
+### Linux
 
 ```sh
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build --parallel
 ```
 
-### MSVC
+### MacOS
+
+On MacOS, you'll want to build without the `--parallel` flag to avoid running out of memory/PIDs:
+
+```sh
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
+cmake --build ./build
+```
+
+### Windows - MSVC
 
 ```powershell
 cmake -B build -S . -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
