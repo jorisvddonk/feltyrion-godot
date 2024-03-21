@@ -95,6 +95,13 @@ public:
     double getNearstarY();
     double getNearstarZ();
 
+    // Player position and camera orientation
+    double getPosX();
+    double getPosY();
+    double getPosZ();
+    double getUserAlfa();
+    double getUserBeta();
+
     void setIPTargetted(int new_target);
     int8_t getIPTargetted();
     void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath);

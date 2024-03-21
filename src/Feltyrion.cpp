@@ -516,6 +516,26 @@ godot::Dictionary Feltyrion::getAPTargetInfo() {
     return ret;
 }
 
+double Feltyrion::getPosX() {
+    return pos_x;
+}
+
+double Feltyrion::getPosY() {
+    return pos_y;
+}
+
+double Feltyrion::getPosZ() {
+    return pos_z;
+}
+
+double Feltyrion::getUserAlfa() {
+    return user_alfa;
+}
+
+double Feltyrion::getUserBeta() {
+    return user_beta;
+}
+
 void Feltyrion::updateTime()
 {
     ::getsecs();
@@ -629,6 +649,12 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_planet_info" ), &Feltyrion::getPlanetInfo );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_dzat" ), &Feltyrion::setDzat );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_nearstar" ), &Feltyrion::setNearstar );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_pos_x" ), &Feltyrion::getPosX );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_pos_y" ), &Feltyrion::getPosY );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_pos_z" ), &Feltyrion::getPosZ );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_user_alfa" ), &Feltyrion::getUserAlfa );
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_user_beta" ), &Feltyrion::getUserBeta );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
