@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <map>
 #include <functional>
+#include <filesystem>
 
 #include "Feltyrion.h"
 #include "noctis-d.h"
@@ -568,6 +569,11 @@ void Feltyrion::unfreeze() {
     ::unfreeze();
 }
 
+godot::String Feltyrion::getCWD() const
+{
+    return std::filesystem::current_path().string().c_str();
+}
+
 
 godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
     auto pba = godot::PackedByteArray();
@@ -689,6 +695,8 @@ void Feltyrion::_bind_methods()
 
     godot::ClassDB::bind_method( godot::D_METHOD( "freeze" ), &Feltyrion::freeze );
     godot::ClassDB::bind_method( godot::D_METHOD( "unfreeze" ), &Feltyrion::unfreeze );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);

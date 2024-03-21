@@ -62,6 +62,8 @@ public:
     void freeze();
     void unfreeze();
 
+    godot::String getCWD() const;
+
     void setAPTargetted(int i);
     void setAPTargetX(double x);
     double getAPTargetX();
