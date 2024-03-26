@@ -30,6 +30,7 @@ extern void planetary_main();
 extern void not_actually_draw_planet(int16_t target_body);
 extern void freeze();
 extern void unfreeze();
+extern void process_comm_bin_file();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -569,6 +570,10 @@ void Feltyrion::unfreeze() {
     ::unfreeze();
 }
 
+void Feltyrion::processCommBinFile() {
+    process_comm_bin_file();
+}
+
 godot::String Feltyrion::getCWD() const
 {
     return std::filesystem::current_path().string().c_str();
@@ -695,6 +700,7 @@ void Feltyrion::_bind_methods()
 
     godot::ClassDB::bind_method( godot::D_METHOD( "freeze" ), &Feltyrion::freeze );
     godot::ClassDB::bind_method( godot::D_METHOD( "unfreeze" ), &Feltyrion::unfreeze );
+    godot::ClassDB::bind_method( godot::D_METHOD( "processCommBinFile" ), &Feltyrion::processCommBinFile );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 

@@ -61,6 +61,7 @@ public:
 
     void freeze();
     void unfreeze();
+    void processCommBinFile();
 
     godot::String getCWD() const;
 

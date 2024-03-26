@@ -1,3 +1,4 @@
+#include "godot_cpp/variant/utility_functions.hpp"
 /*
     The main module of Noctis.
     Supervision functions for the base module.
@@ -424,7 +425,7 @@ void mswrite(int16_t screen_id, const char *text) {
 int8_t gnc_pos            = 0;               // Character number in command line.
 int32_t goesfile_pos      = 0;               // Position of the GOES output file
 char goesnet_command[120] = "_";             // GOES Net Command Line
-const char *comm          = "data/comm.bin"; // File di comunicazione dei moduli.
+const char *comm          = "data/COMM.BIN"; // File di comunicazione dei moduli.
 
 /* Freezes the situation (when exiting the program or running a module). */
 void freeze() {
@@ -528,6 +529,79 @@ char *get_exe_dir() {
     return directory;
 }
 
+void process_comm_bin_file() {
+    // It reacts to the presence of data in the communication file.
+    FILE *ch;
+    int out;
+    godot::UtilityFunctions::print("Opening comm.bin");
+    ch = fopen(comm, "rb");
+
+    if (ch != nullptr) {
+        godot::UtilityFunctions::print("Comm bin file found! Checking file size");
+        fseek(ch, 0, SEEK_END);
+        uint32_t len = ftell(ch);
+        fseek(ch, 0, SEEK_SET);
+        godot::UtilityFunctions::printt("Len seems to be", len);
+        if (len == 2) {
+            godot::UtilityFunctions::print("Len is 2");
+            if (ap_reached) {
+                godot::UtilityFunctions::print("ap_reached is OK");
+                if (pwr > 15000) {
+                    godot::UtilityFunctions::printt("Power OK!");
+                    if (fread(&ip_targetted, 1, 2, ch) == 2) {
+                        godot::UtilityFunctions::printt("COMM READ OK! LETS GO!!!");
+                        ip_targetted--;
+                        fix_local_target();
+                        ip_targetting = 0;
+                        ip_reached    = 0;
+                        ip_reaching   = 1; // Automatic start
+                    }
+                }
+            } else {
+                status("NEED RECAL", 75);
+            }
+        }
+
+        if (len == 24) {
+            godot::UtilityFunctions::print("Len is 24");
+            godot::UtilityFunctions::printt("ap_target_x and y before", ap_target_x, ap_target_y);
+            fread(&ap_target_x, 1, 8, ch);
+            fread(&ap_target_y, 1, 8, ch);
+            godot::UtilityFunctions::printt("ap_target_x and y AFTER", ap_target_x, ap_target_y);
+
+            if (fread(&ap_target_z, 1, 8, ch) == 8) {
+                godot::UtilityFunctions::printt("reading ap_target_z success; getting ap target info...");
+                ap_targetting = 0;
+                extract_ap_target_infos();
+                fix_remote_target();
+
+                if (lithium_collector || manual_target) {
+                    godot::UtilityFunctions::printt("ABORT; CONFLICT");
+                    status("CONFLICT", 50);
+                } else {
+                    godot::UtilityFunctions::printt("Good to go; checking power");
+                    if (pwr > 15000) {
+                        godot::UtilityFunctions::printt("Power OK! LETS GO!!!");
+                        stspeed      = 1; // Automatic start
+                        nsnp         = 1;
+                        ip_reached   = 0;
+                        ip_targetted = -1;
+                    }
+                }
+            }
+        }
+        out = fclose(ch);
+        godot::UtilityFunctions::printt("Comm bin file closed", out, errno);
+        out = remove(comm);
+        godot::UtilityFunctions::printt("Comm bin file removed?", out, errno);
+    } else {
+        godot::UtilityFunctions::printt("Comm bin not found", errno);
+    }
+
+    force_update = 1;
+    goesfile_pos = 0;
+}
+
 // Execution of an executable module of the GOES Net.
 void run_goesnet_module() {
     FILE *ch;
@@ -581,52 +655,7 @@ void run_goesnet_module() {
         get_key();
         exit(0xFF);
     } else {
-        // It reacts to the presence of data in the communication file.
-        ch = fopen(comm, "wb");
-
-        if (ch != nullptr) {
-            uint32_t len = fseek(ch, 0, SEEK_END);
-            fseek(ch, 0, SEEK_SET);
-            if (len == 2) {
-                if (ap_reached) {
-                    if (pwr > 15000) {
-                        if (fread(&ip_targetted, 1, 2, ch) == 2) {
-                            ip_targetted--;
-                            fix_local_target();
-                            ip_targetting = 0;
-                            ip_reached    = 0;
-                            ip_reaching   = 1; // Automatic start
-                        }
-                    }
-                } else {
-                    status("NEED RECAL", 75);
-                }
-            }
-
-            if (len == 24) {
-                fread(&ap_target_x, 1, 8, ch);
-                fread(&ap_target_y, 1, 8, ch);
-
-                if (fread(&ap_target_z, 1, 8, ch) == 8) {
-                    ap_targetting = 0;
-                    extract_ap_target_infos();
-                    fix_remote_target();
-
-                    if (lithium_collector || manual_target) {
-                        status("CONFLICT", 50);
-                    } else {
-                        if (pwr > 15000) {
-                            stspeed      = 1; // Automatic start
-                            nsnp         = 1;
-                            ip_reached   = 0;
-                            ip_targetted = -1;
-                        }
-                    }
-                }
-            }
-            fclose(ch);
-            remove(comm);
-        }
+        process_comm_bin_file();
     }
 
     force_update = 1;
