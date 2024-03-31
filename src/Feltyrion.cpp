@@ -362,7 +362,8 @@ void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
     godot::SceneTree* t = get_tree();
     godot::Window* r = t->get_root();
     godot::Node3D* n = r->get_node<godot::Node3D>(nodePath);
-    for (int i = 0; i < nearstar_nob; i++) {
+    int csize = n->get_children().size();
+    for (int i = 0; i < nearstar_nob && i < csize; i++) {
         planet_xyz(i);
         godot::Node* node = n->get_child(i);
         godot::Node3D* planet = Object::cast_to<godot::Node3D>(node);
