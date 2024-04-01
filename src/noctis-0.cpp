@@ -2147,7 +2147,7 @@ void init() {
      * present in the original source.
      */
     p_surfacemap = (uint8_t *) malloc(ps_bytes | 65536);
-    objectschart = (quadrant *) malloc(oc_bytes);
+    objectschart = (quadrant *) malloc(oc_bytes * sizeof(quadrant));
 #ifdef WITH_GODOT
     ruinschart   = (uint8_t *) malloc(oc_bytes);
 #else
