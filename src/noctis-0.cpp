@@ -2139,8 +2139,10 @@ void init() {
 
     n_offsets_map = (uint8_t *) malloc(om_bytes);
     n_globes_map  = (int8_t *) malloc((uint16_t) gl_bytes + (uint16_t) gl_brest);
-    s_background  = (uint8_t *) malloc(st_bytes);
-    p_background  = (uint8_t *) malloc(pl_bytes);
+    s_background  = (uint8_t *) malloc(st_bytes * sizeof(s_background));
+    p_background  = (uint8_t *) malloc(pl_bytes * sizeof(p_background));
+    memset(s_background, 0, st_bytes * sizeof(s_background));
+    memset(p_background, 0, pl_bytes * sizeof(p_background));
     /* NOTE: This is set to at least 65k because polymap keeps running over the
      * end. It happens in the original source too, and somehow isn't a problem
      * there, but we can't have it running over into random memory. The bug is
