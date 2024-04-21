@@ -3579,15 +3579,24 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
     b <<= 1;
     b += nearstar_b;
     b >>= 1;
-    r1 = r + brtl_random(c) - brtl_random(c);
-    g1 = g + brtl_random(c) - brtl_random(c);
-    b1 = b + brtl_random(c) - brtl_random(c);
-    r2 = r + brtl_random(c) - brtl_random(c);
-    g2 = g + brtl_random(c) - brtl_random(c);
-    b2 = b + brtl_random(c) - brtl_random(c);
-    r3 = r + brtl_random(c) - brtl_random(c);
-    g3 = g + brtl_random(c) - brtl_random(c);
-    b3 = b + brtl_random(c) - brtl_random(c);
+    r1 = r + brtl_random(c);
+    r1 = r1 - brtl_random(c);
+    g1 = g + brtl_random(c);
+    g1 = g1 - brtl_random(c);
+    b1 = b + brtl_random(c);
+    b1 = b1 - brtl_random(c);
+    r2 = r + brtl_random(c);
+    r2 = r2 - brtl_random(c);
+    g2 = g + brtl_random(c);
+    g2 = g2 - brtl_random(c);
+    b2 = b + brtl_random(c);
+    b2 = b2 - brtl_random(c);
+    r3 = r + brtl_random(c);
+    r3 = r3 - brtl_random(c);
+    g3 = g + brtl_random(c);
+    g3 = g3 - brtl_random(c);
+    b3 = b + brtl_random(c);
+    b3 = b3 - brtl_random(c);
     r1 *= 0.25;
     g1 *= 0.25;
     b1 *= 0.25;
@@ -3613,7 +3622,6 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
     } else {
         brt = 64 - (4 * (brt - 4));
     }
-
 
     tavola_colori(tmppal + 3 * colorbase, colorbase, 64, brt, brt, brt);
     QUADWORDS = QW;
