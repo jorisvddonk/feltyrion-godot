@@ -228,6 +228,9 @@ void Feltyrion::prepareStar()
 void Feltyrion::loadPlanet(int logical_id, int type, double seedval, bool lighting, bool include_atmosphere) const
 {
     uint8_t colorbase = 192;
+    if (nearstar_p_owner[logical_id] != -1) {
+        colorbase = 128;
+    }
 
     surface(logical_id, type, seedval, colorbase, lighting, include_atmosphere);
 }
@@ -263,11 +266,15 @@ Feltyrion::Feltyrion()
  * 
  * @param accurate_height get the 'Noctis IV' accurate height, instead of the ENTIRE texture. Noctis clips the entire texture to only 119 lines of latitude.
  * @param raw__one_byte get the image as a one-byte-per-pixel image (FORMAT_L8), without colormap applied
+ * @param is_moon if true, uses the color palette for moons
  * @return godot::Ref<godot::Image> 
  */
-godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__one_byte) const
+godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__one_byte, bool is_moon) const
 {
     uint8_t colorbase = 192;
+    if (is_moon) {
+        colorbase    = 128;
+    }
 
     int vlines = 180;
     if (accurate_height) {
