@@ -111,6 +111,7 @@ endif()
 
 set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 
+set(FLOAT_PRECISION "single") # change to 'double' to enable double-precision mode. NOTE: does not work properly at the moment!!
 add_subdirectory( extern/godot-cpp )
 
 set_target_properties( godot-cpp
