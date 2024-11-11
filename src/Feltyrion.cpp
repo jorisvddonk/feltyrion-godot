@@ -299,6 +299,18 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__
 }
 
 
+void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color)
+{
+    //godot::UtilityFunctions::printt("FOUND RING PARTICLE");
+    instance->onRingParticleFound(
+        xlight,
+        ylight,
+        zlight,
+        radii,
+        unconditioned_color
+    );
+}
+
 void cb_Star(double x, double y, double z, double id_code)
 {
     instance->onStarFound(
@@ -382,6 +394,13 @@ void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
             ));
         }
     }
+}
+
+void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color) {
+    godot::Object::emit_signal(
+        "found_ring_particle",
+        xlight, ylight, zlight, radii, unconditioned_color
+    );
 }
 
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
@@ -772,4 +791,11 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::INT, "term_end" ),
         godot::PropertyInfo( godot::Variant::INT, "qsortindex" ),
         godot::PropertyInfo( godot::Variant::FLOAT, "qsortdist" ) ) );
+    ADD_SIGNAL( godot::MethodInfo( "found_ring_particle", 
+        godot::PropertyInfo( godot::Variant::FLOAT, "xlight" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "ylight" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "zlight" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "radii" ), 
+        godot::PropertyInfo( godot::Variant::INT, "unconditioned_color" ) ) );
+
 }

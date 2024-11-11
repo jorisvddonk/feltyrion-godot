@@ -12,6 +12,11 @@
 #include "noctis-0.h"
 #include "godot_cpp/variant/utility_functions.hpp"
 
+#ifndef WITH_GODOT
+#else
+extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
+#endif
+
 extern int16_t cplx_planet_viewpoint(int16_t logical_id);
 
 // Adaptation of `draw_planets()`; does many things similar to the original, but doesn't actually invoke any of the drawing functions, and callers get to specify which body to prepare via the target_body parameter
@@ -136,7 +141,7 @@ void not_actually_draw_planet(int16_t target_body) {
                     riwp -= 360;
                 }
 
-                //ring(n, plx, ply, plz, riwp, ringlayers);
+                ring(n, plx, ply, plz, riwp, ringlayers);
             }
         }
 
@@ -397,10 +402,15 @@ void not_actually_draw_planet(int16_t target_body) {
 
         if (showrings) {
             if (nearstar_p_ring[n] != 0.0) {
-                //ring(n, plx, ply, plz, plwp, ringlayers);
+                ring(n, plx, ply, plz, plwp, ringlayers);
 
                 if (!showdisc) {
-                    //far_pixel_at(plx, ply, plz, nearstar_p_ray[n], 0);
+                    //godot::UtilityFunctions::printt("another ring variant?");
+                    #ifndef WITH_GODOT
+                    far_pixel_at(plx, ply, plz, nearstar_p_ray[n], 0);
+                    #else
+                    cb_RingParticleFound(plx, ply, plz, nearstar_p_ray[n], 0);
+                    #endif
                 }
             }
         }

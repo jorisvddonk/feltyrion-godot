@@ -47,6 +47,17 @@
 #include "tdpolygs_stub.h"
 #include "additional_math.h"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/classes/image.hpp"
+#include "godot_cpp/classes/node3d.hpp"
+#include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/classes/window.hpp"
+#include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/classes/mutex.hpp"
+#include "godot_cpp/classes/global_constants.hpp"
+#include "godot_cpp/classes/label.hpp"
+#include "godot_cpp/classes/object.hpp"
+extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
 #endif
 
 // Support files
@@ -1886,6 +1897,19 @@ double xsun_onscreen;
 float lft_sin[361];
 float lft_cos[361];
 
+int8_t lens_flares_init() {
+    int16_t c;
+    double a = 0, interval = M_PI / 180;
+
+    for (c = 0; c <= 360; c++) {
+        lft_cos[c] = (float) cos(a);
+        lft_sin[c] = (float) sin(a);
+        a += interval;
+    }
+
+    return (1);
+}
+
 /*
     Distant dots, for example, planets and moons. The two functions are
     integrated: a dot is drawn if the distance is big. As you approach, the dot
@@ -2131,6 +2155,7 @@ int16_t starnop(double star_x, double star_y, double star_z) {
 }
 
 void init() {
+    lens_flares_init();
     getsecs();
     int32_t ir, ig, ib, ire = 0, ige = 0, ibe = 0;
     for (ir = 0; ir < 200; ir++) {
@@ -3627,6 +3652,79 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
     QUADWORDS = QW;
 
 }
+
+/* Tracciamento degli anelli (eventuali). */
+
+void ring(int16_t planet_id, double ox, double oy, double oz, int16_t start, int16_t layers) {
+    int16_t a, b, c, n, m, partn, partcls;
+    double sx, sy, sz;
+    double ringray  = nearstar_p_ring[planet_id];
+    double ringtilt = 0.1 * ringray * nearstar_p_tilt[planet_id];
+    double interval = 0.0075 * ringray;
+    fast_srand((int32_t) (10000 * ringray + planet_id));
+    b       = 1 + fast_random(0x1F) - layers;
+    partcls = 1 + fast_random(3);
+    //godot::UtilityFunctions::printt("ring(", planet_id, ") b is", b, ", layers is ", layers, "  ---- xyz: ", ox , ", ", oy, ", ", oz);
+    //godot::UtilityFunctions::printt("partcls is", partcls);
+
+    while (b > 0) {
+        if (!fast_random(7)) {
+            c             = 1 + fast_random(3);
+            pixel_spreads = 0;
+        } else {
+            c             = 1 + fast_random(7);
+            pixel_spreads = 1;
+        }
+
+        a                 = start - (start % c);
+        pixilating_effect = fast_random(1) + fast_random(1);
+
+        if (a < 0) {
+            a += 360;
+        }
+
+        n = c;
+
+        while (n + c < 180) {
+            m = c + fast_random(1);
+            n += m;
+            a += m;
+
+            if (a > 360) {
+                a -= 360;
+            }
+
+            sy    = oy /*nearstar_p_plx[planet_id]*/ - ringtilt * lft_sin[a];
+            sx    = ox /*nearstar_p_ply[planet_id]*/ + ringray * lft_sin[a];
+            sz    = oz /*nearstar_p_plz[planet_id]*/ + ringray * lft_cos[a];
+            partn = partcls;
+
+            while (partn) {
+                sz += interval - (fast_flandom() * interval);
+                sx += interval - (fast_flandom() * interval);
+                #ifndef WITH_GODOT
+                far_pixel_at(sx, sy, sz, -0.042, 0);
+                #else
+                cb_RingParticleFound(sx, sy, sz, -0.042, 0);
+                #endif
+                partn--;
+            }
+        }
+
+        ringray += interval;
+
+        if (!fast_random(7)) {
+            ringray += 5 * interval;
+        }
+
+        ringtilt = 0.1 * ringray * nearstar_p_tilt[planet_id];
+        b--;
+    }
+
+    pixilating_effect = LIGHT_EMITTING;
+    pixel_spreads     = 1;
+}
+
 
 /*  Visualizza appopriatamente i pianeti, come punti, barlumi di luce
     o globi ben visibili, a seconda di distanza e raggio. C'� un terzo
