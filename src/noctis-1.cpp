@@ -1071,7 +1071,10 @@ inactive:
 #define bk_lines_to_horizon 120
 #define culling_limit 50
 
+extern bool capture_poly3d;
+
 void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
+    capture_poly3d = true;
     // disegna un oggetto sulla superficie di un pianeta.
     switch (_class_) {
     case ROCKS: // rocce, sassi, massi, pietre, pietruzze etc...
@@ -1094,12 +1097,13 @@ void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
     case NOTHING: // una parte non coperta dalla texture (rovine).
         break;
     }
+    capture_poly3d = false;
 }
 
 int8_t gtx; // se attivo, traccia il livello del suolo con texture specifica
 int16_t ipfx,
     ipfz;                               // centro di tracciamento (coordinate SQC dell'osservatore).
-int8_t nearest_fragment_already_traced; // flag di lavoro.
+int8_t nearest_fragment_already_traced = 0; // flag di lavoro.
 
 void fragment(int32_t x, int32_t z) {
     // traccia un quadrante della superficie.
@@ -1530,6 +1534,17 @@ void fragment(int32_t x, int32_t z) {
 
         count--;
     }
+}
+
+void prep_iperficie() {
+    dsd1     = dsd;
+    nray1    = nearstar_ray;
+    landed = 1;
+    cam_x = 0;
+    cam_y = 0;
+    cam_z = 0;
+    ipfx            = ((int32_t) (cam_x)) >> 14;
+    ipfz            = ((int32_t) (cam_z)) >> 14;
 }
 
 void iperficie(int16_t additional_quadrants) {
@@ -4458,12 +4473,9 @@ nosecondarysun:
     directional_beta = user_beta;
 
 
-#ifdef WITH_GODOT
-    sync_start();
-    getsecs();
-    fast_srand(secs / 2);
-#else
+#ifndef WITH_GODOT
     do {
+#endif
         // Start of synchronization and resolution from the blank frame.
         sync_start();
         getsecs();
@@ -4501,7 +4513,9 @@ nosecondarysun:
         bkshift = shift;
         bkstep  = step;
         mpul    = 0;
-        handle_input();
+        #ifndef WITH_GODOT
+            handle_input();
+        #endif
 
         /*if (mpul & 2) {
             shift += mdltx;
@@ -4650,12 +4664,16 @@ nosecondarysun:
         alfa = 0;
         beta = directional_beta - 90;
         change_angle_of_view();
+        #ifndef WITH_GODOT
         p_forward(shift);
+        #endif
         // moto diretto.
         alfa = 0;
         beta = directional_beta;
         change_angle_of_view();
+        #ifndef WITH_GODOT
         p_forward(step);
+        #endif
 
         // attrito.
         if (pos_y >= crcy) {
@@ -4692,11 +4710,15 @@ nosecondarysun:
                 alfa  = 0;
                 beta  = directional_beta - 90;
                 change_angle_of_view();
+                #ifndef WITH_GODOT
                 p_forward(shift);
+                #endif
                 alfa = 0;
                 beta = directional_beta;
                 change_angle_of_view();
+                #ifndef WITH_GODOT
                 p_forward(step);
+                #endif
             }
 
             if (pos_y > crcy - 1200) {
@@ -4804,10 +4826,12 @@ nosecondarysun:
             cam_y = 0;
             cam_z = 0;
 
+#ifndef WITH_GODOT
             if (atmosphere)
                 white_sun(adapted, sun_x, sun_y, sun_z, 4 * nray1, 0);
             else
                 white_sun(adapted, sun_x, sun_y, sun_z, 3 * nray1, 0.5);
+#endif
         }
 
         if (secondarysun) {
@@ -4819,10 +4843,12 @@ nosecondarysun:
                 cam_y = 0;
                 cam_z = 0;
 
+#ifndef WITH_GODOT
                 if (atmosphere)
                     white_sun(adapted, pri_x, pri_y, pri_z, 4 * nray2, 0);
                 else
                     white_sun(adapted, pri_x, pri_y, pri_z, 3 * nray2, 0.5);
+#endif
             }
         }
 
@@ -5314,8 +5340,10 @@ nosecondarysun:
                         alfa = user_alfa;
                         beta = user_beta;
                         change_angle_of_view();
+                        #ifndef WITH_GODOT
                         lens_flares_for(0, 0, 0, sun_x, sun_y, sun_z, (10 * nray1) / dsd1, 1 + (0.002 * dsd1),
                                         hud_rtl_closed, 2, 1, 1);
+                        #endif
                     }
                 }
             }
@@ -5328,8 +5356,10 @@ nosecondarysun:
                     alfa = user_alfa;
                     beta = user_beta;
                     change_angle_of_view();
+                    #ifndef WITH_GODOT
                     lens_flares_for(0, 0, 0, pri_x, pri_y, pri_z, (10 * nray2) / dsd2, 1 + (0.002 * dsd2),
                                     hud_rtl_closed, 2, 1, 1);
+                    #endif
                 }
             }
         }
@@ -5454,7 +5484,9 @@ nosecondarysun:
         QUADWORDS = 16000;
 
         if (!widesnapping) {
+            #ifndef WITH_GODOT
             swapBuffers();
+            #endif
         }
 
         QUADWORDS = pqw;
@@ -5481,7 +5513,11 @@ nosecondarysun:
             }
 
             if (opencapcount > 250) {
-                break;
+                #ifndef WITH_GODOT
+                    break;
+                #else
+                    goto post_while_loop; // can't break in Godot as the while loop has been taken out, so do a jump instead
+                #endif
             }
         }
 
@@ -5509,7 +5545,9 @@ nosecondarysun:
         // consumi supplementari della navicella
         // (ovviamente continua a fare il suo lavoro anche
         // mentre si esplora la superficie, per cui consuma)
+        #ifndef WITH_GODOT
         additional_consumes();
+        #endif
         // aggiornamento coordinate di stepping.
         add_height(pos_x, pos_z, 300);
         // fine sincronizzazione fotogrammi.
@@ -5801,8 +5839,10 @@ nosecondarysun:
                 }
             }
         }
+#ifndef WITH_GODOT
     } while (1);
 #endif
+post_while_loop:
 
 
     /* operazioni di recupero per ritornare al ciclo principale. */

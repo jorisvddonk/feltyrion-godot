@@ -1,3 +1,5 @@
+#include "godot_cpp/variant/utility_functions.hpp"
+
 #pragma once
 
 uint8_t escrescenze = 0xE0; // primo colore dei bumps (escrescenze)
@@ -118,7 +120,16 @@ void stick3d (float p_x, float p_y, float p_z, float x, float y, float z) {
    */
 }
 
+extern void cb_SurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
+extern bool capture_poly3d;
+
 void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_t colore) {
+    if (!capture_poly3d) {
+        return;
+    }
+    if (nrv == 3) {
+        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], colore);
+    }
    // assuming nrv is always 4...
    /*
    FILE *fp;
@@ -138,6 +149,14 @@ void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_
 }
 
 void polymap(float *x, float *y, float *z, int8_t nv, uint8_t tinta) {
+    if (!capture_poly3d) {
+        return;
+    }
+    if (nv == 3) {
+        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], tinta);
+    } else if (nv == 4) {
+        godot::UtilityFunctions::printt("WARNING: not implemented polymap(...) for nv==4");
+    }
 }
 
 uint8_t *txtr; /* Area della texture (FLS a livelli di intensit�,

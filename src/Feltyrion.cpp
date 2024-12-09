@@ -31,6 +31,8 @@ extern void not_actually_draw_planet(int16_t target_body);
 extern void freeze();
 extern void unfreeze();
 extern void process_comm_bin_file();
+extern void iperficie(int16_t additional_quadrants);
+extern void prep_iperficie();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -311,6 +313,24 @@ void cb_RingParticleFound(double xlight, double ylight, double zlight, double ra
     );
 }
 
+void cb_SurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore)
+{
+    instance->onSurfacePolygon3Found(
+        x0,
+        x1,
+        x2,
+        y0,
+        y1,
+        y2,
+        z0,
+        z1,
+        z2,
+        colore
+    );
+}
+
+bool capture_poly3d;
+
 void cb_Star(double x, double y, double z, double id_code)
 {
     instance->onStarFound(
@@ -401,6 +421,16 @@ void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight,
         "found_ring_particle",
         xlight, ylight, zlight, radii, unconditioned_color
     );
+}
+
+void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
+   godot::Object::emit_signal(
+        "found_surface_polygon3",
+        x0, x1, x2,
+        y0, y1, y2,
+        z0, z1, z2,
+        colore
+   );
 }
 
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
@@ -586,6 +616,7 @@ void Feltyrion::loopOneIter()
 }
 
 void Feltyrion::preparePlanetSurface() {
+    prep_iperficie();
     planetary_main();
 }
 
@@ -797,5 +828,18 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::FLOAT, "zlight" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "radii" ), 
         godot::PropertyInfo( godot::Variant::INT, "unconditioned_color" ) ) );
+
+    ADD_SIGNAL( godot::MethodInfo( "found_surface_polygon3", 
+        godot::PropertyInfo( godot::Variant::FLOAT, "x0" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "x1" ), 
+        godot::PropertyInfo(godot::Variant::FLOAT, "x2"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y0"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y1"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y2"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z0"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z1"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z2"),
+        godot::PropertyInfo(godot::Variant::INT, "color")
+    ));
 
 }
