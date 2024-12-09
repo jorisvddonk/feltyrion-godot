@@ -57,7 +57,7 @@ public:
     godot::Ref<godot::Image> returnSkyImage();
     godot::Ref<godot::Image> returnSurfacemapImage();
     godot::Ref<godot::Image> returnRuinschartImage();
-    godot::Ref<godot::Image> returnTxtrImage();
+    godot::Ref<godot::Image> returnTxtrImage(bool raw__one_byte);
 
     void freeze();
     void unfreeze();
