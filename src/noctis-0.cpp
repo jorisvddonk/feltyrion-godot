@@ -4374,8 +4374,8 @@ void polycupola(float y_or, int8_t textured) {
             z[3]     = xx * slon;
 
             if (ontheroof && y_or == 1) {
-                //d1 = 0.5 * (x[0] + x[1]) - cam_x;
-                //d2 = 0.5 * (z[0] + z[1]) - cam_z;
+                d1 = 0.5 * (x[0] + x[1]) - cam_x;
+                d2 = 0.5 * (z[0] + z[1]) - cam_z;
                 dd = 1000 - sqrt(d1 * d1 + d2 * d2);
 
                 if (dd > 600) {
@@ -4386,14 +4386,14 @@ void polycupola(float y_or, int8_t textured) {
                     dd = 0;
                 }
 
-                //cam_y += dd;
+                cam_y += dd;
                 poly3d(x, y, z, 4, 64);
-                //cam_y -= dd;
+                cam_y -= dd;
             } else {
                 if (textured) {
-                    //d1 = 0.5 * (x[0] + x[1]) - cam_x;
-                    //d2 = 0.5 * (y[0] + y[2]) - cam_y;
-                    //d3 = 0.5 * (z[0] + z[1]) - cam_z;
+                    d1 = 0.5 * (x[0] + x[1]) - cam_x;
+                    d2 = 0.5 * (y[0] + y[2]) - cam_y;
+                    d3 = 0.5 * (z[0] + z[1]) - cam_z;
                     dd = 500 - sqrt(d1 * d1 + d2 * d2 + d3 * d3);
 
                     if (dd > 500) {
@@ -4404,7 +4404,7 @@ void polycupola(float y_or, int8_t textured) {
                         dd = 0;
                     }
 
-                    //cam_y += 4 * dd * y_or;
+                    cam_y += 4 * dd * y_or;
                     xx   = x[3];
                     yy   = y[3];
                     zz   = z[3];
@@ -4420,8 +4420,8 @@ void polycupola(float y_or, int8_t textured) {
                     x[0] = xx;
                     y[0] = yy;
                     z[0] = zz;
-                    //polymap(x, y, z, 4, 0);
-                    //cam_y -= 4 * dd * y_or;
+                    polymap(x, y, z, 4, 0);
+                    cam_y -= 4 * dd * y_or;
                 } else {
                     poly3d(x, y, z, 4, 64);
                 }
@@ -4429,5 +4429,5 @@ void polycupola(float y_or, int8_t textured) {
         }
     }
 
-    //resetfx();
+    resetfx();
 }
