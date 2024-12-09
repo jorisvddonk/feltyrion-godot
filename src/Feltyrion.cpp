@@ -673,18 +673,28 @@ godot::Ref<godot::Image> Feltyrion::returnRuinschartImage() {
     return ref;
 }
 
-godot::Ref<godot::Image> Feltyrion::returnTxtrImage() {
+/**
+ * @brief Get an image (RGBA8/FORMAT_L8) for the planet surface texture.
+ * 
+ * @param raw__one_byte get the image as a one-byte-per-pixel image (FORMAT_L8), without colormap applied
+ * @return godot::Ref<godot::Image> 
+ */
+godot::Ref<godot::Image> Feltyrion::returnTxtrImage(bool raw__one_byte) {
     auto pba = godot::PackedByteArray();
     int a = 0;
     for (uint16_t y = 0; y < 256; y++) {
         for (uint16_t x = 0; x < 256; x++) {
             uint8_t val = p_background[(y*256)+x];
-            pba.append(surface_palette[(val) * 3] * 4);
-            pba.append(surface_palette[(val) * 3 + 1] * 4);
-            pba.append(surface_palette[(val) * 3 + 2] * 4);
+            if (raw__one_byte) {
+                pba.append(val);
+            } else {
+                pba.append(surface_palette[(val) * 3] * 4);
+                pba.append(surface_palette[(val) * 3 + 1] * 4);
+                pba.append(surface_palette[(val) * 3 + 2] * 4);
+            }
         }
     }
-    auto image = godot::Image::create_from_data(256, 256, false, godot::Image::FORMAT_RGB8, pba);
+    auto image = godot::Image::create_from_data(256, 256, false, raw__one_byte ? godot::Image::FORMAT_L8 : godot::Image::FORMAT_RGB8, pba);
     godot::Ref<godot::Image> ref = image;
     return ref;
 }
