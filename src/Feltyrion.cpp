@@ -33,6 +33,7 @@ extern void unfreeze();
 extern void process_comm_bin_file();
 extern void iperficie(int16_t additional_quadrants);
 extern void prep_iperficie();
+extern void getAllFragments();
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -329,7 +330,7 @@ void cb_SurfacePolygon3Found(double x0, double x1, double x2, double y0, double 
     );
 }
 
-bool capture_poly3d;
+bool capture_poly3d = false;
 
 void cb_Star(double x, double y, double z, double id_code)
 {
@@ -628,6 +629,11 @@ void Feltyrion::unfreeze() {
     ::unfreeze();
 }
 
+void Feltyrion::generateSurfacePolygons() {
+    prep_iperficie();
+    getAllFragments();
+}
+
 void Feltyrion::processCommBinFile() {
     process_comm_bin_file();
 }
@@ -769,6 +775,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "freeze" ), &Feltyrion::freeze );
     godot::ClassDB::bind_method( godot::D_METHOD( "unfreeze" ), &Feltyrion::unfreeze );
     godot::ClassDB::bind_method( godot::D_METHOD( "processCommBinFile" ), &Feltyrion::processCommBinFile );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "generateSurfacePolygons" ), &Feltyrion::generateSurfacePolygons );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 
