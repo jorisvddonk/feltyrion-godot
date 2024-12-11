@@ -338,6 +338,7 @@ void build_fractal_tree(float x, float y, float z, float scaling, float reductio
 #define GIANT_TREE 333
 
 void tree(float x, float y, float z, int32_t depth) {
+    //godot::UtilityFunctions::printt("tree(", x, ", ", y, ", ", z, ", ", depth, ")");
     // Draw trees where required.
     fast_srand(x + y + z + 3);
     int16_t treetype = fast_random(511);
@@ -398,6 +399,7 @@ void tree(float x, float y, float z, int32_t depth) {
 }
 
 void cespuglio(float x, float y, float z, int32_t depth) {
+    //godot::UtilityFunctions::printt("cespuglio(", x, ", ", y, ", ", z, ", ", depth, ")");
     // disegna un cespuglio.
 
     // da 48 mt in poi: ammasso di foglie.
@@ -421,6 +423,7 @@ void cespuglio(float x, float y, float z, int32_t depth) {
 }
 
 void ciuffo(float x, float y, float z, int32_t depth) {
+    //godot::UtilityFunctions::printt("ciuffo(", x, ", ", y, ", ", z, ", ", depth, ")");
     // disegna un ciuffo d'erba.
 
     // da 64 mt in poi, non ? visibile.
@@ -447,6 +450,7 @@ void ciuffo(float x, float y, float z, int32_t depth) {
 }
 
 void roccia(float x, float y, float z, int32_t depth) {
+    //godot::UtilityFunctions::printt("roccia(", x, ", ", y, ", ", z, ", ", depth, ")");
     // disegna una pietra fatta sulla base di un tetraedo per risparmiare tempo.
     float tx[4], ty[4], tz[4];
     float px[3], pz[3];
@@ -1071,10 +1075,10 @@ inactive:
 #define bk_lines_to_horizon 120
 #define culling_limit 50
 
-extern bool capture_poly3d;
+int8_t capture_poly3d = POLY3D_CAPTURE_NONE;
 
 void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
-    capture_poly3d = true;
+    //godot::UtilityFunctions::printt("srf_detail(", x, ", ", y, ", ", z, ", ", depth, ", ", _class_, ")");
     // disegna un oggetto sulla superficie di un pianeta.
     switch (_class_) {
     case ROCKS: // rocce, sassi, massi, pietre, pietruzze etc...
@@ -1097,7 +1101,6 @@ void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
     case NOTHING: // una parte non coperta dalla texture (rovine).
         break;
     }
-    capture_poly3d = false;
 }
 
 int8_t gtx; // se attivo, traccia il livello del suolo con texture specifica
@@ -1105,7 +1108,8 @@ int16_t ipfx,
     ipfz;                               // centro di tracciamento (coordinate SQC dell'osservatore).
 int8_t nearest_fragment_already_traced = 0; // flag di lavoro.
 
-void fragment(int32_t x, int32_t z) {
+void fragmentWC(int32_t x, int32_t z, bool capture) {
+    //godot::UtilityFunctions::printt("fragment(", x, ", ", z, ")");
     // traccia un quadrante della superficie.
     int8_t poly1, poly2;
     int16_t c1, count, id, cl;
@@ -1117,6 +1121,12 @@ void fragment(int32_t x, int32_t z) {
     float hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8;
     uint8_t rch1, rch2, rch3, rch4;
     uint16_t *ani_sqc_temp;
+
+    #ifdef WITH_GODOT
+    if (capture) {
+        capture_poly3d = POLY3D_CAPTURE_SURFACE;
+    }
+    #endif
 
     #ifndef WITH_GODOT
     if (x == ipfx && z == ipfz) {
@@ -1517,6 +1527,12 @@ void fragment(int32_t x, int32_t z) {
     hp7 = (hp4 - hp3) * qid;
     hp8 = (hp2 - hp3) * qid;
 
+    #ifdef WITH_GODOT
+    if (capture) {
+        capture_poly3d = POLY3D_CAPTURE_SCATTERING;
+    }
+    #endif
+
     while (count) {
         // seleziona la tabella pseudo relativa al presente frammento.
         // (fornisce una base costante per tutti i valori estratti.)
@@ -1566,6 +1582,16 @@ void fragment(int32_t x, int32_t z) {
 
         count--;
     }
+
+    #ifdef WITH_GODOT
+    if (capture) {
+        capture_poly3d = POLY3D_CAPTURE_NONE;
+    }
+    #endif
+}
+
+void fragment(int32_t x, int32_t z) {
+    fragmentWC(x, z, false);
 }
 
 void prep_iperficie() {
@@ -1582,7 +1608,7 @@ void prep_iperficie() {
 void getAllFragments() {
     for (int16_t z = 199; z >= 0;) {
         for (int16_t x = 199; x >= 0;) {
-            fragment(x, z);
+            fragmentWC(x, z, true);
             x--;
         }
         z--;
