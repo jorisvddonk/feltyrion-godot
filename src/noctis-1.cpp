@@ -1239,14 +1239,16 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     // visibility diagonally (from 80 quadrants to 64) according
     // with the decision to trace with maximum precision, and went
     // from depth / 3 to depth / 2 (with a shift, by the way)
-    if (c1 < 00) {
-        c1 = 00;
-    }
+    if (!capture) {
+        if (c1 < 00) {
+            c1 = 00;
+        }
 
-    c1 += depth >> 1;
+        c1 += depth >> 1;
 
-    if (c1 > 32) {
-        c1 = 32;
+        if (c1 > 32) {
+            c1 = 32;
+        }
     }
 
     // depth culling dei territori lontani (per velocizzare).
