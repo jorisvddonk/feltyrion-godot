@@ -188,3 +188,9 @@ struct wasdmov {
     bool left;
     bool right;
 };
+
+// poly3d capture
+
+#define POLY3D_CAPTURE_NONE 0
+#define POLY3D_CAPTURE_SCATTERING 1
+#define POLY3D_CAPTURE_SURFACE 2

@@ -116,6 +116,7 @@ public:
     void scanStars();
     void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
     void onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
+    void onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onStarFound(double x, double y, double z, double id_code);
     void onPlanetFound(int8_t index, double planet_id, double seedval, double x, double y, double z, int8_t type, int16_t owner, int8_t moonid, double ring, double tilt, double ray, double orb_ray, double orb_tilt, double orb_orient, double orb_ecc, int16_t rtperiod, int16_t rotation, int16_t viewpoint, int16_t term_start, int16_t term_end, int16_t qsortindex, float qsortdist);
     void updateTime();

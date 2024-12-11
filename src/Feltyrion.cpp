@@ -34,6 +34,7 @@ extern void process_comm_bin_file();
 extern void iperficie(int16_t additional_quadrants);
 extern void prep_iperficie();
 extern void getAllFragments();
+extern int8_t capture_poly3d;
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -314,23 +315,36 @@ void cb_RingParticleFound(double xlight, double ylight, double zlight, double ra
     );
 }
 
-void cb_SurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore)
+void cb_SurfacePolygon3Found(int8_t what, double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore)
 {
-    instance->onSurfacePolygon3Found(
-        x0,
-        x1,
-        x2,
-        y0,
-        y1,
-        y2,
-        z0,
-        z1,
-        z2,
-        colore
-    );
+    if (what == POLY3D_CAPTURE_SCATTERING) {
+        instance->onScatteringPolygon3Found(
+            x0,
+            x1,
+            x2,
+            y0,
+            y1,
+            y2,
+            z0,
+            z1,
+            z2,
+            colore
+        );
+    } else if (what == POLY3D_CAPTURE_SURFACE) {
+        instance->onSurfacePolygon3Found(
+            x0,
+            x1,
+            x2,
+            y0,
+            y1,
+            y2,
+            z0,
+            z1,
+            z2,
+            colore
+        );
+    }
 }
-
-bool capture_poly3d = false;
 
 void cb_Star(double x, double y, double z, double id_code)
 {
@@ -427,6 +441,16 @@ void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight,
 void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
    godot::Object::emit_signal(
         "found_surface_polygon3",
+        x0, x1, x2,
+        y0, y1, y2,
+        z0, z1, z2,
+        colore
+   );
+}
+
+void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
+   godot::Object::emit_signal(
+        "found_scattering_polygon3",
         x0, x1, x2,
         y0, y1, y2,
         z0, z1, z2,
@@ -631,7 +655,9 @@ void Feltyrion::unfreeze() {
 
 void Feltyrion::generateSurfacePolygons() {
     prep_iperficie();
+    capture_poly3d = POLY3D_CAPTURE_SURFACE;
     getAllFragments();
+    capture_poly3d = POLY3D_CAPTURE_NONE;
 }
 
 void Feltyrion::processCommBinFile() {
@@ -848,6 +874,19 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::INT, "unconditioned_color" ) ) );
 
     ADD_SIGNAL( godot::MethodInfo( "found_surface_polygon3", 
+        godot::PropertyInfo( godot::Variant::FLOAT, "x0" ), 
+        godot::PropertyInfo( godot::Variant::FLOAT, "x1" ), 
+        godot::PropertyInfo(godot::Variant::FLOAT, "x2"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y0"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y1"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "y2"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z0"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z1"),
+        godot::PropertyInfo(godot::Variant::FLOAT, "z2"),
+        godot::PropertyInfo(godot::Variant::INT, "color")
+    ));
+
+    ADD_SIGNAL( godot::MethodInfo( "found_scattering_polygon3", 
         godot::PropertyInfo( godot::Variant::FLOAT, "x0" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "x1" ), 
         godot::PropertyInfo(godot::Variant::FLOAT, "x2"),

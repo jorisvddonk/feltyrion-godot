@@ -120,19 +120,19 @@ void stick3d (float p_x, float p_y, float p_z, float x, float y, float z) {
    */
 }
 
-extern void cb_SurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
-extern bool capture_poly3d;
+extern void cb_SurfacePolygon3Found(int8_t what, double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
+extern int8_t capture_poly3d;
 
 void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_t colore) {
-    if (!capture_poly3d) {
+    if (capture_poly3d == POLY3D_CAPTURE_NONE) {
         return;
     }
     if (nrv == 3) {
-        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], colore);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], colore);
     } else if (nrv == 4) {
         godot::UtilityFunctions::printt("WARNING: unverified implementation of poly3d(...) for nrv==4");
-        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], colore);
-        cb_SurfacePolygon3Found(x[0], x[3], x[2], y[0], y[3], y[2], z[0], z[3], z[2], colore);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], colore);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[3], x[2], y[0], y[3], y[2], z[0], z[3], z[2], colore);
     }
    // assuming nrv is always 4...
    /*
@@ -153,14 +153,14 @@ void poly3d(const float *x, const float *y, const float *z, uint16_t nrv, uint8_
 }
 
 void polymap(float *x, float *y, float *z, int8_t nv, uint8_t tinta) {
-    if (!capture_poly3d) {
+    if (capture_poly3d == POLY3D_CAPTURE_NONE) {
         return;
     }
     if (nv == 3) {
-        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], tinta);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], tinta);
     } else if (nv == 4) {
-        cb_SurfacePolygon3Found(x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], tinta);
-        cb_SurfacePolygon3Found(x[0], x[3], x[2], y[0], y[3], y[2], z[0], z[3], z[2], tinta);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2], tinta);
+        cb_SurfacePolygon3Found(capture_poly3d, x[0], x[3], x[2], y[0], y[3], y[2], z[0], z[3], z[2], tinta);
     }
 }
 
