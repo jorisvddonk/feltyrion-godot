@@ -62,6 +62,8 @@ public:
     void freeze();
     void unfreeze();
     void processCommBinFile();
+    
+    void generateSurfacePolygons();
 
     godot::String getCWD() const;
 

@@ -1118,6 +1118,7 @@ void fragment(int32_t x, int32_t z) {
     uint8_t rch1, rch2, rch3, rch4;
     uint16_t *ani_sqc_temp;
 
+    #ifndef WITH_GODOT
     if (x == ipfx && z == ipfz) {
         // si assicura di tracciare una sola volta
         // il frammento pi? vicino (quello che sta
@@ -1155,6 +1156,7 @@ void fragment(int32_t x, int32_t z) {
             return;
         }
     }
+    #endif
 
     /* -1- Traccia il frammento di superficie del landscape. */
     // fissa le coordinate piane del frammento (parte 1).
@@ -1174,9 +1176,11 @@ void fragment(int32_t x, int32_t z) {
     // Terra piatta non ci crede pi? nessuno...
     // Poi: in Noctis IV ho deciso di tracciare in massima precisione,
     // quindi la limitazione deve essere presente, altrimenti ? lento.
+    #ifndef WITH_GODOT
     if (depth > 64) {
         return;
     }
+    #endif
 
     // fissa le coordinate piane del frammento (parte 2).
     vz1[1] = z << 14;
@@ -1254,6 +1258,9 @@ void fragment(int32_t x, int32_t z) {
             culling_needed = 0;
         }
     }
+    #ifdef WITH_GODOT
+    culling_needed = 0; // in Godot: force culling disabled
+    #endif
 
     // Ground Tracking
     if (!mirror) {
@@ -1266,6 +1273,12 @@ void fragment(int32_t x, int32_t z) {
         }
 
         poly2 = 0;
+        
+        #ifdef WITH_GODOT
+        // in Godot: force rendering everything
+        poly2 = 1;
+        poly1 = 1;
+        #endif
 
         if (facing(vx2, vy2, vz2)) {
             if (gtx || (vy2[0] + vy2[1] + vy2[2] != 0)) {
@@ -1382,6 +1395,12 @@ void fragment(int32_t x, int32_t z) {
             poly2 = 1;
         }
 
+        #ifdef WITH_GODOT
+        // in Godot: force rendering everything
+        poly2 = 1;
+        poly1 = 1;
+        #endif
+
         if (poly1 || poly2) {
             // impostazione parametri della texture dei riflessi.
             txtr = p_background;
@@ -1423,24 +1442,30 @@ void fragment(int32_t x, int32_t z) {
         }
 
         // evita riflessi di oggetti perch? sarebbe davvero troppo.
+        #ifndef WITH_GODOT
         return;
+        #endif
     }
 
     /* -2- tracciamento forme di vita animali. */
 
     // oltre 1 Km, n? animali n? oggetti sono visibili.
+    #ifndef WITH_GODOT
     if (depth > 40) {
         return;
     }
+    #endif
 
     // verifica la visibilit? delle superfici del frammento.
     // (approssima in questo modo, per?, soltanto in profondit?,
     // perch? potrebbe accadere, per i frammenti pi? vicini,
     // che la superficie del suolo non sia visibile, mentre gli
     // oggetti che vi si ergono o gli animali che vi camminano s?...)
+    #ifndef WITH_GODOT
     if (depth > 8 && poly1 + poly2 == 0) {
         return;
     }
+    #endif
 
     ani_sqc_temp = ani_sqc;
     for (id = 0; id < animals; id++) {
@@ -1453,19 +1478,26 @@ void fragment(int32_t x, int32_t z) {
     // se non sono previsti oggetti su questa superficie, lascia...
 
     if ((count = objectschart[h1].nr_of_objects) == 0) {
+        // no objects here, so can do can theoretically do an early out; but not in Godot
+        #ifndef WITH_GODOT
         return;
+        #endif
     }
 
     // diminuisce in generale il numero di oggetti visibili
     // nella distanza... eh, b?, anche la velocit? vuole la
     // sua parte, ? assurdo ma consigliabile. E si nota poco.
+    #ifndef WITH_GODOT
     if (depth > 16) {
-        count >>= 1;
+        // joris: disabled??: count >>= 1;
 
         if (!count) {
-            return;
+            // joris: disabled??: return;
         }
     }
+    #else
+    depth = 0; // in Godot: force highest detail
+    #endif
 
     // impostazione texture per gli oggetti.
     flares = 0;
@@ -1545,6 +1577,16 @@ void prep_iperficie() {
     cam_z = 0;
     ipfx            = ((int32_t) (cam_x)) >> 14;
     ipfz            = ((int32_t) (cam_z)) >> 14;
+}
+
+void getAllFragments() {
+    for (int16_t z = 199; z >= 0;) {
+        for (int16_t x = 199; x >= 0;) {
+            fragment(x, z);
+            x--;
+        }
+        z--;
+    }
 }
 
 void iperficie(int16_t additional_quadrants) {
