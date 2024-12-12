@@ -521,7 +521,9 @@ rockrep:
     ty[0]  = hpoint(tx[0], tz[0]);
     ty[1]  = hpoint(tx[1], tz[1]);
 
+    #ifndef WITH_GODOT
     if (!facing(tx, ty, tz)) {
+    #endif
         if (depth < 2) {
             tx[3] = tx[2];
             ty[3] = ty[2];
@@ -530,7 +532,9 @@ rockrep:
         } else {
             poly3d(tx, ty, tz, 3, rc[0]);
         }
+    #ifndef WITH_GODOT
     }
+    #endif
 
     tx[0] = px[1];
     tx[1] = px[2];
@@ -539,7 +543,9 @@ rockrep:
     ty[0] = hpoint(tx[0], tz[0]);
     ty[1] = hpoint(tx[1], tz[1]);
 
+    #ifndef WITH_GODOT
     if (!facing(tx, ty, tz)) {
+    #endif
         if (depth < 2) {
             tx[3] = tx[2];
             ty[3] = ty[2];
@@ -548,7 +554,9 @@ rockrep:
         } else {
             poly3d(tx, ty, tz, 3, rc[1]);
         }
+    #ifndef WITH_GODOT
     }
+    #endif
 
     tx[0] = px[2];
     tx[1] = px[0];
@@ -557,7 +565,9 @@ rockrep:
     ty[0] = hpoint(tx[0], tz[0]);
     ty[1] = hpoint(tx[1], tz[1]);
 
+    #ifndef WITH_GODOT
     if (!facing(tx, ty, tz)) {
+    #endif
         if (depth < 2) {
             tx[3] = tx[2];
             ty[3] = ty[2];
@@ -566,7 +576,9 @@ rockrep:
         } else {
             poly3d(tx, ty, tz, 3, rc[2]);
         }
+    #ifndef WITH_GODOT
     }
+    #endif
 
     x = x + fast_flandom() * 1000 * cdown - fast_flandom() * 1000 * cdown;
     z = z + fast_flandom() * 1000 * cdown - fast_flandom() * 1000 * cdown;
