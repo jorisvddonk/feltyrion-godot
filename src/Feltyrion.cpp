@@ -1,5 +1,7 @@
 #include "godot_cpp/classes/image.hpp"
 #include "godot_cpp/classes/node3d.hpp"
+#include "godot_cpp/classes/mesh_instance3d.hpp"
+#include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/window.hpp"
 #include "godot_cpp/core/class_db.hpp"
@@ -448,6 +450,61 @@ void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y
    );
 }
 
+void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath)
+{
+    Feltyrion::surfaceScatteringNode = target;
+    godot::ResourceLoader *reLo = godot::ResourceLoader::get_singleton();
+    scatteringObjectScene = reLo->load(scenePath);
+    Feltyrion::surfacePaletteTxtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
+    Feltyrion::surfaceAlbedoL8Txtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
+}
+
+void cb_ScatteringBegin()
+{
+    instance->onScatteringBegin();
+}
+
+void cb_ScatteringEnd()
+{
+    instance->onScatteringEnd();
+}
+
+
+void Feltyrion::onScatteringBegin() {
+    Feltyrion::surfaceTool.instantiate();
+    Feltyrion::surfaceTool->begin(godot::Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+    godot::Color col;
+    col.set_r8(255);
+    col.set_g8(255);
+    col.set_b8(255);
+    Feltyrion::surfaceTool->set_color(col);
+    Feltyrion::surfaceTool->set_smooth_group(-1);
+}
+
+void Feltyrion::onScatteringEnd() {
+    Feltyrion::surfaceTool->generate_normals();
+    godot::Ref<godot::ArrayMesh> mesh = Feltyrion::surfaceTool->commit();
+
+    if (Feltyrion::surfaceAlbedoL8Txtr == nullptr) {
+        godot::UtilityFunctions::printt("Loading surfaceAlbedoL8Txtr");
+        Feltyrion::surfaceAlbedoL8Txtr = godot::ImageTexture::create_from_image(Feltyrion::returnTxtrImage(true));
+    }
+    if (Feltyrion::surfacePaletteTxtr == nullptr) {
+        godot::UtilityFunctions::printt("Loading surfacePaletteTxtr");
+        Feltyrion::surfacePaletteTxtr = godot::ImageTexture::create_from_image(Feltyrion::getSurfacePaletteAsImage());
+    }
+    if (Feltyrion::surfaceScatteringNode != nullptr && Feltyrion::scatteringObjectScene != nullptr && Feltyrion::scatteringObjectScene->can_instantiate())
+    {
+        auto scatteringObject = Feltyrion::scatteringObjectScene->instantiate();
+        godot::MeshInstance3D *asMID3d = godot::Object::cast_to<godot::MeshInstance3D>(scatteringObject);
+        asMID3d->set_mesh(mesh);
+        godot::ShaderMaterial *shaderMaterial = godot::Object::cast_to<godot::ShaderMaterial>(asMID3d->call("get_material_override"));
+        shaderMaterial->set_shader_parameter("albedo_texture_format_l8", Feltyrion::surfaceAlbedoL8Txtr);
+        shaderMaterial->set_shader_parameter("surface_palette", Feltyrion::surfacePaletteTxtr);
+        Feltyrion::surfaceScatteringNode->add_child(scatteringObject);
+    }
+}
+
 void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
    godot::Object::emit_signal(
         "found_scattering_polygon3",
@@ -456,6 +513,23 @@ void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, doubl
         z0, z1, z2,
         colore
    );
+
+   godot::Color col;
+   col.set_r8(colore);
+   col.set_g8(0);
+   col.set_b8(0);
+
+   Feltyrion::surfaceTool->set_color(col);
+   Feltyrion::surfaceTool->set_uv(godot::Vector2(0, 0));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x0 - 1638400) * 0.002, (-y0 - 0) * 0.002, (z0 - 1638400) * 0.002));
+
+   Feltyrion::surfaceTool->set_color(col);
+   Feltyrion::surfaceTool->set_uv(godot::Vector2(1, 0));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x1 - 1638400) * 0.002, (-y1 - 0) * 0.002, (z1 - 1638400) * 0.002));
+
+   Feltyrion::surfaceTool->set_color(col);
+   Feltyrion::surfaceTool->set_uv(godot::Vector2(0, 1));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x2 - 1638400) * 0.002, (-y2 - 0) * 0.002, (z2 - 1638400) * 0.002));
 }
 
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
@@ -805,6 +879,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "generateSurfacePolygons" ), &Feltyrion::generateSurfacePolygons );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_scattering", "target", "scenePath" ), &Feltyrion::prepareSurfaceScattering);
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);
