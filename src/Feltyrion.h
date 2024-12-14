@@ -2,6 +2,12 @@
 
 #include "godot_cpp/classes/control.hpp"
 #include "godot_cpp/classes/node3d.hpp"
+#include "godot_cpp/classes/surface_tool.hpp"
+#include "godot_cpp/classes/packed_scene.hpp"
+#include "godot_cpp/classes/resource_loader.hpp"
+#include "godot_cpp/classes/image_texture.hpp"
+#include "godot_cpp/classes/material.hpp"
+#include "godot_cpp/classes/shader_material.hpp"
 #include "godot_cpp/core/binder_common.hpp"
 #include "godot_cpp/classes/mutex.hpp"
 
@@ -115,6 +121,9 @@ public:
     void unlock();
     void scanStars();
     void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
+    void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath);
+    void onScatteringBegin();
+    void onScatteringEnd();
     void onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onStarFound(double x, double y, double z, double id_code);
@@ -132,4 +141,9 @@ protected:
     static void _bind_methods();
 private:
     godot::Mutex mutex;
+    godot::Node3D *surfaceScatteringNode;
+    godot::Ref<godot::SurfaceTool> surfaceTool;
+    godot::Ref<godot::PackedScene> scatteringObjectScene;
+    godot::Ref<godot::ImageTexture> surfacePaletteTxtr;
+    godot::Ref<godot::ImageTexture> surfaceAlbedoL8Txtr;
 };
