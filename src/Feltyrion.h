@@ -121,7 +121,7 @@ public:
     void unlock();
     void scanStars();
     void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
-    void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath);
+    void prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath);
     void onScatteringBegin();
     void onScatteringEnd();
     void onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
