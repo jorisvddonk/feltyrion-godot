@@ -521,15 +521,15 @@ void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, doubl
 
    Feltyrion::surfaceTool->set_color(col);
    Feltyrion::surfaceTool->set_uv(godot::Vector2(0, 0));
-   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x0 - 1638400) * 0.002, (-y0 - 0) * 0.002, (z0 - 1638400) * 0.002));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x0 - 1638400) * -0.002, (-y0 - 0) * 0.002, (z0 - 1638400) * 0.002));
 
    Feltyrion::surfaceTool->set_color(col);
    Feltyrion::surfaceTool->set_uv(godot::Vector2(1, 0));
-   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x1 - 1638400) * 0.002, (-y1 - 0) * 0.002, (z1 - 1638400) * 0.002));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x1 - 1638400) * -0.002, (-y1 - 0) * 0.002, (z1 - 1638400) * 0.002));
 
    Feltyrion::surfaceTool->set_color(col);
    Feltyrion::surfaceTool->set_uv(godot::Vector2(0, 1));
-   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x2 - 1638400) * 0.002, (-y2 - 0) * 0.002, (z2 - 1638400) * 0.002));
+   Feltyrion::surfaceTool->add_vertex(godot::Vector3((x2 - 1638400) * -0.002, (-y2 - 0) * 0.002, (z2 - 1638400) * 0.002));
 }
 
 void Feltyrion::onStarFound(double x, double y, double z, double id_code) {
