@@ -450,13 +450,24 @@ void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y
    );
 }
 
-void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath)
+void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath, bool singleMesh)
 {
+    Feltyrion::scatteringSingleMesh = singleMesh;
     Feltyrion::surfaceScatteringNode = target;
     godot::ResourceLoader *reLo = godot::ResourceLoader::get_singleton();
     scatteringObjectScene = reLo->load(scenePath);
     Feltyrion::surfacePaletteTxtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
     Feltyrion::surfaceAlbedoL8Txtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
+}
+
+void cb_ScatteringItemBegin()
+{
+    instance->onScatteringItemBegin();
+}
+
+void cb_ScatteringItemEnd()
+{
+    instance->onScatteringItemEnd();
 }
 
 void cb_ScatteringBegin()
@@ -470,7 +481,38 @@ void cb_ScatteringEnd()
 }
 
 
+void Feltyrion::onScatteringItemBegin() {
+    if (Feltyrion::scatteringSingleMesh == false) {
+        Feltyrion::surfaceTool.instantiate();
+        Feltyrion::surfaceTool->begin(godot::Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+        godot::Color col;
+        col.set_r8(255);
+        col.set_g8(255);
+        col.set_b8(255);
+        Feltyrion::surfaceTool->set_color(col);
+        Feltyrion::surfaceTool->set_smooth_group(-1);
+    }
+}
+
+void Feltyrion::onScatteringItemEnd() {
+    if (Feltyrion::scatteringSingleMesh == false) {
+        Feltyrion::commitScattering();
+    }
+}
+
 void Feltyrion::onScatteringBegin() {
+    if (Feltyrion::scatteringSingleMesh == true) {
+        Feltyrion::instantiateScattering();
+    }
+}
+
+void Feltyrion::onScatteringEnd() {
+    if (Feltyrion::scatteringSingleMesh == true) {
+        Feltyrion::commitScattering();
+    }
+}
+
+void Feltyrion::instantiateScattering() {
     Feltyrion::surfaceTool.instantiate();
     Feltyrion::surfaceTool->begin(godot::Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
     godot::Color col;
@@ -481,7 +523,7 @@ void Feltyrion::onScatteringBegin() {
     Feltyrion::surfaceTool->set_smooth_group(-1);
 }
 
-void Feltyrion::onScatteringEnd() {
+void Feltyrion::commitScattering() {
     Feltyrion::surfaceTool->generate_normals();
     godot::Ref<godot::ArrayMesh> mesh = Feltyrion::surfaceTool->commit();
 
@@ -880,7 +922,7 @@ void Feltyrion::_bind_methods()
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 
-    godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_scattering", "target", "scenePath" ), &Feltyrion::prepareSurfaceScattering);
+    godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_scattering", "target", "scenePath", "singleMesh" ), &Feltyrion::prepareSurfaceScattering);
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);

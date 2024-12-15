@@ -1089,12 +1089,12 @@ inactive:
 
 int8_t capture_poly3d = POLY3D_CAPTURE_NONE;
 
-extern void cb_ScatteringBegin();
-extern void cb_ScatteringEnd();
+extern void cb_ScatteringItemBegin();
+extern void cb_ScatteringItemEnd();
 
 void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
     //godot::UtilityFunctions::printt("srf_detail(", x, ", ", y, ", ", z, ", ", depth, ", ", _class_, ")");
-    cb_ScatteringBegin();
+    cb_ScatteringItemBegin();
     // disegna un oggetto sulla superficie di un pianeta.
     switch (_class_) {
     case ROCKS: // rocce, sassi, massi, pietre, pietruzze etc...
@@ -1117,8 +1117,11 @@ void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
     case NOTHING: // una parte non coperta dalla texture (rovine).
         break;
     }
-    cb_ScatteringEnd();
+    cb_ScatteringItemEnd();
 }
+
+extern void cb_ScatteringBegin();
+extern void cb_ScatteringEnd();
 
 int8_t gtx; // se attivo, traccia il livello del suolo con texture specifica
 int16_t ipfx,
@@ -1550,6 +1553,7 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     if (capture) {
         capture_poly3d = POLY3D_CAPTURE_SCATTERING;
     }
+    cb_ScatteringBegin();
     #endif
 
     while (count) {
@@ -1603,6 +1607,7 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     }
 
     #ifdef WITH_GODOT
+    cb_ScatteringEnd();
     if (capture) {
         capture_poly3d = POLY3D_CAPTURE_NONE;
     }

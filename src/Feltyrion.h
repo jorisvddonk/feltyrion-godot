@@ -121,9 +121,11 @@ public:
     void unlock();
     void scanStars();
     void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
-    void prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath);
+    void prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath, bool singleMesh);
     void onScatteringBegin();
     void onScatteringEnd();
+    void onScatteringItemBegin();
+    void onScatteringItemEnd();
     void onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onStarFound(double x, double y, double z, double id_code);
@@ -142,8 +144,12 @@ protected:
 private:
     godot::Mutex mutex;
     godot::Node3D *surfaceScatteringNode;
+    bool scatteringSingleMesh;
     godot::Ref<godot::SurfaceTool> surfaceTool;
     godot::Ref<godot::PackedScene> scatteringObjectScene;
     godot::Ref<godot::ImageTexture> surfacePaletteTxtr;
     godot::Ref<godot::ImageTexture> surfaceAlbedoL8Txtr;
+
+    void instantiateScattering();
+    void commitScattering();
 };
