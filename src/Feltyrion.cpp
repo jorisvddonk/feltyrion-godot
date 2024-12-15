@@ -36,7 +36,6 @@ extern void process_comm_bin_file();
 extern void iperficie(int16_t additional_quadrants);
 extern void prep_iperficie();
 extern void getAllFragments();
-extern int8_t capture_poly3d;
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -448,6 +447,16 @@ void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y
         z0, z1, z2,
         colore
    );
+   Feltyrion::addSurfaceToolPolygon3(x0, x1, x2, y0, y1, y2, z0, z1, z2, colore);
+}
+
+void Feltyrion::prepareSurfaceMesh(godot::Node3D* target, godot::String scenePath)
+{
+    Feltyrion::surfaceMeshNode = target;
+    godot::ResourceLoader *reLo = godot::ResourceLoader::get_singleton();
+    surfaceMeshScene = reLo->load(scenePath);
+    Feltyrion::surfacePaletteTxtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
+    Feltyrion::surfaceAlbedoL8Txtr = godot::Ref<godot::ImageTexture>(); // empty ref assignment
 }
 
 void Feltyrion::prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath, bool singleMesh)
@@ -480,6 +489,16 @@ void cb_ScatteringEnd()
     instance->onScatteringEnd();
 }
 
+void cb_SurfaceBegin()
+{
+    instance->onSurfaceBegin();
+}
+
+void cb_SurfaceEnd()
+{
+    instance->onSurfaceEnd();
+}
+
 
 void Feltyrion::onScatteringItemBegin() {
     if (Feltyrion::scatteringSingleMesh == false) {
@@ -496,23 +515,44 @@ void Feltyrion::onScatteringItemBegin() {
 
 void Feltyrion::onScatteringItemEnd() {
     if (Feltyrion::scatteringSingleMesh == false) {
-        Feltyrion::commitScattering();
+        Feltyrion::commitSurfaceTool(SURFACETOOL_USECASE_SCATTERING);
     }
 }
 
 void Feltyrion::onScatteringBegin() {
+    godot::UtilityFunctions::printt("Scattering begin");
     if (Feltyrion::scatteringSingleMesh == true) {
-        Feltyrion::instantiateScattering();
+        Feltyrion::instantiateSurfaceTool();
+    } else {
+        // clear all children now from the scattering node
+        if (Feltyrion::surfaceScatteringNode != nullptr && Feltyrion::scatteringObjectScene != nullptr) {
+            for (int16_t c = 0; c < Feltyrion::surfaceScatteringNode->get_child_count(); c++) {
+                auto child = Feltyrion::surfaceScatteringNode->get_child(c);
+                Feltyrion::surfaceScatteringNode->remove_child(child);
+                child->queue_free();
+            }
+        }
     }
 }
 
 void Feltyrion::onScatteringEnd() {
+    godot::UtilityFunctions::printt("Scattering end");
     if (Feltyrion::scatteringSingleMesh == true) {
-        Feltyrion::commitScattering();
+        Feltyrion::commitSurfaceTool(SURFACETOOL_USECASE_SCATTERING);
     }
 }
 
-void Feltyrion::instantiateScattering() {
+void Feltyrion::onSurfaceBegin() {
+    godot::UtilityFunctions::printt("Surface begin");
+    Feltyrion::instantiateSurfaceTool();
+}
+
+void Feltyrion::onSurfaceEnd() {
+    godot::UtilityFunctions::printt("Surface end");
+    Feltyrion::commitSurfaceTool(SURFACETOOL_USECASE_SURFACEMESH);
+}
+
+void Feltyrion::instantiateSurfaceTool() {
     Feltyrion::surfaceTool.instantiate();
     Feltyrion::surfaceTool->begin(godot::Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
     godot::Color col;
@@ -523,7 +563,7 @@ void Feltyrion::instantiateScattering() {
     Feltyrion::surfaceTool->set_smooth_group(-1);
 }
 
-void Feltyrion::commitScattering() {
+void Feltyrion::commitSurfaceTool(int8_t whichUsecase) {
     Feltyrion::surfaceTool->generate_normals();
     godot::Ref<godot::ArrayMesh> mesh = Feltyrion::surfaceTool->commit();
 
@@ -535,15 +575,42 @@ void Feltyrion::commitScattering() {
         godot::UtilityFunctions::printt("Loading surfacePaletteTxtr");
         Feltyrion::surfacePaletteTxtr = godot::ImageTexture::create_from_image(Feltyrion::getSurfacePaletteAsImage());
     }
-    if (Feltyrion::surfaceScatteringNode != nullptr && Feltyrion::scatteringObjectScene != nullptr && Feltyrion::scatteringObjectScene->can_instantiate())
-    {
-        auto scatteringObject = Feltyrion::scatteringObjectScene->instantiate();
-        godot::MeshInstance3D *asMID3d = godot::Object::cast_to<godot::MeshInstance3D>(scatteringObject);
-        asMID3d->set_mesh(mesh);
-        godot::ShaderMaterial *shaderMaterial = godot::Object::cast_to<godot::ShaderMaterial>(asMID3d->call("get_material_override"));
-        shaderMaterial->set_shader_parameter("albedo_texture_format_l8", Feltyrion::surfaceAlbedoL8Txtr);
-        shaderMaterial->set_shader_parameter("surface_palette", Feltyrion::surfacePaletteTxtr);
-        Feltyrion::surfaceScatteringNode->add_child(scatteringObject);
+
+    if (whichUsecase == SURFACETOOL_USECASE_SCATTERING) {
+        if (Feltyrion::surfaceScatteringNode != nullptr && Feltyrion::scatteringObjectScene != nullptr && Feltyrion::scatteringObjectScene->can_instantiate())
+        {
+            if (Feltyrion::scatteringSingleMesh == true) {
+                for (int16_t c = 0; c < Feltyrion::surfaceScatteringNode->get_child_count(); c++) {
+                    auto child = Feltyrion::surfaceScatteringNode->get_child(c);
+                    Feltyrion::surfaceScatteringNode->remove_child(child);
+                    child->queue_free();
+                }
+            }
+            auto scatteringObject = Feltyrion::scatteringObjectScene->instantiate();
+            godot::MeshInstance3D *asMID3d = godot::Object::cast_to<godot::MeshInstance3D>(scatteringObject);
+            asMID3d->set_mesh(mesh);
+            godot::ShaderMaterial *shaderMaterial = godot::Object::cast_to<godot::ShaderMaterial>(asMID3d->call("get_material_override"));
+            shaderMaterial->set_shader_parameter("albedo_texture_format_l8", Feltyrion::surfaceAlbedoL8Txtr);
+            shaderMaterial->set_shader_parameter("surface_palette", Feltyrion::surfacePaletteTxtr);
+            Feltyrion::surfaceScatteringNode->add_child(scatteringObject);
+        }
+    } else if (whichUsecase == SURFACETOOL_USECASE_SURFACEMESH) {
+        if (Feltyrion::surfaceMeshNode != nullptr && Feltyrion::surfaceMeshScene != nullptr && Feltyrion::surfaceMeshScene->can_instantiate())
+        {
+            for (int16_t c = 0; c < Feltyrion::surfaceMeshNode->get_child_count(); c++) {
+                auto child = Feltyrion::surfaceMeshNode->get_child(c);
+                Feltyrion::surfaceMeshNode->remove_child(child);
+                child->queue_free();
+            }
+            auto surfaceObject = Feltyrion::surfaceMeshScene->instantiate();
+            godot::MeshInstance3D *asMID3d = godot::Object::cast_to<godot::MeshInstance3D>(surfaceObject);
+            asMID3d->set_mesh(mesh);
+            asMID3d->create_trimesh_collision();
+            godot::ShaderMaterial *shaderMaterial = godot::Object::cast_to<godot::ShaderMaterial>(asMID3d->call("get_material_override"));
+            shaderMaterial->set_shader_parameter("albedo_texture_format_l8", Feltyrion::surfaceAlbedoL8Txtr);
+            shaderMaterial->set_shader_parameter("surface_palette", Feltyrion::surfacePaletteTxtr);
+            Feltyrion::surfaceMeshNode->add_child(surfaceObject);
+        }
     }
 }
 
@@ -555,7 +622,10 @@ void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, doubl
         z0, z1, z2,
         colore
    );
+   Feltyrion::addSurfaceToolPolygon3(x0, x1, x2, y0, y1, y2, z0, z1, z2, colore);
+}
 
+void Feltyrion::addSurfaceToolPolygon3(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
    godot::Color col;
    col.set_r8(colore);
    col.set_g8(0);
@@ -771,9 +841,7 @@ void Feltyrion::unfreeze() {
 
 void Feltyrion::generateSurfacePolygons() {
     prep_iperficie();
-    capture_poly3d = POLY3D_CAPTURE_SURFACE;
     getAllFragments();
-    capture_poly3d = POLY3D_CAPTURE_NONE;
 }
 
 void Feltyrion::processCommBinFile() {
@@ -923,6 +991,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_scattering", "target", "scenePath", "singleMesh" ), &Feltyrion::prepareSurfaceScattering);
+    godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_mesh", "target", "scenePath" ), &Feltyrion::prepareSurfaceMesh);
 
     // Properties
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);

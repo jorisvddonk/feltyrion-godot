@@ -1122,14 +1122,17 @@ void srf_detail(float x, float y, float z, int32_t depth, int8_t _class_) {
 
 extern void cb_ScatteringBegin();
 extern void cb_ScatteringEnd();
+extern void cb_SurfaceBegin();
+extern void cb_SurfaceEnd();
 
 int8_t gtx; // se attivo, traccia il livello del suolo con texture specifica
 int16_t ipfx,
     ipfz;                               // centro di tracciamento (coordinate SQC dell'osservatore).
 int8_t nearest_fragment_already_traced = 0; // flag di lavoro.
 
-void fragmentWC(int32_t x, int32_t z, bool capture) {
+void fragmentWC(int32_t x, int32_t z, int8_t captureWhat) {
     //godot::UtilityFunctions::printt("fragment(", x, ", ", z, ")");
+    capture_poly3d = captureWhat;
     // traccia un quadrante della superficie.
     int8_t poly1, poly2;
     int16_t c1, count, id, cl;
@@ -1141,12 +1144,6 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     float hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8;
     uint8_t rch1, rch2, rch3, rch4;
     uint16_t *ani_sqc_temp;
-
-    #ifdef WITH_GODOT
-    if (capture) {
-        capture_poly3d = POLY3D_CAPTURE_SURFACE;
-    }
-    #endif
 
     #ifndef WITH_GODOT
     if (x == ipfx && z == ipfz) {
@@ -1259,7 +1256,7 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     // visibility diagonally (from 80 quadrants to 64) according
     // with the decision to trace with maximum precision, and went
     // from depth / 3 to depth / 2 (with a shift, by the way)
-    if (!capture) {
+    if (captureWhat == POLY3D_CAPTURE_NONE) {
         if (c1 < 00) {
             c1 = 00;
         }
@@ -1306,17 +1303,23 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
 
         poly2 = 0;
         
-        #ifdef WITH_GODOT
-        // in Godot: force rendering everything
-        poly2 = 1;
-        poly1 = 1;
-        #endif
 
         if (facing(vx2, vy2, vz2)) {
             if (gtx || (vy2[0] + vy2[1] + vy2[2] != 0)) {
                 poly2 = 1;
             }
         }
+
+        #ifdef WITH_GODOT
+        // in Godot: force rendering everything, if we want to capture it
+        if (captureWhat == POLY3D_CAPTURE_SURFACE) {
+            poly1 = 1;
+            poly2 = 1;
+        } else {
+            poly1 = 0;
+            poly2 = 0;
+        }
+        #endif
 
         if (poly1 || poly2) {
             // Setting soil texture parameters
@@ -1428,9 +1431,14 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
         }
 
         #ifdef WITH_GODOT
-        // in Godot: force rendering everything
-        poly2 = 1;
-        poly1 = 1;
+        // in Godot: force rendering everything, if we want to capture it
+        if (captureWhat == POLY3D_CAPTURE_SURFACE) {
+            poly1 = 1;
+            poly2 = 1;
+        } else {
+            poly1 = 0;
+            poly2 = 0;
+        }
         #endif
 
         if (poly1 || poly2) {
@@ -1478,6 +1486,13 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
         return;
         #endif
     }
+
+    #ifdef WITH_GODOT
+    // in Godot: force rendering everything, if we want to capture it
+    if (captureWhat != POLY3D_CAPTURE_SCATTERING) {
+        return; // early out
+    }
+    #endif
 
     /* -2- tracciamento forme di vita animali. */
 
@@ -1549,13 +1564,6 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     hp7 = (hp4 - hp3) * qid;
     hp8 = (hp2 - hp3) * qid;
 
-    #ifdef WITH_GODOT
-    if (capture) {
-        capture_poly3d = POLY3D_CAPTURE_SCATTERING;
-    }
-    cb_ScatteringBegin();
-    #endif
-
     while (count) {
         // seleziona la tabella pseudo relativa al presente frammento.
         // (fornisce una base costante per tutti i valori estratti.)
@@ -1607,15 +1615,12 @@ void fragmentWC(int32_t x, int32_t z, bool capture) {
     }
 
     #ifdef WITH_GODOT
-    cb_ScatteringEnd();
-    if (capture) {
-        capture_poly3d = POLY3D_CAPTURE_NONE;
-    }
+    capture_poly3d = POLY3D_CAPTURE_NONE;
     #endif
 }
 
 void fragment(int32_t x, int32_t z) {
-    fragmentWC(x, z, false);
+    fragmentWC(x, z, POLY3D_CAPTURE_NONE);
 }
 
 void prep_iperficie() {
@@ -1630,13 +1635,25 @@ void prep_iperficie() {
 }
 
 void getAllFragments() {
+    cb_SurfaceBegin();
     for (int16_t z = 199; z >= 0;) {
         for (int16_t x = 199; x >= 0;) {
-            fragmentWC(x, z, true);
+            fragmentWC(x, z, POLY3D_CAPTURE_SURFACE);
             x--;
         }
         z--;
     }
+    cb_SurfaceEnd();
+
+    cb_ScatteringBegin();
+    for (int16_t z = 199; z >= 0;) {
+        for (int16_t x = 199; x >= 0;) {
+            fragmentWC(x, z, POLY3D_CAPTURE_SCATTERING);
+            x--;
+        }
+        z--;
+    }
+    cb_ScatteringEnd();
 }
 
 void iperficie(int16_t additional_quadrants) {

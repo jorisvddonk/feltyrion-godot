@@ -16,6 +16,9 @@
 #define PARSIS_Y_MULTIPLIER 1
 #define PARSIS_Z_MULTIPLIER 1
 
+#define SURFACETOOL_USECASE_SURFACEMESH 1
+#define SURFACETOOL_USECASE_SCATTERING 2
+
 #define _Q(x) #x
 #define _QUOTE(x) _Q(x)
 #define _SET_QUOTE(x) _Q(set_ ## x)
@@ -122,10 +125,13 @@ public:
     void scanStars();
     void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
     void prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath, bool singleMesh);
+    void prepareSurfaceMesh(godot::Node3D* target, godot::String scenePath);
     void onScatteringBegin();
     void onScatteringEnd();
     void onScatteringItemBegin();
     void onScatteringItemEnd();
+    void onSurfaceBegin();
+    void onSurfaceEnd();
     void onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
     void onStarFound(double x, double y, double z, double id_code);
@@ -143,13 +149,17 @@ protected:
     static void _bind_methods();
 private:
     godot::Mutex mutex;
+
     godot::Node3D *surfaceScatteringNode;
+    godot::Node3D *surfaceMeshNode;
     bool scatteringSingleMesh;
     godot::Ref<godot::SurfaceTool> surfaceTool;
     godot::Ref<godot::PackedScene> scatteringObjectScene;
+    godot::Ref<godot::PackedScene> surfaceMeshScene;
     godot::Ref<godot::ImageTexture> surfacePaletteTxtr;
     godot::Ref<godot::ImageTexture> surfaceAlbedoL8Txtr;
 
-    void instantiateScattering();
-    void commitScattering();
+    void instantiateSurfaceTool();
+    void commitSurfaceTool(int8_t whichUsecase);
+    void addSurfaceToolPolygon3(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore);
 };
