@@ -114,9 +114,9 @@ set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 set(FLOAT_PRECISION "single") # change to 'double' to enable double-precision mode. NOTE: does not work properly at the moment!!
 add_subdirectory( extern/godot-cpp )
 
-# TODO: fix this: configure_file(${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.MD ${PROJECT_BINARY_DIR}/${PROJECT_NAME}/LICENSE.MD)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md ${PROJECT_BINARY_DIR}/${PROJECT_NAME}/LICENSE.md)
 install(
-    FILES "LICENSE.MD"
+    FILES "LICENSE.md"
     DESTINATION ${INSTALL_DIR}
 )
 
