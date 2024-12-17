@@ -9,3 +9,4 @@ test.exe
 .cache/
 .DS_Store
 feltyrion-godot-install/
+feltyrion-godot-install-debug/

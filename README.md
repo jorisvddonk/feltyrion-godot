@@ -30,11 +30,14 @@ Here's an example of how to build a release version; use the terminal to run the
 
 (If you want to build from some entirely different path, you can specify the absolute path to the locally checked-out git repository via cmake's `-S` flag (so instead of `-S .` as below, use `-S <absolute path to local git repository>`))
 
+After building, you can find the built addon in `feltyion-godot-install`
+
 ### Linux
 
 ```sh
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build --parallel
+cmake --install ./build --config Release
 ```
 
 ### MacOS
@@ -44,6 +47,7 @@ On MacOS, you'll want to build without the `--parallel` flag to avoid running ou
 ```sh
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build
+cmake --install ./build --config Release
 ```
 
 ### Windows - MSVC
@@ -51,6 +55,7 @@ cmake --build ./build
 ```powershell
 cmake -B build -S . -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build --config Release
+cmake --install ./build --config Release
 ```
 
 This tells CMake to use `Visual Studio 2022`. There is a list of Visual Studio generators [on the CMake site](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators) - pick the one you are using.
