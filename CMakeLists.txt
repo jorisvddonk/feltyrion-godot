@@ -114,6 +114,12 @@ set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 set(FLOAT_PRECISION "single") # change to 'double' to enable double-precision mode. NOTE: does not work properly at the moment!!
 add_subdirectory( extern/godot-cpp )
 
+configure_file("LICENSE.MD" ${PROJECT_BINARY_DIR}/${PROJECT_NAME}/LICENSE.MD)
+install(
+    FILES "LICENSE.MD"
+    DESTINATION ${INSTALL_DIR}
+)
+
 set_target_properties( godot-cpp
     PROPERTIES
         CXX_VISIBILITY_PRESET hidden    # visibility needs to be the same as the main library
