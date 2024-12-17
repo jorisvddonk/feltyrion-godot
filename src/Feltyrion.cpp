@@ -440,6 +440,7 @@ void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight,
 }
 
 void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
+   #ifdef EMIT_POLYGON3_SIGNALS
    godot::Object::emit_signal(
         "found_surface_polygon3",
         x0, x1, x2,
@@ -447,6 +448,7 @@ void Feltyrion::onSurfacePolygon3Found(double x0, double x1, double x2, double y
         z0, z1, z2,
         colore
    );
+   #endif
    Feltyrion::addSurfaceToolPolygon3(x0, x1, x2, y0, y1, y2, z0, z1, z2, colore);
 }
 
@@ -615,6 +617,7 @@ void Feltyrion::commitSurfaceTool(int8_t whichUsecase) {
 }
 
 void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, double y0, double y1, double y2, double z0, double z1, double z2, int colore) {
+   #ifdef EMIT_POLYGON3_SIGNALS
    godot::Object::emit_signal(
         "found_scattering_polygon3",
         x0, x1, x2,
@@ -622,6 +625,7 @@ void Feltyrion::onScatteringPolygon3Found(double x0, double x1, double x2, doubl
         z0, z1, z2,
         colore
    );
+   #endif
    Feltyrion::addSurfaceToolPolygon3(x0, x1, x2, y0, y1, y2, z0, z1, z2, colore);
 }
 
@@ -1060,6 +1064,8 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo( godot::Variant::FLOAT, "radii" ), 
         godot::PropertyInfo( godot::Variant::INT, "unconditioned_color" ) ) );
 
+    #ifdef EMIT_POLYGON3_SIGNALS
+    // deprecated signals that are no longer needed - only compiled in when EMIT_POLYGON3_SIGNALS is defined
     ADD_SIGNAL( godot::MethodInfo( "found_surface_polygon3", 
         godot::PropertyInfo( godot::Variant::FLOAT, "x0" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "x1" ), 
@@ -1072,7 +1078,6 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo(godot::Variant::FLOAT, "z2"),
         godot::PropertyInfo(godot::Variant::INT, "color")
     ));
-
     ADD_SIGNAL( godot::MethodInfo( "found_scattering_polygon3", 
         godot::PropertyInfo( godot::Variant::FLOAT, "x0" ), 
         godot::PropertyInfo( godot::Variant::FLOAT, "x1" ), 
@@ -1085,5 +1090,6 @@ void Feltyrion::_bind_methods()
         godot::PropertyInfo(godot::Variant::FLOAT, "z2"),
         godot::PropertyInfo(godot::Variant::INT, "color")
     ));
+    #endif
 
 }
