@@ -7,6 +7,7 @@ compatibility_minimum = 4.1
 
 linux.release.x86_64 = "lib/Linux-x86_64/lib${PROJECT_NAME}.so"
 linux.x86_64 = "lib/Linux-x86_64/lib${PROJECT_NAME}.so"
+macos.release = "lib/Darwin-universal/lib${PROJECT_NAME}.dylib"
 macos.release.x86_64 = "lib/Darwin-universal/lib${PROJECT_NAME}.dylib"
 macos.x86_64 = "lib/Darwin-universal/lib${PROJECT_NAME}.dylib"
 macos.release.universal = "lib/Darwin-universal/lib${PROJECT_NAME}.dylib"
