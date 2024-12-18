@@ -3241,7 +3241,7 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
 
         break;
 
-    case 3:
+    case 3: {
         r = ranged_fast_random(3) + 4;
         g = 26 + ranged_fast_random(3) - ranged_fast_random(5);
 
@@ -3249,23 +3249,26 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
             ssmooth(p_background);
         }
 
-        currSeed = seed;
-        for (uint16_t i = 64000, j = 0; i > 0; i--, j++) {
-            if (p_background[j] >= g) {
-                currSeed += i;
-                int32_t result  = ((int32_t) currSeed) * ((int32_t) currSeed);
-                auto resultHigh = static_cast<int16_t>(result >> 16u);
-                auto resultLow  = static_cast<int16_t>(result & 0xFFFFu);
-                currSeed        = resultLow + resultHigh;
-                uint8_t color   = currSeed & 0xFFu;
-                color &= 0x3Eu;
-                p_background[j] = color;
-                if (p_background[j] > 0x3E) {
-                    p_background[j] = 0x3E;
-                }
+        uint16_t ax = seed;
+        uint16_t* di = (uint16_t*)p_background;
+        for (uint16_t cx = 64000; cx > 0; cx--) {
+            if (*((uint8_t*)di) < g) {
+                *((uint8_t*)di) = 16;
             } else {
-                p_background[j] = 16;
+                ax = ax + cx;
+                int32_t temp = (int16_t)ax * (int16_t)ax;  // Signed multiplication!
+                uint16_t dx = temp >> 16;        // High word goes to dx
+                ax = (uint16_t)temp;             // Low word goes to ax
+                ax = (uint16_t)((uint32_t)ax + dx);  // Add with wrap at 16 bits
+                uint8_t bl = (uint8_t)ax;        // Take low byte
+                bl &= 0x3E;                      // Mask with 0x3E
+                uint8_t& byte_at_di = *((uint8_t*)di);
+                byte_at_di += bl;
+                if (byte_at_di >= 0x3E) {
+                    *di = 0x3E;
+                }
             }
+            di = (uint16_t*)((uint8_t*)di + 1);
         }
 
         r = 20 + ranged_fast_random(40);
@@ -3285,8 +3288,7 @@ void surface(int16_t logical_id, int16_t type, double seedval, uint8_t colorbase
             a  = ranged_fast_random(360) * deg;
             atm_cyclon();
         }
-
-        break;
+    } break;
 
     case 4:
         ssmooth(p_background);
