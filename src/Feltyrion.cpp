@@ -767,19 +767,21 @@ godot::Dictionary Feltyrion::getPlanetInfo(int n) {
 
 godot::Dictionary Feltyrion::getCurrentStarInfo() {
     godot::Dictionary ret = godot::Dictionary();
-    ret["nearstar_class"] = nearstar_class;
-    ret["nearstar_x"] = nearstar_x * PARSIS_X_MULTIPLIER;
-    ret["nearstar_y"] = nearstar_y * PARSIS_Y_MULTIPLIER;
-    ret["nearstar_z"] = nearstar_z * PARSIS_Z_MULTIPLIER;
-    ret["nearstar_ray"] = nearstar_ray;
-    ret["nearstar_spin"] = nearstar_spin;
-    ret["nearstar_r"] = nearstar_r;
-    ret["nearstar_g"] = nearstar_g;
-    ret["nearstar_b"] = nearstar_b;
-    ret["nearstar_nop"] = nearstar_nop;
-    ret["nearstar_nob"] = nearstar_nob;
-    ret["nearstar_labeled"] = nearstar_labeled;
-    ret["nearstar_id_code"] = get_id_code(nearstar_x, nearstar_y, nearstar_z);
+    if (ap_targetted == 1 && ap_reached == 1) {
+        ret["nearstar_class"] = nearstar_class;
+        ret["nearstar_x"] = nearstar_x * PARSIS_X_MULTIPLIER;
+        ret["nearstar_y"] = nearstar_y * PARSIS_Y_MULTIPLIER;
+        ret["nearstar_z"] = nearstar_z * PARSIS_Z_MULTIPLIER;
+        ret["nearstar_ray"] = nearstar_ray;
+        ret["nearstar_spin"] = nearstar_spin;
+        ret["nearstar_r"] = nearstar_r;
+        ret["nearstar_g"] = nearstar_g;
+        ret["nearstar_b"] = nearstar_b;
+        ret["nearstar_nop"] = nearstar_nop;
+        ret["nearstar_nob"] = nearstar_nob;
+        ret["nearstar_labeled"] = nearstar_labeled;
+        ret["nearstar_id_code"] = get_id_code(nearstar_x, nearstar_y, nearstar_z);
+    }
     return ret;
 }
 
