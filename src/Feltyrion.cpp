@@ -135,6 +135,17 @@ void Feltyrion::setAPTargetted(int i)
     extract_ap_target_infos();
 }
 
+int Feltyrion::getAPTargetted()
+{
+    return ap_targetted;
+}
+
+void Feltyrion::setAPTargettedWithoutExtractingTargetInfos(int i)
+{
+    // used for setting direct parsis targets - otherwise when extracting ap target infos you'd likely select the Westos star by accident!
+    ap_targetted = i;
+}
+
 void Feltyrion::setAPTargetX(double x)
 {
     ap_target_x = x * PARSIS_X_MULTIPLIER;
@@ -974,6 +985,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_z" ), &Feltyrion::getNearstarZ );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted" ), &Feltyrion::setAPTargetted );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted_without_extracting_target_infos" ), &Feltyrion::setAPTargettedWithoutExtractingTargetInfos );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
@@ -998,6 +1010,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_mesh", "target", "scenePath" ), &Feltyrion::prepareSurfaceMesh);
 
     // Properties
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_targetted"), &Feltyrion::getAPTargetted); // set_ap_targetted defined above as method
+    ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "ap_targetted"), "set_ap_targetted", "get_ap_targetted");
     godot::ClassDB::bind_method( godot::D_METHOD( "get_ap_target_x"), &Feltyrion::getAPTargetX);
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_target_x", "ap_target_x" ), &Feltyrion::setAPTargetX );
     ADD_PROPERTY(godot::PropertyInfo(godot::Variant::FLOAT, "ap_target_x"), "set_ap_target_x", "get_ap_target_x");

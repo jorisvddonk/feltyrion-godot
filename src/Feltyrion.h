@@ -76,7 +76,9 @@ public:
 
     godot::String getCWD() const;
 
+    int getAPTargetted();
     void setAPTargetted(int i);
+    void setAPTargettedWithoutExtractingTargetInfos(int i);
     void setAPTargetX(double x);
     double getAPTargetX();
     void setAPTargetY(double y);
