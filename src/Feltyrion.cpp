@@ -18,6 +18,7 @@
 #include "noctis-d.h"
 #include "noctis-0.h"
 #include "noctis.h"
+#include "brtl.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
 #define UNUSED( expr ) (void)( expr )
@@ -706,7 +707,10 @@ godot::String Feltyrion::getStarName(double x, double y, double z) const
         update_star_label_by_offset(offset);
         return (char*)_star_label;
     } else {
-        return "";
+        brtl_srand((uint16_t) id);
+        strcpy((char *) _star_label, "UNKNOWN STAR / CLASS ");
+        sprintf((char *) (_star_label + 21), "S%02d", brtl_random(star_classes));
+        return (char*)_star_label;
     }
 }
 
