@@ -946,6 +946,8 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, setLandingPoint);
 
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, planet_grav, getPlanetGravity, setPlanetGravity);
+
 void Feltyrion::_bind_methods()
 {
     // Methods.
@@ -1050,6 +1052,7 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lon, getLandingPtLon, setLandingPtLon);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_point, getLandingPoint, setLandingPoint);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, planet_grav, getPlanetGravity, setPlanetGravity);
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
