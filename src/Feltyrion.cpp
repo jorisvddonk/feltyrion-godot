@@ -727,6 +727,24 @@ godot::String Feltyrion::getPlanetNameById(double planet_id) const
         update_star_label_by_offset(offset);
         return (char*)_star_label;
     } else {
+        int16_t n = 0;
+        while (n < nearstar_nob) {
+            if (nearstar_p_identity[n] == planet_id) {
+                // found it!
+                if (nearstar_p_owner[n] == -1) {
+                    strcpy((char *) _star_label, "NAMELESS PLANET / N. ...");
+                } else {
+                    memcpy(_star_label, "NAMELESS MOON #../../...", 24);
+                    sprintf((char *) (_star_label + 15), "%02d", nearstar_p_moonid[n] + 1);
+                    sprintf((char *) (_star_label + 18), "%02d", nearstar_p_owner[n] + 1);
+                    _star_label[17] = '/';
+                    _star_label[20] = '&';
+                }
+                sprintf((char *) (_star_label + 21), "P%02d", n + 1);
+                return (char*)_star_label;
+            }
+            n++;
+        }
         return "";
     }
 }
