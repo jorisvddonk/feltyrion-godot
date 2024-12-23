@@ -316,7 +316,7 @@ godot::Ref<godot::Image> Feltyrion::returnImage(bool accurate_height, bool raw__
 }
 
 
-void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color)
+void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color, int body_index)
 {
     //godot::UtilityFunctions::printt("FOUND RING PARTICLE");
     instance->onRingParticleFound(
@@ -324,7 +324,8 @@ void cb_RingParticleFound(double xlight, double ylight, double zlight, double ra
         ylight,
         zlight,
         radii,
-        unconditioned_color
+        unconditioned_color,
+        body_index
     );
 }
 
@@ -444,10 +445,10 @@ void Feltyrion::updateCurrentStarPlanets(godot::NodePath nodePath)
     }
 }
 
-void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color) {
+void Feltyrion::onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color, int body_index) {
     godot::Object::emit_signal(
         "found_ring_particle",
-        xlight, ylight, zlight, radii, unconditioned_color
+        xlight, ylight, zlight, radii, unconditioned_color, body_index
     );
 }
 

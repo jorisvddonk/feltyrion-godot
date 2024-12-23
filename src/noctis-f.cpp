@@ -14,7 +14,7 @@
 
 #ifndef WITH_GODOT
 #else
-extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
+extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color, int body_index);
 #endif
 
 extern int16_t cplx_planet_viewpoint(int16_t logical_id);
@@ -409,7 +409,7 @@ void not_actually_draw_planet(int16_t target_body) {
                     #ifndef WITH_GODOT
                     far_pixel_at(plx, ply, plz, nearstar_p_ray[n], 0);
                     #else
-                    cb_RingParticleFound(plx, ply, plz, nearstar_p_ray[n], 0);
+                    cb_RingParticleFound(plx, ply, plz, nearstar_p_ray[n], 0, n);
                     #endif
                 }
             }

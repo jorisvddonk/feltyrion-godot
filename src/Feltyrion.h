@@ -132,7 +132,7 @@ public:
     void lock();
     void unlock();
     void scanStars();
-    void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
+    void onRingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color, int body_index);
     void prepareSurfaceScattering(godot::Node3D* target, godot::String scenePath, bool singleMesh);
     void prepareSurfaceMesh(godot::Node3D* target, godot::String scenePath);
     void onScatteringBegin();

@@ -57,7 +57,7 @@
 #include "godot_cpp/classes/global_constants.hpp"
 #include "godot_cpp/classes/label.hpp"
 #include "godot_cpp/classes/object.hpp"
-extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color);
+extern void cb_RingParticleFound(double xlight, double ylight, double zlight, double radii, int unconditioned_color, int body_index);
 #endif
 
 // Support files
@@ -3707,7 +3707,7 @@ void ring(int16_t planet_id, double ox, double oy, double oz, int16_t start, int
                 #ifndef WITH_GODOT
                 far_pixel_at(sx, sy, sz, -0.042, 0);
                 #else
-                cb_RingParticleFound(sx, sy, sz, -0.042, 0);
+                cb_RingParticleFound(sx, sy, sz, -0.042, 0, planet_id); // planet_id is actually body index (not the 'object id' composed of Parsis coordinates + body index, as its name may suggest)
                 #endif
                 partn--;
             }
