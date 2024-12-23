@@ -892,6 +892,9 @@ godot::String Feltyrion::getCWD() const
     return std::filesystem::current_path().string().c_str();
 }
 
+void Feltyrion::additionalConsumes() {
+    additional_consumes();
+}
 
 godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
     auto pba = godot::PackedByteArray();
@@ -960,6 +963,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // dri
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
@@ -1033,6 +1037,8 @@ void Feltyrion::_bind_methods()
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_cwd" ), &Feltyrion::getCWD );
 
+    godot::ClassDB::bind_method( godot::D_METHOD( "additional_consumes" ), &Feltyrion::additionalConsumes );
+
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_scattering", "target", "scenePath", "singleMesh" ), &Feltyrion::prepareSurfaceScattering);
     godot::ClassDB::bind_method( godot::D_METHOD( "prepare_surface_mesh", "target", "scenePath" ), &Feltyrion::prepareSurfaceMesh);
 
@@ -1069,6 +1075,7 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, stspeed, getSTSpeed, setSTSpeed);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ap_reached, getAPReached, setAPReached);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, charge, getLithiumCharge, setLithiumCharge);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, pwr, getPwr, setPwr);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lon, getLandingPtLon, setLandingPtLon);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_point, getLandingPoint, setLandingPoint);

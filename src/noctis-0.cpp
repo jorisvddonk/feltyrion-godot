@@ -4433,3 +4433,60 @@ void polycupola(float y_or, int8_t textured) {
 
     resetfx();
 }
+
+/*
+    Consumi supplementari di litio, dal pi� dispendioso al pi� economico:
+	- orbita vimana:			1 KD ogni 7 secondi.
+	- inseguimento a punto lontano: 	1 KD ogni 18 secondi.
+	- inseguimento a punto fisso:		1 KD ogni 29 secondi.
+	- inseguimento a punto vicino:		1 KD ogni 33 secondi.
+	- amplificatore di campo stellare:	1 KD ogni 41 secondi.
+	- orbita geosincrona:			1 KD ogni 58 secondi.
+	- lampada interna:			1 KD ogni 84 secondi.
+	- cercapianeti:				1 KD ogni 155 secondi.
+*/
+
+void additional_consumes()
+{
+	if (iqsecs < (long)secs)
+		iqsecs = secs;
+	//
+	if (ip_targetted > -1 && pwr > 15000) {
+		if (ip_reached/* && sync*/) { // We don't track the chase mode within feltyrion-godot at all, so assume a static powerusage instead
+			/*if (sync==1) // fixed-point chase
+				if (!(iqsecs % 29)) { pwr--; iqsecs++; }
+			if (sync==2) // far chase
+				if (!(iqsecs % 18)) { pwr--; iqsecs++; }
+			if (sync==3) // syncrone orbit
+				if (!(iqsecs % 58)) { pwr--; iqsecs++; }
+			if (sync==4) // vimana orbit
+				if (!(iqsecs %  7)) { pwr--; iqsecs++; }
+			if (sync==5) // near chase
+				if (!(iqsecs % 33)) { pwr--; iqsecs++; }*/
+            if (!(iqsecs % 27)) { pwr--; iqsecs++; } // static powerusage regardless of which sync mode might be used
+		}
+	}
+	//
+	if (pl_search		&& !(iqsecs % 155)) { pwr--; iqsecs++; }
+	if (ilightv == 1	&& !(iqsecs %  84)) { pwr--; iqsecs++; }
+	if (field_amplificator	&& !(iqsecs %  41)) { pwr--; iqsecs++; }
+	//
+	if (pwr <= 15000) {
+		if (charge>0) {
+			charge--;
+			pwr = 20000;
+			status ("FCS: READY", 100);
+		} else if (charge<0) { // OMEGA DRIVE - infinite fuel!
+			pwr = 20000;
+		} else {
+			stspeed 	= 0;
+			ip_reaching 	= 0;
+			ip_reached 	= 1;
+			ip_targetted 	= -1;
+			if (pwr != 15000) {
+				status ("POWER LOSS", 100);
+				pwr = 15000;
+			}
+		}
+	}
+}
