@@ -4151,11 +4151,17 @@ void planetary_main() {
 
     float gravity, crcy, temp;
     float backup_dzat_x = dzat_x;
+#ifndef WITH_GODOT
     dzat_x              = 0;
+#endif
     float backup_dzat_y = dzat_y;
+#ifndef WITH_GODOT
     dzat_y              = 0;
+#endif
     float backup_dzat_z = dzat_z;
+#ifndef WITH_GODOT
     dzat_z              = 0;
+#endif
     float backup_cam_x, backup_cam_y, backup_cam_z;
     float backup__alfa, backup__beta;
     float drop_x, drop_y, drop_z;
