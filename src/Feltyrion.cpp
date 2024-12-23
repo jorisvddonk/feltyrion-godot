@@ -959,6 +959,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ip_reaching, getIPReaching, setIPR
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
@@ -1067,6 +1068,7 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, nsync, getNSync, setNSync);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, stspeed, getSTSpeed, setSTSpeed);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ap_reached, getAPReached, setAPReached);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, charge, getLithiumCharge, setLithiumCharge);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_pt_lon, getLandingPtLon, setLandingPtLon);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, landing_point, getLandingPoint, setLandingPoint);

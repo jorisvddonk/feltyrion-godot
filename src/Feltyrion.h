@@ -91,12 +91,14 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, nsync, getNSync, setNSync); // drive tracking mode (i.e. how the stardrifter orbits around a planet)
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); // 1 if we're in Vimana flight
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, setLandingPoint); // 0 normally, 1 if we're selecting our landing point in the Stardrifter (9 - deploy surface capsule from FCD)
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, planet_grav, getPlanetGravity, setPlanetGravity);
+
 
     void setDzatX(double x);
     double getDzatX();
