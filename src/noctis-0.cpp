@@ -62,10 +62,10 @@ extern void cb_RingParticleFound(double xlight, double ylight, double zlight, do
 
 // Support files
 
-const char *situation_file = "data/current.bin";
+const char *situation_file = "data/CURRENT.BIN";
 const char *starmap_file   = "data/STARMAP.BIN";
 const char *goesoutputfile = "data/GOESfile.txt";
-const char *surface_file   = "data/surface.bin";
+const char *surface_file   = "data/SURFACE.BIN";
 
 // Date and specific functions imported from ASSEMBLY.H
 
