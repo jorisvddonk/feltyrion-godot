@@ -111,7 +111,10 @@ endif()
 
 set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 
-set(FLOAT_PRECISION "single") # change to 'double' to enable double-precision mode. NOTE: does not work properly at the moment!!
+if ("${FLOAT_PRECISION}" STREQUAL "double")
+	add_definitions(-DREAL_T_IS_DOUBLE)
+endif()
+
 add_subdirectory( extern/godot-cpp )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md ${PROJECT_BINARY_DIR}/${PROJECT_NAME}/LICENSE.md)

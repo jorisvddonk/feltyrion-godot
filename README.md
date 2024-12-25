@@ -66,6 +66,7 @@ The following additional CMake options are available:
 
 | Option                                                                   | Description                                      | Default                                                                                              |
 |--------------------------------------------------------------------------|--------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `FLOAT_PRECISION`                                                        | Floating point precision. Ideally set to `double` to support Godot custom-built with double-precision Vector3s | `single` |
 | `CCACHE_PROGRAM`                                                         | Path to `ccache` for faster rebuilds             | This is automatically set **ON** if `ccache` is found. If you do not want to use it, set this to "". |
 | `${PROJECT_NAME_UPPERCASE}_WARN_EVERYTHING` (e.g. FOO_WARN_EVERYTHING)   | Turns on all warnings. (Not available for MSVC.) | **OFF** (too noisy, but can be useful sometimes)                                                     |
 | `${PROJECT_NAME_UPPERCASE}_WARNING_AS_ERROR` (e.g. FOO_WARNING_AS_ERROR) | Turns warnings into errors.                      | **ON**                                                                                               |
