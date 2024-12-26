@@ -973,6 +973,9 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, se
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, planet_grav, getPlanetGravity, setPlanetGravity);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_pressure, getPlanetPressure, setPlanetPressure);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_temp, getPlanetTemperature, setPlanetTemperature);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, nightzone, getNightzone, setNightzone);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(uint8_t, int, sky_brightness, getSkyBrightness, setSkyBrightness);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, rainy, getRainy, setRainy);
 
 void Feltyrion::_bind_methods()
 {
@@ -1085,6 +1088,9 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, planet_grav, getPlanetGravity, setPlanetGravity);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, pp_pressure, getPlanetPressure, setPlanetPressure);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, pp_temp, getPlanetTemperature, setPlanetTemperature);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, nightzone, getNightzone, setNightzone);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, sky_brightness, getSkyBrightness, setSkyBrightness);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, rainy, getRainy, setRainy);
 
     // Signals
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );

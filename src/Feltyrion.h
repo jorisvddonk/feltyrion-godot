@@ -103,6 +103,9 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, planet_grav, getPlanetGravity, setPlanetGravity);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_pressure, getPlanetPressure, setPlanetPressure);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_temp, getPlanetTemperature, setPlanetTemperature);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, nightzone, getNightzone, setNightzone);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(uint8_t, int, sky_brightness, getSkyBrightness, setSkyBrightness);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, rainy, getRainy, setRainy);
 
 
     void setDzatX(double x);
