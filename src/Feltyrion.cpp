@@ -391,7 +391,7 @@ void Feltyrion::setNearstar(double parsis_x, double parsis_y, double parsis_z)
     nearstar_z = parsis_z * PARSIS_Z_MULTIPLIER;
 }
 
-void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath)
+void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double parsis_z, double distanceMultiplier, godot::NodePath nodePath)
 {
     // thread safe as callback is not used
     dzat_x = parsis_x * PARSIS_X_MULTIPLIER;
@@ -406,9 +406,9 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
         auto v = n->get_child(i);
         auto x = Object::cast_to<godot::Node3D>(v);
         auto vector = godot::Vector3(
-            stars_visible[i*3]   * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER, 
-            stars_visible[i*3+1] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER, 
-            stars_visible[i*3+2] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Z_MULTIPLIER
+            stars_visible[i*3]   * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER * distanceMultiplier, 
+            stars_visible[i*3+1] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER * distanceMultiplier, 
+            stars_visible[i*3+2] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Z_MULTIPLIER * distanceMultiplier
         );
         if (vector.x == 0 && vector.y == 0 && vector.z == 0) {
             x->hide();
@@ -1006,7 +1006,7 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "lock" ), &Feltyrion::lock );
     godot::ClassDB::bind_method( godot::D_METHOD( "unlock" ), &Feltyrion::unlock );
 
-    godot::ClassDB::bind_method( godot::D_METHOD( "update_star_particles" ), &Feltyrion::updateStarParticles );
+    godot::ClassDB::bind_method( godot::D_METHOD( "update_star_particles", "parsis_x", "parsis_y", "parsis_z", "distanceMultiplier", "nodePath"), &Feltyrion::updateStarParticles );
     godot::ClassDB::bind_method( godot::D_METHOD( "update_current_star_planets" ), &Feltyrion::updateCurrentStarPlanets );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "set_secs" ), &Feltyrion::setSecs );

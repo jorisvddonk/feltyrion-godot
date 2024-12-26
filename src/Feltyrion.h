@@ -132,7 +132,7 @@ public:
 
     void setIPTargetted(int new_target);
     int8_t getIPTargetted();
-    void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, godot::NodePath nodePath);
+    void updateStarParticles(double parsis_x, double parsis_y, double parsis_z, double distanceMultiplier, godot::NodePath nodePath);
     void updateCurrentStarPlanets(godot::NodePath nodePath);
     void lock();
     void unlock();
