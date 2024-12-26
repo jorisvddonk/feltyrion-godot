@@ -101,6 +101,8 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, landing_point, getLandingPoint, setLandingPoint); // 0 normally, 1 if we're selecting our landing point in the Stardrifter (9 - deploy surface capsule from FCD)
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, planet_grav, getPlanetGravity, setPlanetGravity);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_pressure, getPlanetPressure, setPlanetPressure);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, pp_temp, getPlanetTemperature, setPlanetTemperature);
 
 
     void setDzatX(double x);
