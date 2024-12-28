@@ -2141,8 +2141,10 @@ int32_t search_id_code(double id_code, int8_t type) {
 // Estimate the number of major planets associated with the coord. of a star.
 int16_t starnop(double star_x, double star_y, double star_z) {
     int16_t r;
+    brtl_srand((uint16_t) (star_x / 100000 * star_y / 100000 * star_z / 100000));
+    int16_t star_class = brtl_random(star_classes);
     brtl_srand((int32_t) star_x % 10000 * (int32_t) star_y % 10000 * (int32_t) star_z % 10000);
-    r = brtl_random(class_planets[ap_target_class] + 1);
+    r = brtl_random(class_planets[star_class] + 1);
     r += brtl_random(2);
     r -= brtl_random(2);
 

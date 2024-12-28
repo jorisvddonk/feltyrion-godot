@@ -122,6 +122,8 @@ public:
     double getNearstarX();
     double getNearstarY();
     double getNearstarZ();
+    
+    int getStarnopEstimate(double x, double y, double z);
 
     // Player position and camera orientation
     double getPosX();

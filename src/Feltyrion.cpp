@@ -234,6 +234,11 @@ double Feltyrion::getNearstarZ()
     return nearstar_z * PARSIS_Z_MULTIPLIER;
 }
 
+int Feltyrion::getStarnopEstimate(double x, double y, double z)
+{
+    return starnop(x, y, z);
+}
+
 void Feltyrion::prepareStar()
 {
     // NOTE: this is NOT thread safe!
@@ -1020,6 +1025,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_x" ), &Feltyrion::getNearstarX );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_y" ), &Feltyrion::getNearstarY );
     godot::ClassDB::bind_method( godot::D_METHOD( "get_nearstar_z" ), &Feltyrion::getNearstarZ );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_starnop_estimate", "star_x", "star_y", "star_z" ), &Feltyrion::getStarnopEstimate );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted" ), &Feltyrion::setAPTargetted );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted_without_extracting_target_infos" ), &Feltyrion::setAPTargettedWithoutExtractingTargetInfos );
