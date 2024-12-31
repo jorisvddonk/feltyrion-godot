@@ -10,3 +10,5 @@
 extern RenderTexture2D temp_texture;
 #endif
 extern void swapBuffers();
+
+float get_starmass(float ray, int16_t star_class, double star_parsis_x);

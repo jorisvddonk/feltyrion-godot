@@ -5,6 +5,7 @@
 */
 
 #include "brtl.h"
+#include "noctis.h"
 #include "noctis-0.h"
 #include "noctis-d.h"
 #include <chrono>
@@ -3899,33 +3900,7 @@ ext_1: //
                 if (ap_targetted) {
                     if (ap_targetted == 1) {
                         wrouthud(14, 87, mc, (char *) star_label);
-                        tmp_float = 1e-3 * qt_M_PI * ap_target_ray * ap_target_ray * ap_target_ray;
-                        tmp_float *= starmass_correction[ap_target_class];
-
-                        if (nearstar_class == 8 || nearstar_class == 9) {
-                            fast_srand((int32_t) ap_target_x % 32000);
-
-                            switch (fast_random(5)) {
-                            case 0:
-                                tmp_float /= 1 + 5 * fast_flandom();
-                                break;
-
-                            case 1:
-                                tmp_float /= 1 + fast_flandom();
-                                break;
-
-                            case 2:
-                                tmp_float *= 1 + fast_flandom();
-                                break;
-
-                            case 3:
-                                tmp_float *= 1 + 20 * fast_flandom();
-                                break;
-
-                            case 4:
-                                tmp_float *= 1 + 50 * fast_flandom();
-                            }
-                        }
+                        tmp_float = get_starmass(ap_target_ray, ap_target_class, ap_target_x);
 
                         wrouthud(14, 97, mc, "PRIMARY MASS:");
                         sprintf((char *) outhudbuffer, "%1.8f BAL. M.", tmp_float);
@@ -5421,4 +5396,40 @@ resynctoplanet:
         mc = 0;
     }
 #endif
+}
+
+/**
+ * Get the star mass.
+ */
+float get_starmass(float ray, int16_t star_class, double star_parsis_x) {
+    float tmp = 1e-3 * qt_M_PI * ray * ray * ray;
+    tmp *= starmass_correction[star_class];
+
+    if (star_class == 8 || star_class == 9) { // Note: the original code used `nearstar_class` here - assuming that's done by mistake (it would mean that a remote target's mass is dependent on the star class of the current system) and corrected accordingly.
+        int32_t old_seed = flat_rnd_seed;
+        fast_srand((int32_t) star_parsis_x % 32000);
+
+        switch (fast_random(5)) {
+        case 0:
+            tmp /= 1 + 5 * fast_flandom();
+            break;
+
+        case 1:
+            tmp /= 1 + fast_flandom();
+            break;
+
+        case 2:
+            tmp *= 1 + fast_flandom();
+            break;
+
+        case 3:
+            tmp *= 1 + 20 * fast_flandom();
+            break;
+
+        case 4:
+            tmp *= 1 + 50 * fast_flandom();
+        }
+        fast_srand(old_seed);
+    }
+    return tmp;
 }
