@@ -125,6 +125,8 @@ public:
     
     int getStarnopEstimate(double x, double y, double z);
 
+    float getAPStarMass();
+
     // Player position and camera orientation
     double getPosX();
     double getPosY();
