@@ -23,6 +23,7 @@
 #define _QUOTE(x) _Q(x)
 #define _SET_QUOTE(x) _Q(set_ ## x)
 #define _GET_QUOTE(x) _Q(get_ ## x)
+#define _SIGNAL_NAME_QUOTE(x) _Q(on_ ## x ## _changed)
 
 #define DECLARE_NOCTIS_VARIABLE_ACCESSORS(type, setterType, property, getterName, setterName) type getterName(); void setterName(setterType value)
 #define EXPOSE_NOCTIS_VARIABLE(variantType, property, getterName, setterName) \
@@ -38,6 +39,20 @@ type Feltyrion::getterName()\
 {\
     return property;\
 }
+
+#define DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(type, setterType, property, getterName, setterName) \
+void Feltyrion::setterName(setterType value)\
+{\
+    property = value;\
+    emit_signal(_SIGNAL_NAME_QUOTE(property), value);\
+}\
+type Feltyrion::getterName()\
+{\
+    return property;\
+}
+
+#define DEFINE_NOCTIS_VARIABLE_SIGNAL(variantType, property) \
+ADD_SIGNAL(godot::MethodInfo(_SIGNAL_NAME_QUOTE(property), godot::PropertyInfo(variantType, "newValue")));
 
 class Feltyrion : public godot::Control
 {
@@ -95,6 +110,7 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ilightv, getIlightv, setIlightv);
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);

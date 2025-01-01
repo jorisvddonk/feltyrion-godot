@@ -974,6 +974,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, stspeed, getSTSpeed, setSTSpeed); 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPReached); // 1 if we're in a solar system
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
+DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, ilightv, getIlightv, setIlightv); // 1 if internal light is on
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
@@ -1104,7 +1105,10 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, sky_brightness, getSkyBrightness, setSkyBrightness);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, rainy, getRainy, setRainy);
 
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ilightv, getIlightv, setIlightv);
+
     // Signals
+    DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, ilightv);
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
     ADD_SIGNAL( godot::MethodInfo( "found_planet", 
         godot::PropertyInfo( godot::Variant::INT, "index" ), 
