@@ -1,9 +1,11 @@
 #include "godot_cpp/classes/image.hpp"
 #include "godot_cpp/classes/node3d.hpp"
+#include "godot_cpp/classes/sprite3d.hpp"
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/window.hpp"
+#include "godot_cpp/core/math.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/classes/mutex.hpp"
@@ -37,6 +39,11 @@ extern void process_comm_bin_file();
 extern void iperficie(int16_t additional_quadrants);
 extern void prep_iperficie();
 extern void getAllFragments();
+
+const double _a = -1.857e-13;
+const double _b = 4.362e-10;
+const double _c = -3.697e-07;
+const double _d = 1.173e-04;
 
 godot::Ref<godot::Image> Feltyrion::getPaletteAsImage() const
 {
@@ -413,7 +420,7 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
     int csize = n->get_children().size();
     for (int i = 0; i < csize; i++) {
         auto v = n->get_child(i);
-        auto x = Object::cast_to<godot::Node3D>(v);
+        auto x = Object::cast_to<godot::SpriteBase3D>(v);
         auto vector = godot::Vector3(
             stars_visible[i*3]   * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_X_MULTIPLIER * distanceMultiplier, 
             stars_visible[i*3+1] * FAR_STAR_PARSIS_SCALING_FACTOR * PARSIS_Y_MULTIPLIER * distanceMultiplier, 
@@ -424,6 +431,8 @@ void Feltyrion::updateStarParticles(double parsis_x, double parsis_y, double par
         } else {
             x->show();
             x->set_position(vector);
+            auto l = vector.length();
+            x->set_pixel_size(_a * godot::Math::pow(l, 3) + _b * godot::Math::pow(l, 2) + _c * l + _d);
         }
     }
 }
