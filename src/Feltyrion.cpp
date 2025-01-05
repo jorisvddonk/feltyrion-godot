@@ -984,6 +984,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ap_reached, getAPReached, setAPRea
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, ilightv, getIlightv, setIlightv); // 1 if internal light is on
+DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, autoscreenoff, getAutoscreenoff, setAutoscreenoff); // 1 if auto screen sleep is off
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
@@ -1115,9 +1116,11 @@ void Feltyrion::_bind_methods()
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::FLOAT, rainy, getRainy, setRainy);
 
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ilightv, getIlightv, setIlightv);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, autoscreenoff, getAutoscreenoff, setAutoscreenoff);
 
     // Signals
     DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, ilightv);
+    DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, autoscreenoff);
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
     ADD_SIGNAL( godot::MethodInfo( "found_planet", 
         godot::PropertyInfo( godot::Variant::INT, "index" ), 

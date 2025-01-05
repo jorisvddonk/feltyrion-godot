@@ -111,6 +111,7 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLithiumCharge);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ilightv, getIlightv, setIlightv);
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, autoscreenoff, getAutoscreenoff, setAutoscreenoff);
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
