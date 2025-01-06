@@ -985,6 +985,7 @@ DEFINE_NOCTIS_VARIABLE_ACCESSORS(float, float, charge, getLithiumCharge, setLith
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, pwr, getPwr, setPwr);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, ilightv, getIlightv, setIlightv); // 1 if internal light is on
 DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, autoscreenoff, getAutoscreenoff, setAutoscreenoff); // 1 if auto screen sleep is off
+DEFINE_NOCTIS_VARIABLE_ACCESSORS_WITH_SIGNAL(int8_t, int, revcontrols, getRevcontrols, setRevcontrols); // 1 if pitch (well, yaw, actually) controls are inverted ('reversed'), 0 otherwise
 
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
 DEFINE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
@@ -1117,10 +1118,12 @@ void Feltyrion::_bind_methods()
 
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, ilightv, getIlightv, setIlightv);
     EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, autoscreenoff, getAutoscreenoff, setAutoscreenoff);
+    EXPOSE_NOCTIS_VARIABLE(godot::Variant::INT, revcontrols, getRevcontrols, setRevcontrols);
 
     // Signals
     DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, ilightv);
     DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, autoscreenoff);
+    DEFINE_NOCTIS_VARIABLE_SIGNAL(godot::Variant::INT, revcontrols);
     ADD_SIGNAL( godot::MethodInfo( "found_star", godot::PropertyInfo( godot::Variant::FLOAT, "x" ),  godot::PropertyInfo( godot::Variant::FLOAT, "y" ), godot::PropertyInfo( godot::Variant::FLOAT, "z" ), godot::PropertyInfo( godot::Variant::FLOAT, "id_code" ) ) );
     ADD_SIGNAL( godot::MethodInfo( "found_planet", 
         godot::PropertyInfo( godot::Variant::INT, "index" ), 
