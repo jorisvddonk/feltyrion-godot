@@ -35,7 +35,7 @@ After building, you can find the built addon in `feltyion-godot-install`
 ### Linux
 
 ```sh
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DFLOAT_PRECISION=double -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build --parallel
 cmake --install ./build --config Release
 ```
@@ -45,7 +45,7 @@ cmake --install ./build --config Release
 On MacOS, you'll want to build without the `--parallel` flag to avoid running out of memory/PIDs:
 
 ```sh
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DFLOAT_PRECISION=double -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build
 cmake --install ./build --config Release
 ```
@@ -53,7 +53,7 @@ cmake --install ./build --config Release
 ### Windows - MSVC
 
 ```powershell
-cmake -B build -S . -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
+cmake -B build -S . -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DFLOAT_PRECISION=double -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
 cmake --build ./build --config Release
 cmake --install ./build --config Release
 ```
@@ -66,7 +66,7 @@ The following additional CMake options are available:
 
 | Option                                                                   | Description                                      | Default                                                                                              |
 |--------------------------------------------------------------------------|--------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| `FLOAT_PRECISION`                                                        | Floating point precision. Ideally set to `double` to support Godot custom-built with double-precision Vector3s | `single` |
+| `FLOAT_PRECISION`                                                        | Floating point precision. Ideally set to `double` to support Godot custom-built with double-precision Vector3s, but can also be set to `single` for compatibility with official Godot builds. | `single` |
 | `CCACHE_PROGRAM`                                                         | Path to `ccache` for faster rebuilds             | This is automatically set **ON** if `ccache` is found. If you do not want to use it, set this to "". |
 | `${PROJECT_NAME_UPPERCASE}_WARN_EVERYTHING` (e.g. FOO_WARN_EVERYTHING)   | Turns on all warnings. (Not available for MSVC.) | **OFF** (too noisy, but can be useful sometimes)                                                     |
 | `${PROJECT_NAME_UPPERCASE}_WARNING_AS_ERROR` (e.g. FOO_WARNING_AS_ERROR) | Turns warnings into errors.                      | **ON**                                                                                               |
