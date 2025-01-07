@@ -36,13 +36,11 @@ After building, you can find the built addon in `feltyion-godot-install`
 
 ```sh
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DFLOAT_PRECISION=double -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
-cmake --build ./build --parallel
+cmake --build ./build
 cmake --install ./build --config Release
 ```
 
 ### MacOS
-
-On MacOS, you'll want to build without the `--parallel` flag to avoid running out of memory/PIDs:
 
 ```sh
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DFLOAT_PRECISION=double -DCMAKE_INSTALL_PREFIX=feltyrion-godot-install
