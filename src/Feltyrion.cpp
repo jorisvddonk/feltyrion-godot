@@ -20,6 +20,7 @@
 #include "noctis-d.h"
 #include "noctis-0.h"
 #include "noctis.h"
+#include "extern_animals.h"
 #include "brtl.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
@@ -915,6 +916,30 @@ void Feltyrion::additionalConsumes() {
     additional_consumes();
 }
 
+// function to return an array of animal dictionaries
+godot::Array Feltyrion::getAnimals() {
+    godot::Array ret = godot::Array();
+    for (int i = 0; i < animals; i++) {
+        godot::Dictionary animal = godot::Dictionary();
+        animal["ani_type"] = ani_type[i];
+        animal["ani_seed"] = ani_seed[i];
+        animal["ani_scale"] = ani_scale[i];
+        animal["ani_x"] = ani_x[i];
+        animal["ani_quote"] = ani_quote[i];
+        animal["ani_z"] = ani_z[i];
+        animal["ani_pitch"] = ani_pitch[i];
+        animal["ani_speed"] = ani_speed[i];
+        animal["tgt_quote"] = tgt_quote[i];
+        animal["tgt_speed"] = tgt_speed[i];
+        animal["tgt_pitch"] = tgt_pitch[i];
+        animal["ani_lcount"] = ani_lcount[i];
+        animal["ani_sqc"] = ani_sqc[i];
+        animal["ani_mtype"] = ani_mtype[i];
+        ret.append(animal);
+    }
+    return ret;
+}
+
 godot::Ref<godot::Image> Feltyrion::returnSkyImage() {
     auto pba = godot::PackedByteArray();
     for (uint16_t i = 0; i < (120 * 360); i++) {
@@ -1049,6 +1074,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "set_ap_targetted_without_extracting_target_infos" ), &Feltyrion::setAPTargettedWithoutExtractingTargetInfos );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_animals" ), &Feltyrion::getAnimals );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );

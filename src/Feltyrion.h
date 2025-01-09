@@ -93,6 +93,8 @@ public:
 
     void additionalConsumes();
 
+    godot::Array getAnimals();
+
     int getAPTargetted();
     void setAPTargetted(int i);
     void setAPTargettedWithoutExtractingTargetInfos(int i);
