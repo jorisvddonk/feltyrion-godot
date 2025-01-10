@@ -804,6 +804,7 @@ godot::Dictionary Feltyrion::getPlanetInfo(int n) {
     ret["nearstar_p_term_end"] = nearstar_p_term_end[n];
     ret["nearstar_p_qsortindex"] = nearstar_p_qsortindex[n];
     ret["nearstar_p_qsortdist"] = nearstar_p_qsortdist[n];
+    ret["nearstar_p_revolution"] = rtp(n);
     return ret;
 }
 
