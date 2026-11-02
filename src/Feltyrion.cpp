@@ -12,6 +12,7 @@
 #include "godot_cpp/classes/global_constants.hpp"
 #include "godot_cpp/classes/label.hpp"
 #include <stdio.h>
+#include <strings.h>
 #include <map>
 #include <functional>
 #include <filesystem>
@@ -891,6 +892,132 @@ void Feltyrion::preparePlanetSurface() {
     planetary_main();
 }
 
+extern int32_t sm_consolidated; // defined in noctis.cpp
+
+namespace
+{
+const char *LABEL_REMOVED = "Removed:";
+
+bool label_matches(const int8_t *record_label, const char *label)
+{
+    char padded[21];
+    memset(padded, ' ', 21);
+    size_t len = strlen(label);
+    if (len > 21) {
+        len = 21;
+    }
+    memcpy(padded, label, len);
+    return strncasecmp((const char *) record_label, padded, 21) == 0;
+}
+
+// Returns the file offset of an existing record with the same label, or -1.
+int32_t find_label_offset(const char *label, int32_t skip_offset)
+{
+    FILE *smh = fopen(starmap_file, "rb");
+    if (smh == nullptr) {
+        return -1;
+    }
+    int8_t record[32];
+    int32_t offset = 4;
+    int32_t found  = -1;
+    fseek(smh, 4, SEEK_SET);
+    while (fread(record, 1, 32, smh) == 32) {
+        if (offset != skip_offset && memcmp(record, LABEL_REMOVED, 8) != 0 && label_matches(record + 8, label)) {
+            found = offset;
+            break;
+        }
+        offset += 32;
+    }
+    fclose(smh);
+    return found;
+}
+
+// Writes (or replaces) a label record for the given object id. The suffix is the
+// three character type/class suffix that Noctis IV stores after the label (e.g.
+// "S04" for a star or "P03" for a planet); its first character is the record type.
+bool write_label_record(double id, const char *label, const char *suffix)
+{
+    int32_t offset = search_id_code(id, suffix[0]);
+    if (find_label_offset(label, offset) > -1) {
+        return false; // labels must be unique, as in Noctis IV
+    }
+    FILE *smh = fopen(starmap_file, "rb+");
+    if (smh == nullptr) {
+        smh = fopen(starmap_file, "wb+");
+        if (smh == nullptr) {
+            return false;
+        }
+        sm_consolidated = 4;
+        fwrite(&sm_consolidated, 4, 1, smh);
+    }
+    int8_t record[32];
+    memset(record, 0, 32);
+    memcpy(record, &id, 8);
+    memset(record + 8, ' ', 21);
+    size_t len = strlen(label);
+    if (len > 21) {
+        len = 21;
+    }
+    memcpy(record + 8, label, len);
+    memcpy(record + 29, suffix, 3);
+    if (offset > -1) {
+        fseek(smh, offset, SEEK_SET);
+    } else {
+        fseek(smh, 0, SEEK_END);
+    }
+    fwrite(record, 1, 32, smh);
+    fclose(smh);
+    return true;
+}
+
+// Removes a label by overwriting its identity with "Removed:", like Noctis IV.
+bool remove_label_record(double id, int8_t type)
+{
+    int32_t offset = search_id_code(id, type);
+    if (offset < 0) {
+        return false;
+    }
+    FILE *smh = fopen(starmap_file, "rb+");
+    if (smh == nullptr) {
+        return false;
+    }
+    fseek(smh, offset, SEEK_SET);
+    fwrite(LABEL_REMOVED, 1, 8, smh);
+    fclose(smh);
+    return true;
+}
+}
+
+bool Feltyrion::setStarLabel(double x, double y, double z, godot::String label)
+{
+    godot::CharString utf8 = label.utf8();
+    double id = get_id_code(x, y, z);
+    char suffix[4];
+    brtl_srand((uint16_t) id);
+    snprintf(suffix, 4, "S%02d", brtl_random(star_classes));
+    return write_label_record(id, utf8.get_data(), suffix);
+}
+
+bool Feltyrion::removeStarLabel(double x, double y, double z)
+{
+    return remove_label_record(get_id_code(x, y, z), 'S');
+}
+
+bool Feltyrion::setPlanetLabel(int index, godot::String label)
+{
+    godot::CharString utf8 = label.utf8();
+    double id = get_id_code(nearstar_x, nearstar_y, nearstar_z) + index + 1;
+    char suffix[4];
+    snprintf(suffix, 4, "P%02d", index + 1);
+    return write_label_record(id, utf8.get_data(), suffix);
+}
+
+bool Feltyrion::removePlanetLabel(int index)
+{
+    double id = get_id_code(nearstar_x, nearstar_y, nearstar_z) + index + 1;
+    return remove_label_record(id, 'P');
+}
+
 void Feltyrion::freeze() {
     ::freeze();
 }
@@ -1077,6 +1204,11 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_animals" ), &Feltyrion::getAnimals );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_star_label", "x", "y", "z", "label" ), &Feltyrion::setStarLabel );
+    godot::ClassDB::bind_method( godot::D_METHOD( "remove_star_label", "x", "y", "z" ), &Feltyrion::removeStarLabel );
+    godot::ClassDB::bind_method( godot::D_METHOD( "set_planet_label", "index", "label" ), &Feltyrion::setPlanetLabel );
+    godot::ClassDB::bind_method( godot::D_METHOD( "remove_planet_label", "index" ), &Feltyrion::removePlanetLabel );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );
