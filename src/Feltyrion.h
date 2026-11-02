@@ -115,6 +115,7 @@ public:
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, ilightv, getIlightv, setIlightv);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, autoscreenoff, getAutoscreenoff, setAutoscreenoff);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, revcontrols, getRevcontrols, setRevcontrols); // 1 if pitch (well, yaw, actually) controls are inverted ('reversed'), 0 otherwise
+    DECLARE_NOCTIS_VARIABLE_ACCESSORS(int8_t, int, field_amplificator, getFieldAmplificator, setFieldAmplificator); // 1 if the starfield amplificator is on
 
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lat, getLandingPtLat, setLandingPtLat);
     DECLARE_NOCTIS_VARIABLE_ACCESSORS(int16_t, int, landing_pt_lon, getLandingPtLon, setLandingPtLon);
