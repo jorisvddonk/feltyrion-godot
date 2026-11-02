@@ -94,6 +94,7 @@ public:
     void additionalConsumes();
 
     godot::Array getAnimals();
+    void resetOnboardSystem();
 
     int getAPTargetted();
     void setAPTargetted(int i);
