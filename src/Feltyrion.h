@@ -94,6 +94,8 @@ public:
     void additionalConsumes();
 
     godot::Array getAnimals();
+    bool saveSurfaceState();
+    godot::Dictionary loadSurfaceState();
 
     int getAPTargetted();
     void setAPTargetted(int i);
