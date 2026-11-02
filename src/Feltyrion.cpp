@@ -21,6 +21,7 @@
 #include "noctis-0.h"
 #include "noctis.h"
 #include "extern_animals.h"
+#include "extern_sun.h"
 #include "brtl.h"
 
 // Used to mark unused parameters to indicate intent and suppress warnings.
@@ -887,6 +888,14 @@ void Feltyrion::loopOneIter()
 }
 
 void Feltyrion::preparePlanetSurface() {
+    // Noctis IV keeps `dsd` (the distance to the nearest star) up to date in its
+    // main loop, but the port never runs that loop. Without this the surface would
+    // be prepared with a star distance of zero, which breaks the surface
+    // temperature and the position of the sun in the sky.
+    double dxx = dzat_x - nearstar_x;
+    double dyy = dzat_y - nearstar_y;
+    double dzz = dzat_z - nearstar_z;
+    dsd = sqrt(dxx * dxx + dyy * dyy + dzz * dzz) + 1;
     prep_iperficie();
     planetary_main();
 }
@@ -918,6 +927,26 @@ void Feltyrion::additionalConsumes() {
 }
 
 // function to return an array of animal dictionaries
+// Returns the position of the sun(s) in the local surface coordinate system, as
+// computed when preparing the planet surface. Positions are relative to the
+// player's position on the surface; the ray and distance can be used to size the
+// sun in the sky.
+godot::Dictionary Feltyrion::getSunInfo() const
+{
+    godot::Dictionary ret = godot::Dictionary();
+    ret["sun_x"] = sun_x;
+    ret["sun_y"] = sun_y;
+    ret["sun_z"] = sun_z;
+    ret["sun_ray"] = nray1;
+    ret["sun_distance"] = dsd1;
+    ret["secondary_sun_x"] = pri_x;
+    ret["secondary_sun_y"] = pri_y;
+    ret["secondary_sun_z"] = pri_z;
+    ret["secondary_sun_ray"] = nray2;
+    ret["secondary_sun_distance"] = dsd2;
+    return ret;
+}
+
 godot::Array Feltyrion::getAnimals() {
     godot::Array ret = godot::Array();
     for (int i = 0; i < animals; i++) {
@@ -1077,6 +1106,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_animals" ), &Feltyrion::getAnimals );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "get_sun_info" ), &Feltyrion::getSunInfo );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );
