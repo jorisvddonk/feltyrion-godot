@@ -891,6 +891,36 @@ void Feltyrion::preparePlanetSurface() {
     planetary_main();
 }
 
+// Performs the state changes of Noctis IV's 'reset onboard system' emergency
+// function (see the reset_signal handling in loop() in noctis.cpp). The port does
+// not run Noctis IV's main loop, so the reset is applied immediately instead of as
+// a staged sequence of status messages.
+void Feltyrion::resetOnboardSystem()
+{
+    elight = 1;
+    ilight = 0;
+    setIlightv(0);
+    setIPTargetted(-1);
+    ip_reaching = 0;
+    ap_targetted = 0;
+    setSTSpeed(0);
+    gburst = 0;
+    setNSync(1);
+    anti_rad = 1;
+    pl_search = 0;
+    field_amplificator = 0;
+    sys = 4;
+    psys = 4;
+    lithium_collector = 0;
+    setAutoscreenoff(0);
+    setAPReached(0);
+    setIPReached(0);
+    landing_point = 0;
+    elight = 0;
+    setIlightv(1);
+    status("STANDBY", 100);
+}
+
 void Feltyrion::freeze() {
     ::freeze();
 }
@@ -1077,6 +1107,8 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_animals" ), &Feltyrion::getAnimals );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "reset_onboard_system" ), &Feltyrion::resetOnboardSystem );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );
