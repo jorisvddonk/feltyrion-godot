@@ -4063,6 +4063,62 @@ int8_t entryflag = 0; // flag: se settato all'ingresso di planetary_main,
 // significa che si sta recuperando la situazione
 // di superficie.
 
+/* Saves the current surface state to the surface file, so that it can be restored
+ * when returning to the surface. The HUD animation state is passed in, as it is
+ * local to the surface exploration loop. */
+bool save_surface_state(int16_t hud_delta, int16_t hud_count, int8_t hud_closed) {
+    FILE *sfh = fopen(surface_file, "wb+");
+
+    if (sfh == nullptr) {
+        return false;
+    }
+
+    fwrite(&landing_pt_lon, 2, 1, sfh);
+    fwrite(&landing_pt_lat, 2, 1, sfh);
+    fwrite(&atl_x, 4, 1, sfh);
+    fwrite(&atl_z, 4, 1, sfh);
+    fwrite(&atl_x2, 4, 1, sfh);
+    fwrite(&atl_z2, 4, 1, sfh);
+    fwrite(&pos_x, 4, 1, sfh);
+    fwrite(&pos_y, 4, 1, sfh);
+    fwrite(&pos_z, 4, 1, sfh);
+    fwrite(&user_alfa, 4, 1, sfh);
+    fwrite(&user_beta, 4, 1, sfh);
+    fwrite(&hud_delta, 2, 1, sfh);
+    fwrite(&hud_count, 2, 1, sfh);
+    fwrite(&hud_closed, 1, 1, sfh);
+    fclose(sfh);
+    return true;
+}
+
+/* Loads the surface state from the surface file. Returns false when there is no
+ * surface file to load. */
+bool load_surface_state(int16_t *hud_delta, int16_t *hud_count, int8_t *hud_closed) {
+    FILE *sfh = fopen(surface_file, "rb");
+
+    if (sfh == nullptr) {
+        return false;
+    }
+
+    fread(&landing_pt_lon, 2, 1, sfh);
+    fread(&landing_pt_lat, 2, 1, sfh);
+    fread(&atl_x, 4, 1, sfh);
+    fread(&atl_z, 4, 1, sfh);
+    fread(&atl_x2, 4, 1, sfh);
+    fread(&atl_z2, 4, 1, sfh);
+    fread(&pos_x, 4, 1, sfh);
+    fread(&pos_y, 4, 1, sfh);
+    fread(&pos_z, 4, 1, sfh);
+    fread(&user_alfa, 4, 1, sfh);
+    fread(&user_beta, 4, 1, sfh);
+    fread(hud_delta, 2, 1, sfh);
+    fread(hud_count, 2, 1, sfh);
+    fread(hud_closed, 1, 1, sfh);
+    fclose(sfh);
+    landed = 1;
+    return true;
+}
+
 void planetary_main() {
     const int16_t widesnappingangle = 71;
     uint16_t pqw                    = QUADWORDS;
@@ -4550,25 +4606,7 @@ nosecondarysun:
 
 
     if (entryflag) {
-        FILE *sfh = fopen(surface_file, "rb");
-
-        if (sfh != nullptr) {
-            fread(&landing_pt_lon, 2, 1, sfh);
-            fread(&landing_pt_lat, 2, 1, sfh);
-            fread(&atl_x, 4, 1, sfh);
-            fread(&atl_z, 4, 1, sfh);
-            fread(&atl_x2, 4, 1, sfh);
-            fread(&atl_z2, 4, 1, sfh);
-            fread(&pos_x, 4, 1, sfh);
-            fread(&pos_y, 4, 1, sfh);
-            fread(&pos_z, 4, 1, sfh);
-            fread(&user_alfa, 4, 1, sfh);
-            fread(&user_beta, 4, 1, sfh);
-            fread(&openhuddelta, 2, 1, sfh);
-            fread(&openhudcount, 2, 1, sfh);
-            fread(&hud_rtl_closed, 1, 1, sfh);
-            fclose(sfh);
-            landed       = 1;
+        if (load_surface_state(&openhuddelta, &openhudcount, &hud_rtl_closed)) {
             opencapdelta = 0;
             opencapcount = 0;
         } else {
@@ -5930,24 +5968,7 @@ nosecondarysun:
                 }
 
                 if (w == 27 && landed) {
-                    FILE *sfh = fopen(surface_file, "wb+");
-
-                    if (sfh != nullptr) {
-                        fwrite(&landing_pt_lon, 2, 1, sfh);
-                        fwrite(&landing_pt_lat, 2, 1, sfh);
-                        fwrite(&atl_x, 4, 1, sfh);
-                        fwrite(&atl_z, 4, 1, sfh);
-                        fwrite(&atl_x2, 4, 1, sfh);
-                        fwrite(&atl_z2, 4, 1, sfh);
-                        fwrite(&pos_x, 4, 1, sfh);
-                        fwrite(&pos_y, 4, 1, sfh);
-                        fwrite(&pos_z, 4, 1, sfh);
-                        fwrite(&user_alfa, 4, 1, sfh);
-                        fwrite(&user_beta, 4, 1, sfh);
-                        fwrite(&openhuddelta, 2, 1, sfh);
-                        fwrite(&openhudcount, 2, 1, sfh);
-                        fwrite(&hud_rtl_closed, 1, 1, sfh);
-                        fclose(sfh);
+                    if (save_surface_state(openhuddelta, openhudcount, hud_rtl_closed)) {
                         exitflag = 1;
                         goto nodissolve;
                     }

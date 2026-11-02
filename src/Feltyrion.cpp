@@ -891,6 +891,33 @@ void Feltyrion::preparePlanetSurface() {
     planetary_main();
 }
 
+extern bool save_surface_state(int16_t hud_delta, int16_t hud_count, int8_t hud_closed); // defined in noctis-1.cpp
+extern bool load_surface_state(int16_t *hud_delta, int16_t *hud_count, int8_t *hud_closed); // defined in noctis-1.cpp
+
+// Saves the current surface state (landing point, position and view angles) to the
+// surface file. The HUD animation state is not available here, so its defaults are
+// used; the state that matters for restoring a surface visit is saved.
+bool Feltyrion::saveSurfaceState()
+{
+    return save_surface_state(0, 180, 1);
+}
+
+// Loads the surface state from the surface file, if there is one. Returns a
+// dictionary with a 'loaded' flag and the HUD animation state from the file.
+godot::Dictionary Feltyrion::loadSurfaceState()
+{
+    int16_t hud_delta = 0;
+    int16_t hud_count = 180;
+    int8_t hud_closed = 1;
+    bool loaded = load_surface_state(&hud_delta, &hud_count, &hud_closed);
+    godot::Dictionary ret = godot::Dictionary();
+    ret["loaded"] = loaded;
+    ret["openhuddelta"] = hud_delta;
+    ret["openhudcount"] = hud_count;
+    ret["hud_rtl_closed"] = hud_closed;
+    return ret;
+}
+
 void Feltyrion::freeze() {
     ::freeze();
 }
@@ -1077,6 +1104,9 @@ void Feltyrion::_bind_methods()
     godot::ClassDB::bind_method( godot::D_METHOD( "loop_iter" ), &Feltyrion::loopOneIter );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_animals" ), &Feltyrion::getAnimals );
+
+    godot::ClassDB::bind_method( godot::D_METHOD( "save_surface_state" ), &Feltyrion::saveSurfaceState );
+    godot::ClassDB::bind_method( godot::D_METHOD( "load_surface_state" ), &Feltyrion::loadSurfaceState );
 
     godot::ClassDB::bind_method( godot::D_METHOD( "get_fcs_status" ), &Feltyrion::getFCSStatus );
     godot::ClassDB::bind_method( godot::D_METHOD( "set_fcs_status" ), &Feltyrion::setFCSStatus );
