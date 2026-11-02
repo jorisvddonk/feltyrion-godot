@@ -94,6 +94,7 @@ public:
     void additionalConsumes();
 
     godot::Array getAnimals();
+    godot::Dictionary getSunInfo() const;
 
     int getAPTargetted();
     void setAPTargetted(int i);
