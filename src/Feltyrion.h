@@ -94,6 +94,10 @@ public:
     void additionalConsumes();
 
     godot::Array getAnimals();
+    bool setStarLabel(double x, double y, double z, godot::String label);
+    bool removeStarLabel(double x, double y, double z);
+    bool setPlanetLabel(int index, godot::String label);
+    bool removePlanetLabel(int index);
 
     int getAPTargetted();
     void setAPTargetted(int i);
